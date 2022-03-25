@@ -17,7 +17,8 @@ jobs:
           MARIADB_PASSWORD: e2etesting
           MARIADB_DATABASE: trpcdb
         ports:
-          - 3306:3306
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
