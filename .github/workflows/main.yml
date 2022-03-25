@@ -16,6 +16,7 @@ jobs:
           MARIADB_USER: mariadb
           MARIADB_PASSWORD: e2etesting
           MARIADB_DATABASE: trpcdb
+          MYSQL_ROOT_PASSWORD: e2etesting
         ports:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
