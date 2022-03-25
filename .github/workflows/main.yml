@@ -3,18 +3,19 @@ on: [push]
 jobs:
   e2e:
     env:
-      DATABASE_URL: mysql://mariadb:@localhost:3306/trpcdb
+      DATABASE_URL: mysql://mariadb:e2etesting@localhost:3306/trpcdb
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         node: ['14.x']
         os: [ubuntu-latest]
     services:
-      postgres:
+      mariadb:
         image: mariadb:10.7
         env:
           MARIADB_USER: mariadb
-          MARIADB_PASSWORD: trpcdb
+          MARIADB_PASSWORD: e2etesting
+          MARIADB_DATABASE: trpcdb
         ports:
           - 3306:3306
     steps:
