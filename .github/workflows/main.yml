@@ -3,7 +3,7 @@ on: [push]
 jobs:
   e2e:
     env:
-      DATABASE_URL: postgresql://postgres:@localhost:5432/trpcdb
+      DATABASE_URL: mysql://mariadb:@localhost:3306/trpcdb
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -11,12 +11,12 @@ jobs:
         os: [ubuntu-latest]
     services:
       postgres:
-        image: postgres:12.1
+        image: mariadb:10.7
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_DB: trpcdb
+          MARIADB_USER: mariadb
+          MARIADB_PASSWORD: trpcdb
         ports:
-          - 5432:5432
+          - 3306:3306
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
