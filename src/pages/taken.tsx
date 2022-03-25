@@ -1,13 +1,28 @@
 import Link from 'next/link';
-import Planning from '~/components/Planning';
+import TaskList from '~/components/TaskList';
 import { trpc } from '../utils/trpc';
 import { NextPageWithLayout } from './_app';
 
 const PlanningPage: NextPageWithLayout = () => {
   return (
-    <div className="flex flex-row w-full gap-4">
+    <div className="flex flex-col w-full gap-2">
+      <div className="basis-full">
+        <h2 className="text-lg px-4 pt-2">Buitenterrein / Tochtsluis</h2>
+      </div>
       <div className="basis-full rounded-lg shadow-lg bg-white">
-        <Planning />
+        <TaskList />
+      </div>
+      <div className="basis-full">
+        <h2 className="text-lg px-4 pt-2">Hallo</h2>
+      </div>
+      <div className="basis-full rounded-lg shadow-lg bg-white">
+        <TaskList />
+      </div>
+      <div className="basis-full">
+        <h2 className="text-lg px-4 pt-2">Hallo</h2>
+      </div>
+      <div className="basis-full rounded-lg shadow-lg bg-white">
+        <TaskList />
       </div>
     </div>
   );

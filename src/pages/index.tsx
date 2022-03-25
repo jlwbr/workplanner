@@ -6,16 +6,16 @@ import { NextPageWithLayout } from './_app';
 const IndexPage: NextPageWithLayout = () => {
   return (
     <div className="flex flex-row justify-center cneter w-full self-center gap-4">
-      <div className="rounded-lg shadow-lg bg-white text-center p-6">
-        <Link href="/planning">
+      <Link href="/planning">
+        <div className="rounded-lg shadow-lg bg-white text-center p-6 hover:cursor-pointer">
           <a>Planning</a>
-        </Link>
-      </div>
-      <div className="rounded-lg shadow-lg bg-white text-center p-6">
-        <Link href="/taken">
+        </div>
+      </Link>
+      <Link href="/taken">
+        <div className="rounded-lg shadow-lg bg-white text-center p-6 hover:cursor-pointer">
           <a>Taken</a>
-        </Link>
-      </div>
+        </div>
+      </Link>
     </div>
   );
 };
