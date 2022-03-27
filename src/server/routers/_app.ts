@@ -3,8 +3,8 @@
  */
 import superjson from 'superjson';
 import { createRouter } from '../createRouter';
-import { postRouter } from './post';
-
+import { todoRouter } from './todo';
+import { todoCategoryRouter } from './todoCategory';
 /**
  * Create your application's root router
  * If you want to use SSG, you need export this
@@ -30,8 +30,7 @@ export const appRouter = createRouter()
       return 'yay!';
     },
   })
-  /**
-   * Merge `postRouter` under `post.`
-   */
+  .merge("todo.", todoRouter)
+  .merge("todoCategory.", todoCategoryRouter)
 
 export type AppRouter = typeof appRouter;

@@ -4,7 +4,7 @@
  */
 
 import { createRouter } from '~/server/createRouter';
-import { z } from 'zod';
+import { boolean, z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';
@@ -14,26 +14,25 @@ import { Prisma } from '@prisma/client';
  * It's important to always explicitly say which fields you want to return in order to not leak extra information
  * @see https://github.com/prisma/prisma/issues/9353
  */
-const defaultPostSelect = Prisma.validator<Prisma.PostSelect>()({
-  id: true,
-  title: true,
-  text: true,
-  createdAt: true,
-  updatedAt: true,
-});
+const defaultTodoCategorySelect = Prisma.validator<Prisma.TodoCategorySelect>()(
+  {
+    id: true,
+    name: true,
+    TodoItems: true,
+  },
+);
 
-export const postRouter = createRouter()
+export const todoCategoryRouter = createRouter()
   // create
   .mutation('add', {
     input: z.object({
       id: z.string().uuid().optional(),
-      title: z.string().min(1).max(32),
-      text: z.string().min(1),
+      name: z.string().min(1).max(32),
     }),
     async resolve({ input }) {
-      const post = await prisma.post.create({
+      const post = await prisma.todoCategory.create({
         data: input,
-        select: defaultPostSelect,
+        select: defaultTodoCategorySelect,
       });
       return post;
     },
@@ -46,8 +45,8 @@ export const postRouter = createRouter()
        * @link https://trpc.io/docs/useInfiniteQuery
        */
 
-      return prisma.post.findMany({
-        select: defaultPostSelect,
+      return prisma.todoCategory.findMany({
+        select: defaultTodoCategorySelect,
       });
     },
   })
@@ -57,14 +56,14 @@ export const postRouter = createRouter()
     }),
     async resolve({ input }) {
       const { id } = input;
-      const post = await prisma.post.findUnique({
+      const post = await prisma.todoCategory.findUnique({
         where: { id },
-        select: defaultPostSelect,
+        select: defaultTodoCategorySelect,
       });
       if (!post) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: `No post with id '${id}'`,
+          message: `No todo with id '${id}'`,
         });
       }
       return post;
@@ -75,16 +74,15 @@ export const postRouter = createRouter()
     input: z.object({
       id: z.string().uuid(),
       data: z.object({
-        title: z.string().min(1).max(32).optional(),
-        text: z.string().min(1).optional(),
+        name: z.string().min(1).max(32),
       }),
     }),
     async resolve({ input }) {
       const { id, data } = input;
-      const post = await prisma.post.update({
+      const post = await prisma.todoCategory.update({
         where: { id },
         data,
-        select: defaultPostSelect,
+        select: defaultTodoCategorySelect,
       });
       return post;
     },
@@ -96,7 +94,7 @@ export const postRouter = createRouter()
     }),
     async resolve({ input }) {
       const { id } = input;
-      await prisma.post.delete({ where: { id } });
+      await prisma.todoCategory.delete({ where: { id } });
       return {
         id,
       };

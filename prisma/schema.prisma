@@ -16,16 +16,10 @@ model Comment {
   id         String     @id @default(cuid())
   text       String
   todoItemId String
-  TodoLists  TodoList[]
+  userId     String
 
+  user     User     @relation(fields: [userId], references: [id])
   todoItem TodoItem @relation(fields: [todoItemId], references: [id])
-}
-
-model TodoList {
-  id        String     @id @default(cuid())
-  date      DateTime   @unique
-  TodoItems TodoItem[]
-  Comments  Comment[]
 }
 
 model TodoCategory {
@@ -38,8 +32,9 @@ model TodoItem {
   id         String     @id @default(cuid())
   name       String
   categoryId String
-  TodoLists  TodoList[]
-  Comments   Comment[]
+  rules      Json
+  done       Json
+  comments   Comment[]
 
   category TodoCategory @relation(fields: [categoryId], references: [id])
 }
@@ -79,6 +74,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  comments      Comment[]
 }
 
 model VerificationToken {

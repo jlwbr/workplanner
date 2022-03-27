@@ -1,14 +1,24 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { Dispatch, Fragment, SetStateAction } from 'react';
 import Link from 'next/link';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-const Header = () => {
+type DateHeaderType = {
+  date: Date;
+  setDate: Dispatch<SetStateAction<Date>>;
+};
+
+function addDays(dateTime: Date, count_days = 0) {
+  return new Date(new Date(dateTime).setDate(dateTime.getDate() + count_days));
+}
+
+const DateHeader = ({ date, setDate }: DateHeaderType) => {
   const { data: session } = useSession();
+
   return (
     <nav className="flex items-center justify-between flex-wrap p-4 shadow-md bg-white">
       <div className="flex items-center flex-shrink-0 mr-6">
@@ -17,6 +27,51 @@ const Header = () => {
             Workload Planner
           </a>
         </Link>
+      </div>
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => setDate(addDays(date, -1))}
+          className="inline-flex items-center justify-center w-10 h-10 mr-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"
+            />
+          </svg>
+        </button>
+        <h5 className="text-xl text-center">
+          {new Date().toDateString() == date.toDateString()
+            ? 'Vandaag'
+            : date.toLocaleDateString()}
+        </h5>
+        <button
+          onClick={() => setDate(addDays(date, 1))}
+          className="inline-flex items-center justify-center w-10 h-10 ml-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z"
+            />
+          </svg>
+        </button>
       </div>
       <div>
         {(session && <UserMenu image={session.user?.image || ''} />) || (
@@ -101,4 +156,4 @@ const UserMenu = ({ image }: { image: string }) => {
   );
 };
 
-export default Header;
+export default DateHeader;

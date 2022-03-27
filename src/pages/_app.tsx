@@ -22,9 +22,9 @@ type AppPropsWithLayout = AppProps & {
 
 const MyApp = (({ Component, pageProps: { session, ...pageProps } }: AppPropsWithLayout) => {
   const getLayout =
-    Component.getLayout ?? ((page) => <SessionProvider session={session}><DefaultLayout>{page}</DefaultLayout></SessionProvider>);
+    Component.getLayout ?? ((page) => <DefaultLayout>{page}</DefaultLayout>);
 
-  return getLayout(<Component {...pageProps} />);
+  return <SessionProvider session={session}>{getLayout(<Component {...pageProps} />)}</SessionProvider>;
 }) as AppType;
 
 function getBaseUrl() {
