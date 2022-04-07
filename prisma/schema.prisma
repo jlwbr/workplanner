@@ -13,10 +13,20 @@ generator client {
 }
 
 model Comment {
-  id         String     @id @default(cuid())
+  id         String @id @default(cuid())
   text       String
   todoItemId String
   userId     String
+
+  user     User     @relation(fields: [userId], references: [id])
+  todoItem TodoItem @relation(fields: [todoItemId], references: [id])
+}
+
+model ItemStatus {
+  id         String  @id @default(cuid())
+  status     Boolean
+  userId     String
+  todoItemId String
 
   user     User     @relation(fields: [userId], references: [id])
   todoItem TodoItem @relation(fields: [todoItemId], references: [id])
@@ -29,11 +39,11 @@ model TodoCategory {
 }
 
 model TodoItem {
-  id         String     @id @default(cuid())
+  id         String       @id @default(cuid())
   name       String
   categoryId String
   rules      Json
-  done       Json
+  status     ItemStatus[]
   comments   Comment[]
 
   category TodoCategory @relation(fields: [categoryId], references: [id])
@@ -67,14 +77,15 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?      @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
   comments      Comment[]
+  itemStatus    ItemStatus[]
 }
 
 model VerificationToken {
