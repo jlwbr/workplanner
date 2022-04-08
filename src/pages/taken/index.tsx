@@ -1,13 +1,10 @@
-import Link from 'next/link';
-import { ReactElement, useContext } from 'react';
-import { DateContext, DateLayout } from '~/components/DateLayout';
+import { ReactElement } from 'react';
+import { DateLayout } from '~/components/DateLayout';
 import TaskList from '~/components/TaskList';
 import { trpc } from '../../utils/trpc';
 import { NextPageWithLayout } from '../_app';
 
 const PlanningPage: NextPageWithLayout = () => {
-  const date = useContext(DateContext);
-
   const todoCategoryQuery = trpc.useQuery(['todoCategory.all']);
 
   if (!todoCategoryQuery.isSuccess) return null;

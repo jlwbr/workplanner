@@ -7,7 +7,8 @@ import { AppProps } from 'next/app';
 import { AppType } from 'next/dist/shared/lib/utils';
 import { ReactElement, ReactNode } from 'react';
 import { AppRouter } from '~/server/routers/_app';
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider } from 'next-auth/react';
+import { Toaster } from 'react-hot-toast';
 import superjson from 'superjson';
 
 import '../styles/globals.css';
@@ -20,11 +21,19 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-const MyApp = (({ Component, pageProps: { session, ...pageProps } }: AppPropsWithLayout) => {
+const MyApp = (({
+  Component,
+  pageProps: { session, ...pageProps },
+}: AppPropsWithLayout) => {
   const getLayout =
     Component.getLayout ?? ((page) => <DefaultLayout>{page}</DefaultLayout>);
 
-  return <SessionProvider session={session}>{getLayout(<Component {...pageProps} />)}</SessionProvider>;
+  return (
+    <SessionProvider session={session}>
+      {getLayout(<Component {...pageProps} />)}
+      <Toaster position="bottom-right" />
+    </SessionProvider>
+  );
 }) as AppType;
 
 function getBaseUrl() {

@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { createContext, ReactNode, useState } from 'react';
+import { createContext, ReactNode, useMemo, useState } from 'react';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import DateHeader from './DateHeader';
 
@@ -8,7 +8,15 @@ type DefaultLayoutProps = { children: ReactNode };
 export const DateContext = createContext(new Date());
 
 export const DateLayout = ({ children }: DefaultLayoutProps) => {
-  const [date, setDate] = useState(new Date());
+  const [value, setDate] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
+  const { value: date } = useMemo(
+    () => ({
+      value,
+      setDate,
+    }),
+    [value],
+  );
+
   return (
     <>
       <Head>

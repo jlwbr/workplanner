@@ -1,10 +1,5 @@
-/**
- *
- * This is an example router, you can delete this file and then update `../pages/api/trpc/[trpc].tsx`
- */
-
 import { createRouter } from '~/server/createRouter';
-import { boolean, z } from 'zod';
+import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';

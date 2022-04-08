@@ -22,14 +22,17 @@ model Comment {
   todoItem TodoItem @relation(fields: [todoItemId], references: [id])
 }
 
-model ItemStatus {
+model TodoStatus {
   id         String  @id @default(cuid())
+  date       DateTime
   status     Boolean
   userId     String
   todoItemId String
 
   user     User     @relation(fields: [userId], references: [id])
   todoItem TodoItem @relation(fields: [todoItemId], references: [id])
+
+  @@unique([date, todoItemId], name: "key")
 }
 
 model TodoCategory {
@@ -43,7 +46,7 @@ model TodoItem {
   name       String
   categoryId String
   rules      Json
-  status     ItemStatus[]
+  status     TodoStatus[]
   comments   Comment[]
 
   category TodoCategory @relation(fields: [categoryId], references: [id])
@@ -85,7 +88,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   comments      Comment[]
-  itemStatus    ItemStatus[]
+  itemStatus    TodoStatus[]
 }
 
 model VerificationToken {

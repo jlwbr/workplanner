@@ -1,9 +1,10 @@
-import { signIn, signOut, useSession } from 'next-auth/react';
-import { Menu, Transition } from '@headlessui/react';
-import { Dispatch, Fragment, SetStateAction } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { Dispatch, SetStateAction } from 'react';
 import Link from 'next/link';
+import { UserMenu } from './UserMenu';
+import { trpc } from '~/utils/trpc';
 
-function classNames(...classes: string[]) {
+export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
@@ -13,10 +14,14 @@ type DateHeaderType = {
 };
 
 function addDays(dateTime: Date, count_days = 0) {
-  return new Date(new Date(dateTime).setDate(dateTime.getDate() + count_days));
+  const new_date = new Date(
+    new Date(dateTime).setDate(dateTime.getDate() + count_days),
+  );
+  return new_date > new Date() ? new Date() : new_date;
 }
 
 const DateHeader = ({ date, setDate }: DateHeaderType) => {
+  const utils = trpc.useContext();
   const { data: session } = useSession();
 
   return (
@@ -30,7 +35,10 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
       </div>
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setDate(addDays(date, -1))}
+          onClick={() => {
+            utils.cancelQuery(['todoStatus.unique']);
+            setDate(addDays(date, -1));
+          }}
           className="inline-flex items-center justify-center w-10 h-10 mr-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
         >
           <svg
@@ -54,6 +62,7 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
             : date.toLocaleDateString()}
         </h5>
         <button
+          disabled={new Date().toDateString() == date.toDateString()}
           onClick={() => setDate(addDays(date, 1))}
           className="inline-flex items-center justify-center w-10 h-10 ml-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
         >
@@ -108,51 +117,6 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
         )}
       </div>
     </nav>
-  );
-};
-
-const UserMenu = ({ image }: { image: string }) => {
-  return (
-    <Menu as="div" className="relative inline-block text-left">
-      <div>
-        <Menu.Button>
-          <img
-            className="inline object-cover w-8 h-8 mr-6 rounded-full shadow-md hover:ring"
-            src={image}
-            alt="Profile image"
-          />
-        </Menu.Button>
-      </div>
-
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
-            <Menu.Item>
-              {({ active }) => (
-                <a
-                  href="#"
-                  onClick={() => signOut()}
-                  className={classNames(
-                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    'block px-4 py-2 text-sm',
-                  )}
-                >
-                  Uitloggen
-                </a>
-              )}
-            </Menu.Item>
-          </div>
-        </Menu.Items>
-      </Transition>
-    </Menu>
   );
 };
 

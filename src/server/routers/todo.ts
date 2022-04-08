@@ -1,10 +1,5 @@
-/**
- *
- * This is an example router, you can delete this file and then update `../pages/api/trpc/[trpc].tsx`
- */
-
 import { createRouter } from '~/server/createRouter';
-import { boolean, z } from 'zod';
+import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';
@@ -19,7 +14,6 @@ const defaultTaskSelect = Prisma.validator<Prisma.TodoItemSelect>()({
   name: true,
   categoryId: true,
   rules: true,
-  done: true,
 });
 
 export const todoRouter = createRouter()
@@ -30,7 +24,6 @@ export const todoRouter = createRouter()
       name: z.string().min(1).max(32),
       categoryId: z.string().min(1),
       rules: z.array(z.boolean()).min(5).max(7),
-      done: z.array(z.boolean()),
     }),
     async resolve({ input }) {
       const post = await prisma.todoItem.create({
@@ -99,7 +92,6 @@ export const todoRouter = createRouter()
         name: z.string().min(1).max(32).optional(),
         categoryId: z.string().min(1).optional(),
         rules: z.array(z.boolean()).min(5).max(7).optional(),
-        done: z.array(z.boolean()).optional(),
       }),
     }),
     async resolve({ input }) {
