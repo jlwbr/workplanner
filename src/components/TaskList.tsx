@@ -205,7 +205,7 @@ const StaticTask = ({ todoItem }: TaskType) => {
   };
 
   if (status != 'authenticated') return null;
-  if (!session.user?.id) return null;
+  if (!session || !session.user?.id) return null;
 
   const userId = session.user.id;
   return (

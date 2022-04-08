@@ -1,6 +1,4 @@
 import Link from 'next/link';
-import Planning from '~/components/Planning';
-import { trpc } from '../utils/trpc';
 import { NextPageWithLayout } from './_app';
 
 const IndexPage: NextPageWithLayout = () => {

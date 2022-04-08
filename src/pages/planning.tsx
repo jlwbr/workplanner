@@ -1,8 +1,6 @@
-import Link from 'next/link';
 import { ReactElement } from 'react';
 import { DateLayout } from '~/components/DateLayout';
 import Planning from '~/components/Planning';
-import { trpc } from '../utils/trpc';
 import { NextPageWithLayout } from './_app';
 
 const PlanningPage: NextPageWithLayout = () => {
@@ -20,7 +18,9 @@ const PlanningPage: NextPageWithLayout = () => {
   );
 };
 
-PlanningPage.getLayout = (page: ReactElement) => <DateLayout>{page}</DateLayout>;
+PlanningPage.getLayout = (page: ReactElement) => (
+  <DateLayout>{page}</DateLayout>
+);
 
 export default PlanningPage;
 
