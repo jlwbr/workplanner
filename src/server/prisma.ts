@@ -19,5 +19,14 @@ export const prisma: PrismaClient =
   });
 
 if (process.env.NODE_ENV !== 'production') {
-  prismaGlobal.prisma = prisma;
+  prismaGlobal.prisma ||
+    new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env.PLANETSCALE_DB
+            ? `mysql://${process.env.PLANETSCALE_DB_USERNAME}:${process.env.PLANETSCALE_DB_PASSWORD}@${process.env.PLANETSCALE_DB_HOST}/${process.env.PLANETSCALE_DB}?sslmode=require&sslcert=${process.env.PLANETSCALE_SSL_CERT_PATH}`
+            : `${process.env.DATABASE_URL}`,
+        },
+      },
+    });
 }
