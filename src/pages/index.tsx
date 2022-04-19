@@ -1,20 +1,23 @@
 import Link from 'next/link';
+import KanbanComponent from '~/components/KanbanComponent';
 import { NextPageWithLayout } from './_app';
 
 const IndexPage: NextPageWithLayout = () => {
   return (
-    <div className="flex flex-row justify-center cneter w-full self-center gap-4">
-      <Link href="/planning">
-        <div className="rounded-lg shadow-lg bg-white text-center p-6 hover:cursor-pointer">
-          <a>Planning</a>
-        </div>
-      </Link>
-      <Link href="/taken">
-        <div className="rounded-lg shadow-lg bg-white text-center p-6 hover:cursor-pointer">
-          <a>Taken</a>
-        </div>
-      </Link>
-    </div>
+    // <div className="flex flex-row justify-center cneter w-full self-center gap-4">
+    //   <Link href="/planning">
+    //     <div className="rounded-lg shadow-lg bg-white text-center p-6 hover:cursor-pointer">
+    //       <a>Planning</a>
+    //     </div>
+    //   </Link>
+    //   <Link href="/taken">
+    //     <div className="rounded-lg shadow-lg bg-white text-center p-6 hover:cursor-pointer">
+    //       <a>Taken</a>
+    //     </div>
+    //   </Link>
+    // </div>
+
+    <KanbanComponent />
   );
 };
 

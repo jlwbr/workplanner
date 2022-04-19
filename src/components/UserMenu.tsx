@@ -2,8 +2,10 @@ import { signOut } from 'next-auth/react';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { classNames } from './DateHeader';
+import { trpc } from '~/utils/trpc';
 
 export const UserMenu = ({ image }: { image: string }) => {
+  const syncChannels = trpc.useMutation(['slack.syncChannels']);
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div className="mr-6">
@@ -27,6 +29,20 @@ export const UserMenu = ({ image }: { image: string }) => {
       >
         <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
+            <Menu.Item>
+              {({ active }) => (
+                <a
+                  href="#"
+                  onClick={() => syncChannels.mutateAsync()}
+                  className={classNames(
+                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                    'block px-4 py-2 text-sm',
+                  )}
+                >
+                  Sync rollen
+                </a>
+              )}
+            </Menu.Item>
             <Menu.Item>
               {({ active }) => (
                 <a

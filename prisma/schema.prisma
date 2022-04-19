@@ -12,44 +12,41 @@ generator client {
   previewFeatures = ["referentialIntegrity"]
 }
 
-model Comment {
-  id         String @id @default(cuid())
-  text       String
-  todoItemId String
-  userId     String
+model Planning {
+  id        String   @id @default(cuid())
+  date      DateTime
+  channelId String
 
-  user     User     @relation(fields: [userId], references: [id])
-  todoItem TodoItem @relation(fields: [todoItemId], references: [id])
+  channel      Channel        @relation(fields: [channelId], references: [id])
+  PlanningItem PlanningItem[]
+  @@unique([id, date, channelId])
 }
 
-model TodoStatus {
-  id         String  @id @default(cuid())
-  date       DateTime
-  status     Boolean
-  userId     String
-  todoItemId String
+model PlanningItem {
+  id             String @id @default(cuid())
+  planningId     String
+  planningRuleId String
 
-  user     User     @relation(fields: [userId], references: [id])
-  todoItem TodoItem @relation(fields: [todoItemId], references: [id])
-
-  @@unique([date, todoItemId], name: "key")
+  Planning     Planning     @relation(fields: [planningId], references: [id])
+  PlanningRule PlanningRule @relation(fields: [planningRuleId], references: [id])
 }
 
-model TodoCategory {
-  id        String     @id @default(cuid())
+model PlanningRule {
+  id        String @id @default(cuid())
   name      String
-  TodoItems TodoItem[]
+  rule      String
+  channelId String
+
+  channel      Channel        @relation(fields: [channelId], references: [id])
+  PlanningItem PlanningItem[]
 }
 
-model TodoItem {
-  id         String       @id @default(cuid())
-  name       String
-  categoryId String
-  rules      Json
-  status     TodoStatus[]
-  comments   Comment[]
-
-  category TodoCategory @relation(fields: [categoryId], references: [id])
+model Channel {
+  id           String         @id
+  name         String         @unique
+  members      User[]
+  PlanningRule PlanningRule[]
+  Planning     Planning[]
 }
 
 model Account {
@@ -80,15 +77,14 @@ model Session {
 }
 
 model User {
-  id            String       @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String?      @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-  comments      Comment[]
-  itemStatus    TodoStatus[]
+  channels      Channel[]
 }
 
 model VerificationToken {
