@@ -15,9 +15,9 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     return <p>NOT AUTHENTICATED</p>;
   }
 
-  if (data.user && !data.user.isEditor) {
-    return <p>UNAUTHORIZED</p>;
-  }
+  // if (data.user && !data.user.isEditor) {
+  //   return <p>UNAUTHORIZED</p>;
+  // }
 
   return (
     <>
