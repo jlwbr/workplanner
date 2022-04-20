@@ -14,7 +14,7 @@ interface CreateContextOptions {
  * This is useful for testing when we don't want to mock Next.js' request/response
  */
 export async function createContextInner(_opts: CreateContextOptions) {
-  return {};
+  return _opts;
 }
 
 export type Context = trpc.inferAsyncReturnType<typeof createContextInner>;

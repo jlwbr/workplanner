@@ -1,17 +1,34 @@
-const KanbanComponent = () => (
-  <div className="flex flex-col md:flex-row w-full h-full px-4 md:gap-6 overflow-x-scroll">
-    <KanbanList />
-    <KanbanList />
-    <KanbanList />
-    <KanbanList />
-    <KanbanList />
-    <KanbanList />
-  </div>
-);
+import { useContext } from 'react';
+import { trpc } from '~/utils/trpc';
+import { DateContext } from './DateLayout';
 
-const KanbanList = () => (
+const KanbanComponent = () => {
+  const date = useContext(DateContext);
+  const planing = trpc.useQuery([
+    'planning.byDate',
+    {
+      date: date,
+    },
+  ]);
+
+  if (!planing.isSuccess) return null;
+
+  return (
+    <div className="flex flex-col md:flex-row w-full h-full px-4 md:gap-6 overflow-x-scroll">
+      {planing.data.map((plan) => (
+        <KanbanList key={plan.id} title={plan.channel.name} />
+      ))}
+    </div>
+  );
+};
+
+type KanbanListType = {
+  title: string;
+};
+
+const KanbanList = ({ title }: KanbanListType) => (
   <div className="grow max-w-md min-w-[16rem]">
-    <h1 className="text-lg font-bold text-gray-900 py-3">Ochtend</h1>
+    <h1 className="text-lg font-bold text-gray-900 py-3">{title}</h1>
     <div className="flex w-full flex-col gap-4">
       <KanbanItem />
       <KanbanItem />

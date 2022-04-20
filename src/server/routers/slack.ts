@@ -8,6 +8,33 @@ const client = new WebClient(process.env.SLACK_BOT_TOKEN);
 
 export const slackRouter = createRouter()
   // update
+  .query('channels.all', {
+    async resolve({ ctx }) {
+      if (!ctx.session?.user?.isAdmin && !ctx.session?.user?.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      return await prisma.channel.findMany({
+        where: {
+          members: {
+            some: {
+              id: ctx.session.user.id,
+            },
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+        orderBy: {
+          name: 'asc',
+        },
+      });
+    },
+  })
   .mutation('syncChannels', {
     async resolve() {
       const users = await prisma.user.findMany({
@@ -28,9 +55,9 @@ export const slackRouter = createRouter()
         types: 'public_channel,private_channel',
       });
       if (!channels.ok || !channels.channels)
-        return new TRPCError({
-          message: 'Could not fetch channels',
-          code: 'INTERNAL_SERVER_ERROR',
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be authorized',
         });
 
       channels.channels.forEach(async ({ id, name }) => {

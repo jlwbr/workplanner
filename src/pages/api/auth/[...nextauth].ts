@@ -20,6 +20,16 @@ export default NextAuth({
     session: async ({ session, token }) => {
       if (session?.user && token.sub) {
         session.user.id = token.sub;
+        const prismaUser = await prisma.user.findUnique({
+          where: {
+            id: token.sub,
+          },
+        });
+
+        if (prismaUser) {
+          session.user.isAdmin = prismaUser.admin;
+          session.user.isEditor = prismaUser.editor || prismaUser.admin;
+        }
       }
       return session;
     },

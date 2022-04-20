@@ -1,0 +1,177 @@
+/* This example requires Tailwind CSS v2.0+ */
+import { Fragment, HTMLInputTypeAttribute } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { trpc } from '~/utils/trpc';
+
+export type PlanningRuleArrayType = { [idx: string]: string };
+
+type PlanningRuleEditorType = {
+  open: boolean;
+  onClose: () => any;
+  value: PlanningRuleArrayType;
+  onChange: (value: PlanningRuleArrayType) => void;
+};
+
+const PlanningRuleEditor = ({
+  open,
+  onClose,
+  value,
+  onChange,
+}: PlanningRuleEditorType) => {
+  const channels = trpc.useQuery(['slack.channels.all']);
+
+  const PlanningRuleInputs: {
+    field: string;
+    label: string;
+    input: HTMLInputTypeAttribute | 'textarea' | 'select';
+    values?: () => { id: string; name: string }[];
+  }[] = [
+    {
+      field: 'name',
+      label: 'Naam',
+      input: 'text',
+    },
+    {
+      field: 'rule',
+      label: 'Regel',
+      input: 'textarea',
+    },
+    {
+      field: 'channelId',
+      label: 'Kanaal',
+      input: 'select',
+      values: () => (channels.isSuccess ? channels.data : []),
+    },
+  ];
+
+  return (
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog
+        as="div"
+        className="fixed z-10 inset-0 overflow-y-auto"
+        onClose={onClose}
+      >
+        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          {/* This element is to trick the browser into centering the modal contents. */}
+          <span
+            className="hidden sm:inline-block sm:align-middle sm:h-screen"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            enterTo="opacity-100 translate-y-0 sm:scale-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+            leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          >
+            <div className="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg leading-6 font-medium text-gray-900 pb-2"
+                  >
+                    {(value && value['name'] && `Taak: ${value['name']}`) ||
+                      'Nieuwe taak'}
+                  </Dialog.Title>
+                  <div className="mt-2">
+                    {PlanningRuleInputs.map((input) => (
+                      <div key={input.field} className="flex pb-4">
+                        <label
+                          htmlFor={input.field}
+                          className="w-1/5 block mb-2 text-sm font-medium text-gray-900"
+                        >
+                          {input.label}
+                        </label>
+                        {(input.input == 'select' && (
+                          <div className="inline-block relative w-full">
+                            <select
+                              name={input.field}
+                              id={input.field}
+                              value={value[input.field] || ''}
+                              onChange={(event) =>
+                                onChange({
+                                  ...value,
+                                  [input.field]: event.target.value,
+                                })
+                              }
+                              className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 text-gray-900 rounded leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                              {input.values &&
+                                input.values().map(({ id, name }) => (
+                                  <option key={id} value={id}>
+                                    {name}
+                                  </option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-900">
+                              <svg
+                                className="fill-current h-4 w-4"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                              >
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                              </svg>
+                            </div>
+                          </div>
+                        )) ||
+                          (input.input == 'textarea' && (
+                            <textarea
+                              id={input.field}
+                              name={input.field}
+                              value={value[input.field] || ''}
+                              onChange={(event) =>
+                                onChange({
+                                  ...value,
+                                  [input.field]: event.target.value,
+                                })
+                              }
+                              rows={4}
+                              cols={50}
+                              className="bg-white border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            ></textarea>
+                          )) || (
+                            <input
+                              type={input.input}
+                              name={input.field}
+                              value={value[input.field] || ''}
+                              onChange={(event) =>
+                                onChange({
+                                  ...value,
+                                  [input.field]: event.target.value,
+                                })
+                              }
+                              id={input.field}
+                              className="bg-white border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            />
+                          )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Transition.Child>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  );
+};
+
+export default PlanningRuleEditor;
