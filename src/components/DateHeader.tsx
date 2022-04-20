@@ -21,7 +21,6 @@ function addDays(dateTime: Date, count_days = 0) {
 }
 
 const DateHeader = ({ date, setDate }: DateHeaderType) => {
-  const utils = trpc.useContext();
   const { data: session } = useSession();
 
   return (
@@ -36,7 +35,6 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => {
-            utils.cancelQuery(['todoStatus.unique']);
             setDate(addDays(date, -1));
           }}
           className="inline-flex items-center justify-center w-10 h-10 mr-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
