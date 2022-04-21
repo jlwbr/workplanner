@@ -43,6 +43,7 @@ specifiers:
   start-server-and-test: ^1.12.0
   superjson: ^1.7.4
   tailwindcss: ^3.0.23
+  tau-prolog: ^0.3.2
   ts-jest: ^27.0.5
   ts-node: ^10.3.0
   typescript: 4.4.4
@@ -72,6 +73,7 @@ dependencies:
   start-server-and-test: 1.14.0
   superjson: 1.8.1
   tailwindcss: 3.0.23_b89136460714832cdda11d1e9d57d1ff
+  tau-prolog: 0.3.2
   zod: 3.14.2
 
 devDependencies:
@@ -2282,6 +2284,11 @@ packages:
     dependencies:
       delayed-stream: 1.0.0
 
+  /commander/7.2.0:
+    resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
+    engines: {node: '>= 10'}
+    dev: false
+
   /commander/8.3.0:
     resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
     engines: {node: '>= 12'}
@@ -3237,6 +3244,10 @@ packages:
       type-fest: 0.20.2
     dev: true
 
+  /globalyzer/0.1.0:
+    resolution: {integrity: sha512-40oNTM9UfG6aBmuKxk/giHn5nQ8RVz/SS4Ir6zgzOv9/qC3kKZ9v4etGTcJbEl/NyVQH7FGU7d+X1egr57Md2Q==}
+    dev: false
+
   /globby/11.1.0:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
     engines: {node: '>=10'}
@@ -3248,6 +3259,10 @@ packages:
       merge2: 1.4.1
       slash: 3.0.0
     dev: true
+
+  /globrex/0.1.2:
+    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
+    dev: false
 
   /goober/2.1.8_csstype@3.0.11:
     resolution: {integrity: sha512-S0C85gCzcfFCMSdjD/CxyQMt1rbf2qEg6hmDzxk2FfD7+7Ogk55m8ZFUMtqNaZM4VVX/qaU9AzSORG+Gf4ZpAQ==}
@@ -4515,6 +4530,11 @@ packages:
   /node-releases/2.0.2:
     resolution: {integrity: sha512-XxYDdcQ6eKqp/YjI+tb2C5WM2LgjnZrfYg4vgQt49EK268b6gYCHsBLrK2qvJo4FmCtqmKezb0WZFK4fkrZNsg==}
 
+  /node-watch/0.7.3:
+    resolution: {integrity: sha512-3l4E8uMPY1HdMMryPRUAl+oIHtXtyiTlIiESNSVSNxcPfzAFzeTbXFQkZfAwBbo0B1qMSG8nUABx+Gd+YrbKrQ==}
+    engines: {node: '>=6'}
+    dev: false
+
   /nomnom/1.8.1:
     resolution: {integrity: sha1-IVH3Ikcrp55Qp2/BJbuMjy5Nwqc=}
     deprecated: Package no longer supported. Contact support@npmjs.com for more info.
@@ -5117,6 +5137,16 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
+  /qunit/2.18.2:
+    resolution: {integrity: sha512-Ux+x9pIU38/F+r3jOl35QzGHPPupMifUvhczCqHgzYWX76fCjPg6VqM84ox1D57fhAXHtpS4Jl91EV8gDoCHPg==}
+    engines: {node: '>=10'}
+    hasBin: true
+    dependencies:
+      commander: 7.2.0
+      node-watch: 0.7.3
+      tiny-glob: 0.2.9
+    dev: false
+
   /react-dnd-html5-backend/15.1.2:
     resolution: {integrity: sha512-mem9QbutUF+aA2YC1y47G3ECjnYV/sCYKSnu5Jd7cbg3fLMPAwbnTf/JayYdnCH5l3eg9akD9dQt+cD0UdF8QQ==}
     dependencies:
@@ -5229,6 +5259,11 @@ packages:
     engines: {node: '>=8.10.0'}
     dependencies:
       picomatch: 2.3.1
+    dev: false
+
+  /readline-sync/1.4.9:
+    resolution: {integrity: sha1-PtqOZfI80qF+YTAbHwADOWr17No=}
+    engines: {node: '>= 0.8.0'}
     dev: false
 
   /redux/4.1.2:
@@ -5753,6 +5788,13 @@ packages:
       - ts-node
     dev: false
 
+  /tau-prolog/0.3.2:
+    resolution: {integrity: sha512-DlC8MBYtDEdfX0EdD5eNV3W7uPkqUO0vfck/fawt2lH85exj2rKiKxDkmkPa6DVg2thxnDxI+8UbxHs7rXb4Fg==}
+    dependencies:
+      qunit: 2.18.2
+      readline-sync: 1.4.9
+    dev: false
+
   /terminal-link/2.1.1:
     resolution: {integrity: sha512-un0FmiRUQNr5PJqy9kP7c40F5BOfpGlYTrxonDChEZB7pzZxRNp/bt+ymiy9/npwXya9KH99nJ/GXFIiUkYGFQ==}
     engines: {node: '>=8'}
@@ -5780,6 +5822,13 @@ packages:
 
   /through/2.3.8:
     resolution: {integrity: sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=}
+    dev: false
+
+  /tiny-glob/0.2.9:
+    resolution: {integrity: sha512-g/55ssRPUjShh+xkfx9UPDXqhckHEsHr4Vd9zX55oSdGZc/MD0m3sferOkwWtp98bv+kcVfEHtRJgBVJzelrzg==}
+    dependencies:
+      globalyzer: 0.1.0
+      globrex: 0.1.2
     dev: false
 
   /tmpl/1.0.5:

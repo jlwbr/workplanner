@@ -17,7 +17,7 @@ function addDays(dateTime: Date, count_days = 0) {
   const new_date = new Date(
     new Date(dateTime).setDate(dateTime.getDate() + count_days),
   );
-  return new_date > new Date() ? new Date() : new_date;
+  return new_date;
 }
 
 const DateHeader = ({ date, setDate }: DateHeaderType) => {
@@ -25,13 +25,14 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
 
   return (
     <nav className="flex items-center justify-between flex-wrap p-4 shadow-md bg-white">
-      <div className="flex items-center flex-shrink-0 mr-6">
+      <div className="hidden md:block">
         <Link href="/">
           <a href="#" className="font-semibold text-xl tracking-tight">
             Workload Planner
           </a>
         </Link>
       </div>
+      <div className="md:hidden"></div>
       <div className="flex items-center justify-between">
         <button
           onClick={() => {
@@ -60,7 +61,6 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
             : date.toLocaleDateString()}
         </h5>
         <button
-          disabled={new Date().toDateString() == date.toDateString()}
           onClick={() => setDate(addDays(date, 1))}
           className="inline-flex items-center justify-center w-10 h-10 ml-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
         >

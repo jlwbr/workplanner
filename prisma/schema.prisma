@@ -23,19 +23,35 @@ model Planning {
 }
 
 model PlanningItem {
-  id             String @id @default(cuid())
-  planningId     String
-  planningRuleId String
+  id               String  @id @default(cuid())
+  planningId       String
+  planningRuleId   String?
+  name             String
+  priority         Int
+  description      String
+  maxMorning       Int     @default(0)
+  maxAfternoon     Int     @default(0)
+  maxEvening       Int     @default(0)
+  morningAsignee   User[]  @relation(name: "PlanningItem_morningAsignee")
+  afternoonAsignee User[]  @relation(name: "PlanningItem_afternoonAsignee")
+  eveningAsignee   User[]  @relation(name: "PlanningItem_eveningAsignee")
+  ownerId          String?
 
-  Planning     Planning     @relation(fields: [planningId], references: [id])
-  PlanningRule PlanningRule @relation(fields: [planningRuleId], references: [id])
+  owner        User?         @relation(fields: [ownerId], references: [id])
+  Planning     Planning      @relation(fields: [planningId], references: [id])
+  PlanningRule PlanningRule? @relation(fields: [planningRuleId], references: [id])
 }
 
 model PlanningRule {
-  id        String @id @default(cuid())
-  name      String
-  rule      String
-  channelId String
+  id           String @id @default(cuid())
+  name         String
+  description  String
+  priority     Int
+  rule         String
+  channelId    String
+  maxMorning   Int    @default(0)
+  maxAfternoon Int    @default(0)
+  maxEvening   Int    @default(0)
 
   channel      Channel        @relation(fields: [channelId], references: [id])
   PlanningItem PlanningItem[]
@@ -77,16 +93,20 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  admin         Boolean   @default(false)
-  editor         Boolean   @default(false)
-  accounts      Account[]
-  sessions      Session[]
-  channels      Channel[]
+  id               String         @id @default(cuid())
+  name             String?
+  email            String?        @unique
+  emailVerified    DateTime?
+  image            String?
+  admin            Boolean        @default(false)
+  editor           Boolean        @default(false)
+  accounts         Account[]
+  sessions         Session[]
+  channels         Channel[]
+  MorningAsignee   PlanningItem[] @relation(name: "PlanningItem_morningAsignee")
+  AfternoonAsignee PlanningItem[] @relation(name: "PlanningItem_afternoonAsignee")
+  EveningAsignee   PlanningItem[] @relation(name: "PlanningItem_eveningAsignee")
+  PlanningItem     PlanningItem[]
 }
 
 model VerificationToken {

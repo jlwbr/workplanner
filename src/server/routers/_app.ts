@@ -5,6 +5,7 @@ import superjson from 'superjson';
 import { createRouter } from '../createRouter';
 import { slackRouter } from './slack';
 import { planningRouter } from './planning';
+import { prologRouter } from './prolog';
 /**
  * Create your application's root router
  * If you want to use SSG, you need export this
@@ -31,6 +32,7 @@ export const appRouter = createRouter()
     },
   })
   .merge('planning.', planningRouter)
-  .merge('slack.', slackRouter);
+  .merge('slack.', slackRouter)
+  .merge('prolog.', prologRouter);
 
 export type AppRouter = typeof appRouter;

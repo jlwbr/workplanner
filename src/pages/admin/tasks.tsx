@@ -1,15 +1,28 @@
 import { Tab } from '@headlessui/react';
+import { PlanningRule } from '@prisma/client';
 import { ReactElement, useState } from 'react';
 import { AdminLayout } from '~/components/AdminLayout';
-import PlanningRuleEditor, {
-  PlanningRuleArrayType,
-} from '~/components/PlanningRuleEditor';
+import PlanningEditor, {
+  PlanningInputsType,
+} from '~/components/PlanningEditor';
 import { NextPageWithLayout } from '~/pages/_app';
 import { trpc } from '~/utils/trpc';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
+
+const defaultEditingRuleData: PlanningRule = {
+  id: '',
+  name: '',
+  priority: 0,
+  description: '',
+  rule: '',
+  channelId: '',
+  maxMorning: 0,
+  maxAfternoon: 0,
+  maxEvening: 0,
+};
 
 const IndexPage: NextPageWithLayout = () => {
   const context = trpc.useContext();
@@ -19,37 +32,111 @@ const IndexPage: NextPageWithLayout = () => {
       context.invalidateQueries(['planning.rules.all']);
     },
   });
+  const deleteMutation = trpc.useMutation(['planning.rules.delete'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.rules.all']);
+    },
+  });
+
   const [open, setOpen] = useState(false);
-  const [editingRuleData, setEditingRuleData] = useState<PlanningRuleArrayType>(
-    {},
+  const [editingRuleData, setEditingRuleData] = useState<PlanningRule>(
+    defaultEditingRuleData,
   );
 
-  const openRule = (data?: PlanningRuleArrayType) => {
-    setEditingRuleData(data || {});
+  const openRule = (data?: PlanningRule) => {
+    if (data) {
+      setEditingRuleData(data);
+    } else {
+      setEditingRuleData(defaultEditingRuleData);
+    }
     setOpen(true);
   };
 
-  const onRuleClose = () => {
-    const { id, name, rule, channelId } = editingRuleData;
-    UpsertRule.mutate({
-      id,
-      name,
-      rule,
-      channelId,
-    });
+  const onRuleClose = async (cancel?: boolean) => {
+    if (cancel) {
+      setOpen(false);
+      return;
+    }
+
+    const { id, ...data } = editingRuleData;
+
+    if (Object.values(data).some((x) => x === null || x === '')) {
+      alert('Niet alle velden zijn ingevuld');
+      return;
+    }
+
+    await UpsertRule.mutateAsync({ id, ...data });
     setOpen(false);
   };
+
+  const onDelete = async (id: string) => {
+    await deleteMutation.mutateAsync({ id });
+    setOpen(false);
+  };
+
+  // TODO: find a more typescript friendly way to do this
+  const PlanningInputs: PlanningInputsType = [
+    {
+      field: 'name',
+      label: 'Naam',
+      input: 'text',
+    },
+    {
+      field: 'priority',
+      label: 'Prioriteit',
+      input: 'number',
+    },
+    {
+      field: 'description',
+      label: 'Beschrijving',
+      input: 'textarea',
+    },
+    {
+      field: 'rule',
+      label: 'Regel',
+      input: 'textarea',
+    },
+    {
+      field: 'maxMorning',
+      label: 'Max. aantal ochtend',
+      input: 'number',
+    },
+    {
+      field: 'maxAfternoon',
+      label: 'Max. aantal middag',
+      input: 'number',
+    },
+    {
+      field: 'maxEvening',
+      label: 'Max. aantal avond',
+      input: 'number',
+    },
+    {
+      field: 'channelId',
+      label: 'Kanaal',
+      input: 'select',
+      values: () =>
+        RulesQuery.data
+          ? RulesQuery.data.map(({ id, name }) => ({
+              id,
+              name,
+            }))
+          : [],
+    },
+  ];
 
   // FIXME: Better loading page
   if (!RulesQuery.isSuccess) return null;
 
   return (
     <div className="w-full px-2 sm:px-0">
-      <PlanningRuleEditor
+      <PlanningEditor
         open={open}
         onClose={onRuleClose}
         value={editingRuleData}
-        onChange={setEditingRuleData}
+        onChange={(e: unknown) => setEditingRuleData(e as PlanningRule)}
+        inputs={PlanningInputs}
+        onDelete={onDelete}
       />
       <Tab.Group>
         <Tab.List className="flex p-1 space-x-1 bg-blue-900/90 rounded-xl">
@@ -89,14 +176,6 @@ const IndexPage: NextPageWithLayout = () => {
                     <h3 className="text-sm font-medium leading-5">
                       {rule.name}
                     </h3>
-
-                    {/* <ul className="flex mt-1 space-x-1 text-xs font-normal leading-4 text-coolGray-500">
-                      <li>{post.date}</li>
-                      <li>&middot;</li>
-                      <li>{post.commentCount} comments</li>
-                      <li>&middot;</li>
-                      <li>{post.shareCount} shares</li>
-                    </ul> */}
 
                     <a
                       href="#"
