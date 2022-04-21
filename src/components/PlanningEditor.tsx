@@ -2,6 +2,7 @@
 import { Fragment, HTMLInputTypeAttribute } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { PlanningItem, PlanningRule } from '@prisma/client';
+import { inferMutationInput } from '~/utils/trpc';
 
 // TODO: find a more typescript friendly way to do this
 export type PlanningInputsType = {
@@ -15,8 +16,14 @@ export type PlanningInputsType = {
 type PlanningEditorType = {
   open: boolean;
   onClose: (cancel?: boolean) => any;
-  value: PlanningItem | PlanningRule;
-  onChange: (value: PlanningItem | PlanningRule) => void;
+  value:
+    | inferMutationInput<'planning.tasks.upsert'>
+    | inferMutationInput<'planning.rules.upsert'>;
+  onChange: (
+    value:
+      | inferMutationInput<'planning.tasks.upsert'>
+      | inferMutationInput<'planning.rules.upsert'>,
+  ) => void;
   inputs: PlanningInputsType;
   onDelete: (id: string) => void;
 };
@@ -173,7 +180,7 @@ const PlanningEditor = ({
                   <button
                     type="button"
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-                    onClick={() => onDelete(value.id)}
+                    onClick={() => value.id && onDelete(value.id)}
                   >
                     Verwijder
                   </button>

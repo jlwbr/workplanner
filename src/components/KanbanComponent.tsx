@@ -1,13 +1,42 @@
 import { PlanningItem } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { useContext, useState } from 'react';
-import { trpc } from '~/utils/trpc';
+import { z } from 'zod';
+import { inferMutationInput, inferQueryOutput, trpc } from '~/utils/trpc';
 import { DateContext } from './DateLayout';
+import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
 
-// TODO: We might want to refactor this file
+// TODO: find a way to infer this type.
+export type KanbanRule = Exclude<
+  inferQueryOutput<'planning.byDate'>,
+  false
+>[0]['PlanningItem'][0];
+// export type KanbanRule = {
+//   id: string;
+//   name: string;
+//   description: string;
+//   ownerId: string | null;
+//   priority: number;
+//   maxMorning: number;
+//   maxAfternoon: number;
+//   maxEvening: number;
+//   planningRuleId: string;
+//   morningAsignee: {
+//     id: string;
+//     name: string | null;
+//   }[];
+//   afternoonAsignee: {
+//     id: string;
+//     name: string | null;
+//   }[];
+//   eveningAsignee: {
+//     id: string;
+//     name: string | null;
+//   }[];
+// };
 
-const defaultEditingRuleData: PlanningItem = {
+const defaultEditingRuleData: inferMutationInput<'planning.tasks.upsert'> = {
   id: '',
   name: '',
   ownerId: '',
@@ -17,7 +46,6 @@ const defaultEditingRuleData: PlanningItem = {
   maxAfternoon: 0,
   maxEvening: 0,
   planningId: '',
-  planningRuleId: null,
 };
 
 const PlanningInputs: PlanningInputsType = [
@@ -82,11 +110,11 @@ const KanbanComponent = () => {
     },
   });
   const [open, setOpen] = useState(false);
-  const [editingRuleData, setEditingRuleData] = useState<PlanningItem>(
-    defaultEditingRuleData,
-  );
+  const [editingRuleData, setEditingRuleData] = useState<
+    inferMutationInput<'planning.tasks.upsert'>
+  >(defaultEditingRuleData);
 
-  const openTask = (data?: PlanningItem) => {
+  const openTask = (data?: inferMutationInput<'planning.tasks.upsert'>) => {
     if (data) {
       setEditingRuleData(data);
     } else {
@@ -101,15 +129,25 @@ const KanbanComponent = () => {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, planningRuleId, ...data } = editingRuleData;
+    // TODO: find a way to infer this from the server
+    const input = z.object({
+      id: z.string().optional(),
+      planningId: z.string(),
+      name: z.string(),
+      ownerId: z.string().nullable().optional(),
+      description: z.string(),
+      priority: z.number(),
+      maxMorning: z.number().nonnegative().optional(),
+      maxAfternoon: z.number().nonnegative().optional(),
+      maxEvening: z.number().nonnegative(),
+    });
 
-    if (Object.values(data).some((x) => x === null || x === '')) {
+    if (input.safeParse(editingRuleData).success === false) {
       alert('Niet alle velden zijn ingevuld');
       return;
     }
 
-    await UpsertRule.mutateAsync({ id, ...data });
+    await UpsertRule.mutateAsync(editingRuleData);
     setOpen(false);
   };
 
@@ -154,280 +192,51 @@ const KanbanComponent = () => {
   );
 };
 
-type KanbanRule = {
-  id: string;
-  name: string;
-  description: string;
-  priority: number;
-  maxMorning: number;
-  maxAfternoon: number;
-  maxEvening: number;
-  morningAsignee: {
-    id: string;
-    name: string | null;
-  }[];
-  afternoonAsignee: {
-    id: string;
-    name: string | null;
-  }[];
-  eveningAsignee: {
-    id: string;
-    name: string | null;
-  }[];
-};
-
 type KanbanListType = {
   id: string;
   title: string;
   rules: KanbanRule[];
-  newTask: (data?: PlanningItem) => void;
+  newTask: (data?: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
-const KanbanList = ({ id, title, rules, newTask }: KanbanListType) => (
-  <div className="grow max-w-sm min-w-[16rem] bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
-    <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
-    <div className="flex w-full flex-col gap-4 p-2 overflow-auto sm:max-h-[67vh]">
-      {rules.map((rule) => (
-        <KanbanItem key={rule.id} {...rule} />
-      ))}
-    </div>
-    <button
-      onClick={() => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { planningId, ...data } = defaultEditingRuleData;
-        newTask({
-          planningId: id,
-          ...data,
-        });
-      }}
-      className="inline-flex justify-center items-center gap-1 w-full p-4 text-gray-900 font-medium"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-4 w-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-      Nieuwe taak
-    </button>
-  </div>
-);
-
-const KanbanItem = ({
-  id,
-  name,
-  description,
-  priority,
-  maxMorning,
-  maxAfternoon,
-  maxEvening,
-  morningAsignee,
-  afternoonAsignee,
-  eveningAsignee,
-}: KanbanRule) => {
-  const context = trpc.useContext();
-  const { data, status } = useSession();
-  const asigneeMuation = trpc.useMutation(['planning.asignee.add'], {
-    onSuccess: () => {
-      context.invalidateQueries(['planning.byDate']);
-    },
-  });
-
-  const userId = data?.user?.id;
-
-  // TODO: show a loading animation here.
-  if (status !== 'authenticated' || !userId) {
-    return null;
-  }
-
-  const restMorning =
-    maxMorning - morningAsignee.length > 0
-      ? maxMorning - morningAsignee.length
-      : 1;
-
-  const restAfternoon =
-    maxAfternoon - afternoonAsignee.length > 0
-      ? maxAfternoon - afternoonAsignee.length
-      : 1;
-
-  const restEvening =
-    maxEvening - eveningAsignee.length > 0
-      ? maxEvening - eveningAsignee.length
-      : 1;
-
-  const canMorningAsign =
-    maxMorning == 0 ||
-    (!morningAsignee.some((item) => item.id === userId) &&
-      morningAsignee.length < maxMorning);
-  const canAfternoonAsign =
-    maxAfternoon == 0 ||
-    (!afternoonAsignee.some((item) => item.id === userId) &&
-      afternoonAsignee.length < maxAfternoon);
-  const canEveningAsign =
-    maxEvening == 0 ||
-    (!eveningAsignee.some((item) => item.id === userId) &&
-      eveningAsignee.length < maxEvening);
-
+const KanbanList = ({ id, title, rules, newTask }: KanbanListType) => {
+  const { data: user } = useSession();
   return (
-    <div className="bg-white rounded-md shadow-md">
-      <div className="p-5">
-        <div className="flex justify-between content-center tracking-tight pb-2">
-          <strong className="inline-flex items-center">
-            <h2 className="font-bold text-gray-900">{name}</h2>
-          </strong>
-          {/* TODO: Prio */}
-          {priority > 0 && (
-            <div className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-blue-200 text-blue-700 rounded-full">
-              Prio {priority}
-            </div>
-          )}
-        </div>
-        <p>{description}</p>
-        <div className="pt-2">
-          <div className="flex gap-2 content-center tracking-tight my-2">
-            <h2 className="font-bold text-gray-900">Ochtend</h2>
-            <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
-              {morningAsignee.length} / {maxMorning > 0 ? maxMorning : '∞'}
-            </span>
-          </div>
-          {morningAsignee.map(({ id: itemId, name }) => (
-            <span
-              key={itemId}
-              className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
-            >
-              {name}
-            </span>
-          ))}
-
-          {canMorningAsign && maxMorning > 0
-            ? [...new Array(restMorning)].map((_, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'morning',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              ))
-            : canMorningAsign && (
-                <a
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'morning',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              )}
-        </div>
-        <div className="pt-2">
-          <div className="flex gap-2 content-center tracking-tight my-2">
-            <h2 className="font-bold text-gray-900">Middag</h2>
-            <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
-              {afternoonAsignee.length} /{' '}
-              {maxAfternoon > 0 ? maxAfternoon : '∞'}
-            </span>
-          </div>
-          {afternoonAsignee.map(({ id: itemId, name }) => (
-            <span
-              key={itemId}
-              className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
-            >
-              {name}
-            </span>
-          ))}
-          {canAfternoonAsign && maxAfternoon > 0
-            ? [...new Array(restAfternoon)].map((_, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'afternoon',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              ))
-            : canAfternoonAsign && (
-                <a
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'afternoon',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              )}
-        </div>
-        <div className="pt-2">
-          <div className="flex gap-2 content-center tracking-tight my-2">
-            <h2 className="font-bold text-gray-900">Avond</h2>
-            <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
-              {eveningAsignee.length} / {maxEvening > 0 ? maxEvening : '∞'}
-            </span>
-          </div>
-          {eveningAsignee.map(({ id: itemId, name }) => (
-            <span
-              key={itemId}
-              className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
-            >
-              {name}
-            </span>
-          ))}
-          {canEveningAsign && maxEvening > 0
-            ? [...new Array(restEvening)].map((_, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'evening',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              ))
-            : canEveningAsign && (
-                <a
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'evening',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              )}
-        </div>
+    <div className="grow max-w-sm min-w-[16rem] bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
+      <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
+      <div className="flex w-full flex-col gap-4 p-2 overflow-auto sm:max-h-[67vh]">
+        {rules.map((rule) => (
+          <KanbanItem key={rule.id} editTask={newTask} item={rule} />
+        ))}
       </div>
+      <button
+        onClick={() => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { planningId, ownerId, ...data } = defaultEditingRuleData;
+          newTask({
+            ownerId: user?.user?.id || '',
+            planningId: id,
+            ...data,
+          });
+        }}
+        className="inline-flex justify-center items-center gap-1 w-full p-4 text-gray-900 font-medium"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        Nieuwe taak
+      </button>
     </div>
   );
 };

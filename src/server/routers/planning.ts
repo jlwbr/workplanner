@@ -21,6 +21,8 @@ const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
     select: {
       id: true,
       name: true,
+      ownerId: true,
+      planningId: true,
       priority: true,
       description: true,
       maxMorning: true,
@@ -104,6 +106,7 @@ export const planningRouter = createRouter()
       id: z.string().optional(),
       planningId: z.string(),
       name: z.string(),
+      ownerId: z.string().nullable().optional(),
       description: z.string(),
       priority: z.number(),
       maxMorning: z.number().nonnegative(),

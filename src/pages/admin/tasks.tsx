@@ -1,12 +1,13 @@
 import { Tab } from '@headlessui/react';
 import { PlanningRule } from '@prisma/client';
 import { ReactElement, useState } from 'react';
+import { z } from 'zod';
 import { AdminLayout } from '~/components/AdminLayout';
 import PlanningEditor, {
   PlanningInputsType,
 } from '~/components/PlanningEditor';
 import { NextPageWithLayout } from '~/pages/_app';
-import { trpc } from '~/utils/trpc';
+import { inferMutationInput, trpc } from '~/utils/trpc';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -39,9 +40,9 @@ const IndexPage: NextPageWithLayout = () => {
   });
 
   const [open, setOpen] = useState(false);
-  const [editingRuleData, setEditingRuleData] = useState<PlanningRule>(
-    defaultEditingRuleData,
-  );
+  const [editingRuleData, setEditingRuleData] = useState<
+    inferMutationInput<'planning.rules.upsert'>
+  >(defaultEditingRuleData);
 
   const openRule = (data?: PlanningRule) => {
     if (data) {
@@ -58,14 +59,25 @@ const IndexPage: NextPageWithLayout = () => {
       return;
     }
 
-    const { id, ...data } = editingRuleData;
+    // TODO: find a way to infer this from the server
+    const input = z.object({
+      id: z.string().optional(),
+      planningId: z.string(),
+      name: z.string(),
+      ownerId: z.string().nullable().optional(),
+      description: z.string(),
+      priority: z.number(),
+      maxMorning: z.number().nonnegative(),
+      maxAfternoon: z.number().nonnegative(),
+      maxEvening: z.number().nonnegative(),
+    });
 
-    if (Object.values(data).some((x) => x === null || x === '')) {
+    if (input.safeParse(editingRuleData).success === false) {
       alert('Niet alle velden zijn ingevuld');
       return;
     }
 
-    await UpsertRule.mutateAsync({ id, ...data });
+    await UpsertRule.mutateAsync(editingRuleData);
     setOpen(false);
   };
 
