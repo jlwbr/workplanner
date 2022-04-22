@@ -1,6 +1,5 @@
 import { createRouter } from '~/server/createRouter';
 import { z } from 'zod';
-import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 
 // TODO: This whole file is a mess. It should be refactored.
@@ -38,7 +37,7 @@ export const prologRouter = createRouter()
     input: z.object({
       date: z.date(),
     }),
-    async resolve({ input, ctx }) {
+    async resolve({ input }) {
       const { date } = input;
       const session = pl.create();
 

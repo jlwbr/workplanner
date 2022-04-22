@@ -136,10 +136,10 @@ const KanbanComponent = () => {
       name: z.string(),
       ownerId: z.string().nullable().optional(),
       description: z.string(),
-      priority: z.number(),
+      priority: z.number().optional(),
       maxMorning: z.number().nonnegative().optional(),
       maxAfternoon: z.number().nonnegative().optional(),
-      maxEvening: z.number().nonnegative(),
+      maxEvening: z.number().nonnegative().optional(),
     });
 
     if (input.safeParse(editingRuleData).success === false) {

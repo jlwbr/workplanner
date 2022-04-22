@@ -66,10 +66,10 @@ const IndexPage: NextPageWithLayout = () => {
       name: z.string(),
       ownerId: z.string().nullable().optional(),
       description: z.string(),
-      priority: z.number(),
-      maxMorning: z.number().nonnegative(),
-      maxAfternoon: z.number().nonnegative(),
-      maxEvening: z.number().nonnegative(),
+      priority: z.number().optional(),
+      maxMorning: z.number().nonnegative().optional(),
+      maxAfternoon: z.number().nonnegative().optional(),
+      maxEvening: z.number().nonnegative().optional(),
     });
 
     if (input.safeParse(editingRuleData).success === false) {
@@ -97,6 +97,7 @@ const IndexPage: NextPageWithLayout = () => {
       field: 'priority',
       label: 'Prioriteit',
       input: 'number',
+      placeholder: 'Geen prioriteit',
     },
     {
       field: 'description',
@@ -112,16 +113,19 @@ const IndexPage: NextPageWithLayout = () => {
       field: 'maxMorning',
       label: 'Max. aantal ochtend',
       input: 'number',
+      placeholder: 'Geen limiet',
     },
     {
       field: 'maxAfternoon',
       label: 'Max. aantal middag',
       input: 'number',
+      placeholder: 'Geen limiet',
     },
     {
       field: 'maxEvening',
       label: 'Max. aantal avond',
       input: 'number',
+      placeholder: 'Geen limiet',
     },
     {
       field: 'channelId',
