@@ -78,7 +78,6 @@ const IndexPage: NextPageWithLayout = () => {
       maxEvening: z.number().nonnegative().optional(),
     });
 
-
     if (input.safeParse(editingRuleData).success === false) {
       alert('Niet alle velden zijn ingevuld');
       return;

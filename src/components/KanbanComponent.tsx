@@ -246,7 +246,7 @@ const KanbanList = ({ id, title, rules, newTask }: KanbanListType) => {
     );
   });
 
-  const currentPrio = parseInt(currentPrioString || "0") || 0;
+  const currentPrio = parseInt(currentPrioString || '0') || 0;
 
   return (
     <div className="grow max-w-sm min-w-[16rem] bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">

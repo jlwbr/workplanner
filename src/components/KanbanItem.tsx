@@ -4,7 +4,7 @@ import { KanbanRule } from './KanbanComponent';
 
 type KanbanItemType = {
   item: KanbanRule;
-  currentPrio: Number;
+  currentPrio: number;
   editTask: (item: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
