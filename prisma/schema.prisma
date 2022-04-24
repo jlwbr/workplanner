@@ -29,6 +29,9 @@ model PlanningItem {
   name             String
   priority         Int
   description      String
+  minMorning       Int     @default(0)
+  minAfternoon     Int     @default(0)
+  minEvening       Int     @default(0)
   maxMorning       Int     @default(0)
   maxAfternoon     Int     @default(0)
   maxEvening       Int     @default(0)
@@ -49,6 +52,9 @@ model PlanningRule {
   priority     Int
   rule         String
   channelId    String
+  minMorning   Int    @default(0)
+  minAfternoon Int    @default(0)
+  minEvening   Int    @default(0)
   maxMorning   Int    @default(0)
   maxAfternoon Int    @default(0)
   maxEvening   Int    @default(0)

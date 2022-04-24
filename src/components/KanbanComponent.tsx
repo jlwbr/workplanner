@@ -7,6 +7,15 @@ import { DateContext } from './DateLayout';
 import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
 
+const groupByKey = (list: any[], key: string) =>
+  list.reduce(
+    (hash, obj) => ({
+      ...hash,
+      [obj[key]]: (hash[obj[key]] || []).concat(obj),
+    }),
+    {},
+  );
+
 // TODO: find a way to infer this type.
 export type KanbanRule = Exclude<
   inferQueryOutput<'planning.byDate'>,
@@ -42,6 +51,9 @@ const defaultEditingRuleData: inferMutationInput<'planning.tasks.upsert'> = {
   ownerId: '',
   priority: 0,
   description: '',
+  minMorning: 0,
+  minAfternoon: 0,
+  minEvening: 0,
   maxMorning: 0,
   maxAfternoon: 0,
   maxEvening: 0,
@@ -64,6 +76,24 @@ const PlanningInputs: PlanningInputsType = [
     field: 'description',
     label: 'Beschrijving',
     input: 'textarea',
+  },
+  {
+    field: 'minMorning',
+    label: 'Min. aantal ochtend',
+    input: 'number',
+    placeholder: 'Geen limiet',
+  },
+  {
+    field: 'minAfternoon',
+    label: 'Min. aantal middag',
+    input: 'number',
+    placeholder: 'Geen limiet',
+  },
+  {
+    field: 'minEvening',
+    label: 'Min. aantal avond',
+    input: 'number',
+    placeholder: 'Geen limiet',
   },
   {
     field: 'maxMorning',
@@ -132,11 +162,14 @@ const KanbanComponent = () => {
     // TODO: find a way to infer this from the server
     const input = z.object({
       id: z.string().optional(),
-      planningId: z.string(),
-      name: z.string(),
+      planningId: z.string().nonempty(),
+      name: z.string().nonempty(),
       ownerId: z.string().nullable().optional(),
-      description: z.string(),
-      priority: z.number().optional(),
+      description: z.string().optional(),
+      priority: z.number().nonnegative().optional(),
+      minMorning: z.number().nonnegative().optional(),
+      minAfternoon: z.number().nonnegative().optional(),
+      minEvening: z.number().nonnegative().optional(),
       maxMorning: z.number().nonnegative().optional(),
       maxAfternoon: z.number().nonnegative().optional(),
       maxEvening: z.number().nonnegative().optional(),
@@ -201,12 +234,31 @@ type KanbanListType = {
 
 const KanbanList = ({ id, title, rules, newTask }: KanbanListType) => {
   const { data: user } = useSession();
+
+  const prioGroups = groupByKey(rules, 'priority');
+
+  const currentPrioString = Object.keys(prioGroups).find((k) => {
+    return prioGroups[k].find(
+      (item: KanbanRule) =>
+        item.morningAsignee.length <= item.minMorning &&
+        item.afternoonAsignee.length <= item.minAfternoon &&
+        item.eveningAsignee.length <= item.minEvening,
+    );
+  });
+
+  const currentPrio = parseInt(currentPrioString || "0") || 0;
+
   return (
     <div className="grow max-w-sm min-w-[16rem] bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
       <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
       <div className="flex w-full flex-col gap-4 p-2 overflow-auto sm:max-h-[67vh]">
         {rules.map((rule) => (
-          <KanbanItem key={rule.id} editTask={newTask} item={rule} />
+          <KanbanItem
+            key={rule.id}
+            currentPrio={currentPrio}
+            editTask={newTask}
+            item={rule}
+          />
         ))}
       </div>
       <button

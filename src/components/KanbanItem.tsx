@@ -4,10 +4,11 @@ import { KanbanRule } from './KanbanComponent';
 
 type KanbanItemType = {
   item: KanbanRule;
+  currentPrio: Number;
   editTask: (item: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
-const KanbanItem = ({ item, editTask }: KanbanItemType) => {
+const KanbanItem = ({ item, currentPrio, editTask }: KanbanItemType) => {
   const context = trpc.useContext();
   const { data, status } = useSession();
   const asigneeMuation = trpc.useMutation(['planning.asignee.add'], {
@@ -22,6 +23,9 @@ const KanbanItem = ({ item, editTask }: KanbanItemType) => {
     description,
     priority,
     ownerId,
+    minMorning,
+    minAfternoon,
+    minEvening,
     maxMorning,
     maxAfternoon,
     maxEvening,
@@ -38,28 +42,49 @@ const KanbanItem = ({ item, editTask }: KanbanItemType) => {
     return null;
   }
 
-  const restMorning =
-    maxMorning - morningAsignee.length > 0
-      ? maxMorning - morningAsignee.length
-      : 1;
+  const willUseMaxMorning =
+    maxMorning - morningAsignee.length > 0 ? true : false;
+  const willUseMaxAfternoon =
+    maxAfternoon - afternoonAsignee.length > 0 ? true : false;
+  const willUseMaxEvening =
+    maxEvening - eveningAsignee.length > 0 ? true : false;
 
-  const restAfternoon =
-    maxAfternoon - afternoonAsignee.length > 0
-      ? maxAfternoon - afternoonAsignee.length
-      : 1;
+  const willUseMinMorning =
+    minMorning - morningAsignee.length > 0 ? true : false;
+  const willUseMinAfternoon =
+    minAfternoon - afternoonAsignee.length > 0 ? true : false;
+  const willUseMinEvening =
+    minEvening - eveningAsignee.length > 0 ? true : false;
 
-  const restEvening =
-    maxEvening - eveningAsignee.length > 0
-      ? maxEvening - eveningAsignee.length
-      : 1;
+  const restMorning = willUseMaxMorning
+    ? maxMorning - morningAsignee.length
+    : willUseMinMorning
+    ? minMorning - morningAsignee.length
+    : 1;
+  const restAfternoon = willUseMaxAfternoon
+    ? maxAfternoon - afternoonAsignee.length
+    : willUseMinAfternoon
+    ? minAfternoon - afternoonAsignee.length
+    : 1;
+  const restEvening = willUseMaxEvening
+    ? maxEvening - eveningAsignee.length
+    : willUseMinEvening
+    ? minEvening - eveningAsignee.length
+    : 1;
+
+  const isCorrectPrio = currentPrio == 0 || currentPrio == priority;
 
   const canMorningAsign =
+    isCorrectPrio &&
     !morningAsignee.some((item) => item.id === userId) &&
+    (maxMorning == 0 || morningAsignee.length < maxMorning) &&
     (maxMorning == 0 || morningAsignee.length < maxMorning);
   const canAfternoonAsign =
+    isCorrectPrio &&
     !afternoonAsignee.some((item) => item.id === userId) &&
     (maxAfternoon == 0 || afternoonAsignee.length < maxAfternoon);
   const canEveningAsign =
+    isCorrectPrio &&
     !eveningAsignee.some((item) => item.id === userId) &&
     (maxEvening == 0 || eveningAsignee.length < maxEvening);
 
@@ -117,36 +142,22 @@ const KanbanItem = ({ item, editTask }: KanbanItemType) => {
             </span>
           ))}
 
-          {canMorningAsign && maxMorning > 0
-            ? [...new Array(restMorning)].map((_, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'morning',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              ))
-            : canMorningAsign && (
-                <a
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'morning',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              )}
+          {canMorningAsign &&
+            [...new Array(restMorning)].map((_, i) => (
+              <a
+                key={i}
+                href="#"
+                onClick={() => {
+                  asigneeMuation.mutate({
+                    planningItemId: id,
+                    timeOfDay: 'morning',
+                  });
+                }}
+                className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
+              >
+                Leeg
+              </a>
+            ))}
         </div>
         <div className="pt-2">
           <div className="flex gap-2 content-center tracking-tight my-2">
@@ -164,36 +175,22 @@ const KanbanItem = ({ item, editTask }: KanbanItemType) => {
               {name}
             </span>
           ))}
-          {canAfternoonAsign && maxAfternoon > 0
-            ? [...new Array(restAfternoon)].map((_, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'afternoon',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              ))
-            : canAfternoonAsign && (
-                <a
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'afternoon',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              )}
+          {canAfternoonAsign &&
+            [...new Array(restAfternoon)].map((_, i) => (
+              <a
+                key={i}
+                href="#"
+                onClick={() => {
+                  asigneeMuation.mutate({
+                    planningItemId: id,
+                    timeOfDay: 'afternoon',
+                  });
+                }}
+                className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
+              >
+                Leeg
+              </a>
+            ))}
         </div>
         <div className="pt-2">
           <div className="flex gap-2 content-center tracking-tight my-2">
@@ -210,36 +207,22 @@ const KanbanItem = ({ item, editTask }: KanbanItemType) => {
               {name}
             </span>
           ))}
-          {canEveningAsign && maxEvening > 0
-            ? [...new Array(restEvening)].map((_, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'evening',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              ))
-            : canEveningAsign && (
-                <a
-                  href="#"
-                  onClick={() => {
-                    asigneeMuation.mutate({
-                      planningItemId: id,
-                      timeOfDay: 'evening',
-                    });
-                  }}
-                  className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-                >
-                  Leeg
-                </a>
-              )}
+          {canEveningAsign &&
+            [...new Array(restEvening)].map((_, i) => (
+              <a
+                key={i}
+                href="#"
+                onClick={() => {
+                  asigneeMuation.mutate({
+                    planningItemId: id,
+                    timeOfDay: 'evening',
+                  });
+                }}
+                className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
+              >
+                Leeg
+              </a>
+            ))}
         </div>
       </div>
     </div>

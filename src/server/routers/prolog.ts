@@ -48,7 +48,7 @@ export const prologRouter = createRouter()
 
         today(X) :- weekday(X, today).
         today(weekend) :- weekend(today).
-        
+
         weekday(monday, 1).
         weekday(tuesday, 2).
         weekday(wednesday, 3).
@@ -56,23 +56,23 @@ export const prologRouter = createRouter()
         weekday(friday, 5).
         weekday(saturday, 6).
         weekday(sunday, 7).
-        
+
         weekday(X, Date) :-
           timestamp(Date, D),
-            time_property(D, weekday(Num)),
-            weekday(X, Num).
-            
+          time_property(D, weekday(Num)),
+          weekday(X, Num).
+
         weekend(saturday).
         weekend(sunday).
-        
+
         weekend(X) :-
           weekday(Day, X),
             weekend(Day).
 
-        test_all(X) :-
+            test_all(X) :-
           findall(Y, task(Y), X).
-        
-        ${PlanningRules.map((rule) => `task(${rule.id}) :- ${rule.rule}.`).join(
+
+        ${PlanningRules.map((rule) => `task(${rule.id}) :- ${rule.rule}`).join(
           '\n',
         )}
       `;

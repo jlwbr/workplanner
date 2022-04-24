@@ -20,6 +20,9 @@ const defaultEditingRuleData: PlanningRule = {
   description: '',
   rule: '',
   channelId: '',
+  minMorning: 0,
+  minAfternoon: 0,
+  minEvening: 0,
   maxMorning: 0,
   maxAfternoon: 0,
   maxEvening: 0,
@@ -62,14 +65,19 @@ const IndexPage: NextPageWithLayout = () => {
     // TODO: find a way to infer this from the server
     const input = z.object({
       id: z.string().optional(),
-      name: z.string(),
+      planningId: z.string().nonempty(),
+      name: z.string().nonempty(),
       ownerId: z.string().nullable().optional(),
-      description: z.string(),
-      priority: z.number().optional(),
+      description: z.string().optional(),
+      priority: z.number().nonnegative().optional(),
+      minMorning: z.number().nonnegative().optional(),
+      minAfternoon: z.number().nonnegative().optional(),
+      minEvening: z.number().nonnegative().optional(),
       maxMorning: z.number().nonnegative().optional(),
       maxAfternoon: z.number().nonnegative().optional(),
       maxEvening: z.number().nonnegative().optional(),
     });
+
 
     if (input.safeParse(editingRuleData).success === false) {
       alert('Niet alle velden zijn ingevuld');
@@ -107,6 +115,24 @@ const IndexPage: NextPageWithLayout = () => {
       field: 'rule',
       label: 'Regel',
       input: 'textarea',
+    },
+    {
+      field: 'minMorning',
+      label: 'Min. aantal ochtend',
+      input: 'number',
+      placeholder: 'Geen limiet',
+    },
+    {
+      field: 'minAfternoon',
+      label: 'Min. aantal middag',
+      input: 'number',
+      placeholder: 'Geen limiet',
+    },
+    {
+      field: 'minEvening',
+      label: 'Min. aantal avond',
+      input: 'number',
+      placeholder: 'Geen limiet',
     },
     {
       field: 'maxMorning',
