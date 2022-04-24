@@ -57,16 +57,23 @@ export const planningRouter = createRouter()
   .mutation('asignee.add', {
     input: z.object({
       planningItemId: z.string().cuid(),
+      asigneeId: z.string().cuid().optional(),
       timeOfDay: z.enum(['morning', 'afternoon', 'evening']),
     }),
     async resolve({ input, ctx }) {
-      const { planningItemId, timeOfDay } = input;
-      if (!ctx.session?.user?.isEditor) {
+      const { planningItemId, timeOfDay, asigneeId } = input;
+      if (
+        asigneeId &&
+        asigneeId !== ctx.session?.user?.id &&
+        !ctx.session?.user?.isEditor
+      ) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
           message: 'You must be an admin or editor to acces this resource',
         });
       }
+
+      const id = asigneeId ?? ctx.session?.user?.id;
 
       switch (timeOfDay) {
         case 'morning':
@@ -74,7 +81,7 @@ export const planningRouter = createRouter()
             where: { id: planningItemId },
             data: {
               morningAsignee: {
-                connect: { id: ctx.session?.user?.id },
+                connect: { id },
               },
             },
           });
@@ -83,7 +90,7 @@ export const planningRouter = createRouter()
             where: { id: planningItemId },
             data: {
               afternoonAsignee: {
-                connect: { id: ctx.session?.user?.id },
+                connect: { id },
               },
             },
           });
@@ -92,7 +99,64 @@ export const planningRouter = createRouter()
             where: { id: planningItemId },
             data: {
               eveningAsignee: {
-                connect: { id: ctx.session?.user?.id },
+                connect: { id },
+              },
+            },
+          });
+        default:
+          throw new TRPCError({
+            code: 'PARSE_ERROR',
+            message: 'Invalid time of day',
+          });
+      }
+    },
+  })
+  .mutation('asignee.remove', {
+    input: z.object({
+      planningItemId: z.string().cuid(),
+      asigneeId: z.string().cuid().optional(),
+      timeOfDay: z.enum(['morning', 'afternoon', 'evening']),
+    }),
+    async resolve({ input, ctx }) {
+      const { planningItemId, timeOfDay, asigneeId } = input;
+      if (
+        asigneeId &&
+        asigneeId !== ctx.session?.user?.id &&
+        !ctx.session?.user?.isEditor
+      ) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      const id = asigneeId ?? ctx.session?.user?.id;
+
+      switch (timeOfDay) {
+        case 'morning':
+          return await prisma.planningItem.update({
+            where: { id: planningItemId },
+            data: {
+              morningAsignee: {
+                disconnect: { id },
+              },
+            },
+          });
+        case 'afternoon':
+          return await prisma.planningItem.update({
+            where: { id: planningItemId },
+            data: {
+              afternoonAsignee: {
+                disconnect: { id },
+              },
+            },
+          });
+        case 'evening':
+          return await prisma.planningItem.update({
+            where: { id: planningItemId },
+            data: {
+              eveningAsignee: {
+                disconnect: { id },
               },
             },
           });
@@ -293,6 +357,17 @@ export const planningRouter = createRouter()
           return false;
         }
       }
-      return planning;
+
+      // FIXME: we should be sorting in the prisma query
+      const sortedPlanning = planning.map((item) => ({
+        ...item,
+        PlanningItem: item.PlanningItem.sort((a, b) => {
+          if (a.priority === 0) return 1; //Return 1 so that b goes first
+          if (b.priority === 0) return -1; //Return -1 so that a goes first
+          return a.priority - b.priority;
+        }),
+      }));
+
+      return sortedPlanning;
     },
   });

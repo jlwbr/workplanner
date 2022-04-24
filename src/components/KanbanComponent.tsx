@@ -240,6 +240,7 @@ const KanbanList = ({ id, title, rules, newTask }: KanbanListType) => {
   const currentPrioString = Object.keys(prioGroups).find((k) => {
     return prioGroups[k].find(
       (item: KanbanRule) =>
+        item.priority !== 0 &&
         item.morningAsignee.length <= item.minMorning &&
         item.afternoonAsignee.length <= item.minAfternoon &&
         item.eveningAsignee.length <= item.minEvening,
