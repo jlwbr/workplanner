@@ -241,9 +241,9 @@ const KanbanList = ({ id, title, rules, newTask }: KanbanListType) => {
     return prioGroups[k].find(
       (item: KanbanRule) =>
         item.priority !== 0 &&
-        item.morningAsignee.length < item.minMorning &&
-        item.afternoonAsignee.length < item.minAfternoon &&
-        item.eveningAsignee.length < item.minEvening,
+        (item.morningAsignee.length < item.minMorning ||
+        item.afternoonAsignee.length < item.minAfternoon ||
+        item.eveningAsignee.length < item.minEvening),
     );
   });
 
