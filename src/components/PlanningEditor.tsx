@@ -150,6 +150,7 @@ const PlanningEditor = ({
                             <input
                               type={input.input}
                               name={input.field}
+                              min="0"
                               // TODO: This is ugly, but it works
                               value={(value as any)[input.field] || ''}
                               placeholder={input.placeholder}
