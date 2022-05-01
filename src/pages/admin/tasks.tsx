@@ -65,7 +65,7 @@ const IndexPage: NextPageWithLayout = () => {
     // TODO: find a way to infer this from the server
     const input = z.object({
       id: z.string().optional(),
-      planningId: z.string().nonempty(),
+      planningId: z.string().nonempty().optional(),
       name: z.string().nonempty(),
       ownerId: z.string().nullable().optional(),
       description: z.string().optional(),
