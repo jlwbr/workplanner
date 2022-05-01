@@ -27,6 +27,7 @@ const Stepper = ({ steps, currentStepNumber }: StepperType) => {
     stepsStateRef.current = stepsState;
     const currentSteps = updateStep(currentStepNumber - 1, stepsState);
     setStep(currentSteps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     const currentSteps = updateStep(
