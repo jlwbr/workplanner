@@ -1,10 +1,11 @@
-import { ReactElement } from 'react';
-import { DateLayout } from '~/components/DateLayout';
+import { ReactElement, useContext } from 'react';
+import { DateContext, DateLayout } from '~/components/DateLayout';
 import KanbanComponent from '~/components/KanbanComponent';
 import { NextPageWithLayout } from './_app';
 
 const IndexPage: NextPageWithLayout = () => {
-  return <KanbanComponent />;
+  const date = useContext(DateContext);
+  return <KanbanComponent date={date} />;
 };
 
 IndexPage.getLayout = (page: ReactElement) => <DateLayout>{page}</DateLayout>;

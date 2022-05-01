@@ -5,14 +5,16 @@ import DateHeader from './DateHeader';
 
 type DefaultLayoutProps = { children: ReactNode };
 
-export const DateContext = createContext(new Date());
+export const DateContext = createContext(
+  new Date(new Date().setHours(0, 0, 0, 0)),
+);
 
 export const DateLayout = ({ children }: DefaultLayoutProps) => {
-  const [value, setDate] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
-  const { value: date } = useMemo(
+  const [value, setValue] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
+  const { value: date, setValue: setDate } = useMemo(
     () => ({
       value,
-      setDate,
+      setValue,
     }),
     [value],
   );

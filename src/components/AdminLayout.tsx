@@ -1,23 +1,39 @@
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { ReactNode } from 'react';
+import { createContext, ReactNode, useMemo, useState } from 'react';
 import { ReactQueryDevtools } from 'react-query/devtools';
+import DateHeader from './DateHeader';
 import Header from './Header';
 
-type AdminLayoutProps = { children: ReactNode };
+type AdminLayoutProps = {
+  children: ReactNode;
+  hasDate?: boolean;
+};
 
-export const AdminLayout = ({ children }: AdminLayoutProps) => {
+export const AdminDateContext = createContext(
+  new Date(new Date().setHours(0, 0, 0, 0)),
+);
+
+export const AdminLayout = ({ children, hasDate }: AdminLayoutProps) => {
   const { data, status } = useSession();
+  const [value, setValue] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
+  const { value: date, setValue: setDate } = useMemo(
+    () => ({
+      value,
+      setValue,
+    }),
+    [value],
+  );
 
   // TODO: Make better error page
   if (status != 'authenticated') {
     return <p>NOT AUTHENTICATED</p>;
   }
 
-  // if (data.user && !data.user.isEditor) {
-  //   return <p>UNAUTHORIZED</p>;
-  // }
+  if (data.user && !data.user.isEditor) {
+    return <p>UNAUTHORIZED</p>;
+  }
 
   return (
     <>
@@ -28,10 +44,14 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       <main>
         <div className="min-h-screen bg-slate-100">
-          <Header />
+          {hasDate ? <DateHeader date={date} setDate={setDate} /> : <Header />}
           <div className="flex gap-4 mr-4">
             <Sidebar />
-            <div className="container mx-auto px-1 py-4">{children}</div>
+            <div className="container mx-auto px-1 py-4">
+              <AdminDateContext.Provider value={date}>
+                {children}
+              </AdminDateContext.Provider>
+            </div>
           </div>
         </div>
       </main>
@@ -45,7 +65,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
 const menuItems = [
   {
-    name: 'Dashboard',
+    name: 'Dagverdeling',
     location: '/admin',
     Icon: () => (
       <svg

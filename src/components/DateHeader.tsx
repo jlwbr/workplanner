@@ -2,7 +2,6 @@ import { signIn, useSession } from 'next-auth/react';
 import { Dispatch, SetStateAction } from 'react';
 import Link from 'next/link';
 import { UserMenu } from './UserMenu';
-import { trpc } from '~/utils/trpc';
 
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');

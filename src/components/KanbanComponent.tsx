@@ -1,9 +1,8 @@
 import { PlanningItem } from '@prisma/client';
 import { useSession } from 'next-auth/react';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
 import { inferMutationInput, inferQueryOutput, trpc } from '~/utils/trpc';
-import { DateContext } from './DateLayout';
 import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
 
@@ -16,34 +15,10 @@ const groupByKey = (list: any[], key: string) =>
     {},
   );
 
-// TODO: find a way to infer this type.
 export type KanbanRule = Exclude<
   inferQueryOutput<'planning.byDate'>,
   false
 >[0]['PlanningItem'][0];
-// export type KanbanRule = {
-//   id: string;
-//   name: string;
-//   description: string;
-//   ownerId: string | null;
-//   priority: number;
-//   maxMorning: number;
-//   maxAfternoon: number;
-//   maxEvening: number;
-//   planningRuleId: string;
-//   morningAsignee: {
-//     id: string;
-//     name: string | null;
-//   }[];
-//   afternoonAsignee: {
-//     id: string;
-//     name: string | null;
-//   }[];
-//   eveningAsignee: {
-//     id: string;
-//     name: string | null;
-//   }[];
-// };
 
 const defaultEditingRuleData: inferMutationInput<'planning.tasks.upsert'> = {
   id: '',
@@ -115,8 +90,11 @@ const PlanningInputs: PlanningInputsType = [
   },
 ];
 
-const KanbanComponent = () => {
-  const date = useContext(DateContext);
+type KanbanComponentType = {
+  date: Date;
+};
+
+const KanbanComponent = ({ date }: KanbanComponentType) => {
   const context = trpc.useContext();
   const filterDay = trpc.useMutation(['prolog.FilterDay'], {
     onSuccess: () => {
@@ -129,6 +107,7 @@ const KanbanComponent = () => {
       date: date,
     },
   ]);
+
   const UpsertRule = trpc.useMutation(['planning.tasks.upsert'], {
     onSuccess: () => {
       context.invalidateQueries(['planning.byDate']);
@@ -216,6 +195,7 @@ const KanbanComponent = () => {
         <KanbanList
           key={plan.id}
           id={plan.id}
+          locked={plan.locked}
           title={plan.channel.name}
           rules={plan.PlanningItem}
           newTask={openTask}
@@ -229,10 +209,11 @@ type KanbanListType = {
   id: string;
   title: string;
   rules: KanbanRule[];
+  locked: boolean;
   newTask: (data?: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
-const KanbanList = ({ id, title, rules, newTask }: KanbanListType) => {
+const KanbanList = ({ id, title, rules, locked, newTask }: KanbanListType) => {
   const { data: user } = useSession();
 
   const prioGroups = groupByKey(rules, 'priority');
@@ -259,37 +240,40 @@ const KanbanList = ({ id, title, rules, newTask }: KanbanListType) => {
             currentPrio={currentPrio}
             editTask={newTask}
             item={rule}
+            locked={locked}
           />
         ))}
       </div>
-      <button
-        onClick={() => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { planningId, ownerId, ...data } = defaultEditingRuleData;
-          newTask({
-            ownerId: user?.user?.id || '',
-            planningId: id,
-            ...data,
-          });
-        }}
-        className="inline-flex justify-center items-center gap-1 w-full p-4 text-gray-900 font-medium"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+      {!locked && (
+        <button
+          onClick={() => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { planningId, ownerId, ...data } = defaultEditingRuleData;
+            newTask({
+              ownerId: user?.user?.id || '',
+              planningId: id,
+              ...data,
+            });
+          }}
+          className="inline-flex justify-center items-center gap-1 w-full p-4 text-gray-900 font-medium"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
-        Nieuwe taak
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Nieuwe taak
+        </button>
+      )}
     </div>
   );
 };

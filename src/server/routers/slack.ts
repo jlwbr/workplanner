@@ -1,5 +1,4 @@
 import { createRouter } from '~/server/createRouter';
-import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { WebClient } from '@slack/web-api';
@@ -52,7 +51,8 @@ export const slackRouter = createRouter()
       });
 
       const channels = await client.conversations.list({
-        types: 'public_channel,private_channel',
+        types: 'public_channel,private_channel,mpim,im',
+        limit: 9999,
       });
       if (!channels.ok || !channels.channels)
         throw new TRPCError({

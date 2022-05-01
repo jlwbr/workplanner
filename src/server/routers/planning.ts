@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client';
 const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
   id: true,
   date: true,
+  locked: true,
   channel: {
     select: {
       name: true,
@@ -369,5 +370,31 @@ export const planningRouter = createRouter()
       }));
 
       return sortedPlanning;
+    },
+  })
+  .mutation('lockbyDate', {
+    input: z.object({
+      date: z.date(),
+    }),
+    async resolve({ input, ctx }) {
+      const { date } = input;
+      const { session } = ctx;
+      if (!session?.user || !session.user.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be authorized',
+        });
+      }
+
+      const planning = await prisma.planning.updateMany({
+        where: {
+          date,
+        },
+        data: {
+          locked: true,
+        },
+      });
+
+      return planning;
     },
   });

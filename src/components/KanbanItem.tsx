@@ -6,10 +6,16 @@ import { KanbanRule } from './KanbanComponent';
 type KanbanItemType = {
   item: KanbanRule;
   currentPrio: number;
+  locked: boolean;
   editTask: (item: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
-const KanbanItem = ({ item, currentPrio, editTask }: KanbanItemType) => {
+const KanbanItem = ({
+  item,
+  currentPrio,
+  locked,
+  editTask,
+}: KanbanItemType) => {
   const context = trpc.useContext();
   const { data, status } = useSession();
   // FIXME: We are invalidating a lot of data all over the app, we should only invalidate the data we need to.
@@ -78,15 +84,18 @@ const KanbanItem = ({ item, currentPrio, editTask }: KanbanItemType) => {
 
   const canMorningAsign =
     isCorrectPrio &&
+    !locked &&
     !morningAsignee.some((item) => item.id === userId) &&
     (maxMorning == 0 || morningAsignee.length < maxMorning) &&
     (maxMorning == 0 || morningAsignee.length < maxMorning);
   const canAfternoonAsign =
     isCorrectPrio &&
+    !locked &&
     !afternoonAsignee.some((item) => item.id === userId) &&
     (maxAfternoon == 0 || afternoonAsignee.length < maxAfternoon);
   const canEveningAsign =
     isCorrectPrio &&
+    !locked &&
     !eveningAsignee.some((item) => item.id === userId) &&
     (maxEvening == 0 || eveningAsignee.length < maxEvening);
 
@@ -113,7 +122,7 @@ const KanbanItem = ({ item, currentPrio, editTask }: KanbanItemType) => {
                 Prio {priority}
               </div>
             )}
-            {(userId === ownerId || isEditer) && (
+            {(userId === ownerId || isEditer) && !locked && (
               <button
                 onClick={() => editTask(item)}
                 className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-purple-200 text-purple-700 rounded-full"
@@ -152,7 +161,7 @@ const KanbanItem = ({ item, currentPrio, editTask }: KanbanItemType) => {
               asigneeId={itemId}
               name={name}
               timeOfDay="morning"
-              canRemove={isEditer || itemId == userId}
+              canRemove={!locked && (isEditer || itemId == userId)}
             />
           ))}
 
@@ -187,7 +196,7 @@ const KanbanItem = ({ item, currentPrio, editTask }: KanbanItemType) => {
               planningItemId={id}
               name={name}
               timeOfDay="afternoon"
-              canRemove={isEditer || itemId == userId}
+              canRemove={!locked && (isEditer || itemId == userId)}
             />
           ))}
           {canAfternoonAsign &&
@@ -220,7 +229,7 @@ const KanbanItem = ({ item, currentPrio, editTask }: KanbanItemType) => {
               planningItemId={id}
               name={name}
               timeOfDay="evening"
-              canRemove={isEditer || itemId == userId}
+              canRemove={!locked && (isEditer || itemId == userId)}
             />
           ))}
           {canEveningAsign &&
