@@ -5,7 +5,7 @@ import { NextPageWithLayout } from './_app';
 
 const IndexPage: NextPageWithLayout = () => {
   const date = useContext(DateContext);
-  return <KanbanComponent date={date} />;
+  return <KanbanComponent date={date} isAdmin={false} />;
 };
 
 IndexPage.getLayout = (page: ReactElement) => <DateLayout>{page}</DateLayout>;
