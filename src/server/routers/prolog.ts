@@ -11,6 +11,38 @@ import pl from 'tau-prolog';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('tau-prolog/modules/promises.js')(pl);
 
+const generateProgram = (date: Date, rule: string) => `
+timestamp(today, ${date.valueOf()}).
+
+today(X) :- weekday(X, today).
+today(weekend) :- weekend(today).
+
+weekday(monday, 1).
+weekday(tuesday, 2).
+weekday(wednesday, 3).
+weekday(thursday, 4).
+weekday(friday, 5).
+weekday(saturday, 6).
+weekday(sunday, 7).
+
+weekday(X, Date) :-
+  timestamp(Date, D),
+  time_property(D, weekday(Num)),
+  weekday(X, Num).
+
+weekend(saturday).
+weekend(sunday).
+
+weekend(X) :-
+  weekday(Day, X),
+    weekend(Day).
+
+    test_all(X) :-
+  findall(Y, task(Y), X).
+
+${rule}
+`;
+
 function fromList<T>(xs: any) {
   const arr = [];
   while (pl.type.is_term(xs) && xs.indicator === './2') {
@@ -32,6 +64,27 @@ const groupByKey = (list: any[], key: string) =>
   );
 
 export const prologRouter = createRouter()
+  .mutation('Check', {
+    input: z.string(),
+    async resolve({ input }) {
+      const session = pl.create();
+
+      const program = generateProgram(new Date(), `test :- ${input}`);
+
+      try {
+        await session.promiseQuery('test.');
+        await session.promiseConsult(program);
+        return {
+          success: true,
+        };
+      } catch (e) {
+        console.log(e);
+        return {
+          success: false,
+        };
+      }
+    },
+  })
   // update
   .mutation('FilterDay', {
     input: z.object({
@@ -43,39 +96,12 @@ export const prologRouter = createRouter()
 
       const PlanningRules = await prisma.planningRule.findMany();
 
-      const program = `
-        timestamp(today, ${date.valueOf()}).
-
-        today(X) :- weekday(X, today).
-        today(weekend) :- weekend(today).
-
-        weekday(monday, 1).
-        weekday(tuesday, 2).
-        weekday(wednesday, 3).
-        weekday(thursday, 4).
-        weekday(friday, 5).
-        weekday(saturday, 6).
-        weekday(sunday, 7).
-
-        weekday(X, Date) :-
-          timestamp(Date, D),
-          time_property(D, weekday(Num)),
-          weekday(X, Num).
-
-        weekend(saturday).
-        weekend(sunday).
-
-        weekend(X) :-
-          weekday(Day, X),
-            weekend(Day).
-
-            test_all(X) :-
-          findall(Y, task(Y), X).
-
-        ${PlanningRules.map((rule) => `task(${rule.id}) :- ${rule.rule}`).join(
+      const program = generateProgram(
+        date,
+        PlanningRules.map((rule) => `task(${rule.id}) :- ${rule.rule}`).join(
           '\n',
-        )}
-      `;
+        ),
+      );
 
       type PlanningRulesByChannelId = {
         [key: string]: {

@@ -45,7 +45,12 @@ export const AdminLayout = ({ children, hasDate }: AdminLayoutProps) => {
       <main>
         <div className="min-h-screen bg-slate-100">
           {hasDate ? <DateHeader date={date} setDate={setDate} /> : <Header />}
-          <div className="flex gap-4 mr-4">
+          <div className="flex md:hidden items-center justify-center w-full h-full">
+            <h1 className="text-center text-2xl text-slate-200">
+              Deze pagina werk niet op een mobiele telefoon
+            </h1>
+          </div>
+          <div className="hidden md:flex gap-4 mr-4">
             <Sidebar />
             <div className="container mx-auto px-1 py-4">
               <AdminDateContext.Provider value={date}>

@@ -31,6 +31,7 @@ const defaultEditingRuleData: PlanningRule = {
 const IndexPage: NextPageWithLayout = () => {
   const context = trpc.useContext();
   const RulesQuery = trpc.useQuery(['planning.rules.all']);
+  const checkMutation = trpc.useMutation(['prolog.Check']);
   const UpsertRule = trpc.useMutation(['planning.rules.upsert'], {
     onSuccess: () => {
       context.invalidateQueries(['planning.rules.all']);
@@ -67,7 +68,9 @@ const IndexPage: NextPageWithLayout = () => {
       id: z.string().optional(),
       planningId: z.string().nonempty().optional(),
       name: z.string().nonempty(),
+      rule: z.string().nonempty(),
       ownerId: z.string().nullable().optional(),
+      channelId: z.string().nonempty(),
       description: z.string().optional(),
       priority: z.number().nonnegative().optional(),
       minMorning: z.number().nonnegative().optional(),
@@ -80,6 +83,13 @@ const IndexPage: NextPageWithLayout = () => {
 
     if (input.safeParse(editingRuleData).success === false) {
       alert('Niet alle velden zijn ingevuld');
+      return;
+    }
+
+    const result = await checkMutation.mutateAsync(editingRuleData.rule);
+
+    if (!result.success) {
+      alert('Syntax error!');
       return;
     }
 
