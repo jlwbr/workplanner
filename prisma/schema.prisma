@@ -12,39 +12,45 @@ generator client {
   previewFeatures = ["referentialIntegrity"]
 }
 
+enum TimeOffDay {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
 model Planning {
   id        String   @id @default(cuid())
   date      DateTime
   channelId String
   locked    Boolean  @default(false)
 
-  channel       Channel         @relation(fields: [channelId], references: [id])
-  PlanningItem  PlanningItem[]
-  Communication Communication[]
-  Break Break[]
+  channel      Channel        @relation(fields: [channelId], references: [id])
+  PlanningItem PlanningItem[]
 
   @@unique([id, date, channelId])
 }
 
 model Communication {
-  id          String  @id @default(cuid())
+  id          String     @id @default(cuid())
+  TimeOffDay  TimeOffDay
+  date        DateTime
   userId      String
-  planningId  String
   phoneNumber String
   HT          Boolean
 
-  user     User     @relation(fields: [userId], references: [id])
-  planning Planning @relation(fields: [planningId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  @@unique([userId, date, TimeOffDay])
 }
 
 model Break {
-  id         String @id @default(cuid())
-  planningId String
+  id         String     @id @default(cuid())
+  TimeOffDay TimeOffDay
+  date       DateTime
   userId     String
   number     Int
 
-  user     User     @relation(fields: [userId], references: [id])
-  planning Planning @relation(fields: [planningId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  @@unique([userId, date, TimeOffDay])
 }
 
 model PlanningItem {

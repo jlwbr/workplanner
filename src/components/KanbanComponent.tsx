@@ -92,9 +92,10 @@ const PlanningInputs: PlanningInputsType = [
 
 type KanbanComponentType = {
   date: Date;
+  isAdmin: boolean;
 };
 
-const KanbanComponent = ({ date }: KanbanComponentType) => {
+const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
   const context = trpc.useContext();
   const filterDay = trpc.useMutation(['prolog.FilterDay'], {
     onSuccess: () => {
@@ -198,6 +199,7 @@ const KanbanComponent = ({ date }: KanbanComponentType) => {
           locked={plan.locked}
           title={plan.channel.name}
           rules={plan.PlanningItem}
+          isAdmin={isAdmin}
           newTask={openTask}
         />
       ))}
@@ -210,10 +212,18 @@ type KanbanListType = {
   title: string;
   rules: KanbanRule[];
   locked: boolean;
+  isAdmin: boolean;
   newTask: (data?: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
-const KanbanList = ({ id, title, rules, locked, newTask }: KanbanListType) => {
+const KanbanList = ({
+  id,
+  title,
+  rules,
+  locked,
+  isAdmin,
+  newTask,
+}: KanbanListType) => {
   const { data: user } = useSession();
 
   const prioGroups = groupByKey(rules, 'priority');
@@ -241,6 +251,7 @@ const KanbanList = ({ id, title, rules, locked, newTask }: KanbanListType) => {
             editTask={newTask}
             item={rule}
             locked={locked}
+            isAdmin={isAdmin}
           />
         ))}
       </div>

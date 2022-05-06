@@ -3,6 +3,7 @@ import { AdminDateContext, AdminLayout } from '~/components/AdminLayout';
 import BreakComponent from '~/components/BreakComponent';
 import CommunicationComponent from '~/components/CommunicationComponent';
 import KanbanComponent from '~/components/KanbanComponent';
+import Planningpage from '~/components/PlanningPage';
 import Stepper from '~/components/Stepper';
 import { NextPageWithLayout } from '~/pages/_app';
 import { trpc } from '~/utils/trpc';
@@ -31,8 +32,8 @@ const IndexPage: NextPageWithLayout = () => {
       <div className="container horizontal">
         <Stepper steps={stepArray} currentStepNumber={currentStep} />
       </div>
-      <div className="container flex justify-around my-8 ">
-        {currentStep == 1 && <KanbanComponent date={date} />}
+      <div className="container flex justify-around my-8 pt-4">
+        {currentStep == 1 && <KanbanComponent date={date} isAdmin={true} />}
         {currentStep == 2 && (
           <div className="text-center px-10">
             <h2 className="text-2xl m-5">Vergrendel planning</h2>
@@ -54,6 +55,7 @@ const IndexPage: NextPageWithLayout = () => {
         )}
         {currentStep == 3 && <CommunicationComponent date={date} />}
         {currentStep == 4 && <BreakComponent date={date} />}
+        {currentStep == 5 && <Planningpage date={date} />}
       </div>
       <div className="container flex justify-around my-8 ">
         <button

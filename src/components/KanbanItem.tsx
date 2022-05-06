@@ -1,4 +1,5 @@
 import { useSession } from 'next-auth/react';
+import Select, { MultiValue } from 'react-select';
 import { inferMutationInput, trpc } from '~/utils/trpc';
 import AsigneeBadge from './AsigneeBadge';
 import { KanbanRule } from './KanbanComponent';
@@ -7,6 +8,7 @@ type KanbanItemType = {
   item: KanbanRule;
   currentPrio: number;
   locked: boolean;
+  isAdmin: boolean;
   editTask: (item: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
@@ -14,16 +16,28 @@ const KanbanItem = ({
   item,
   currentPrio,
   locked,
+  isAdmin,
   editTask,
 }: KanbanItemType) => {
   const context = trpc.useContext();
   const { data, status } = useSession();
+  const userQuery = trpc.useQuery(['user.all']);
   // FIXME: We are invalidating a lot of data all over the app, we should only invalidate the data we need to.
   const asigneeMuation = trpc.useMutation(['planning.asignee.add'], {
     onSuccess: () => {
       context.invalidateQueries(['planning.byDate']);
     },
   });
+  const removableAsignee = trpc.useMutation(['planning.asignee.remove'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+
+  const options = userQuery.data?.map((user) => ({
+    value: user.id,
+    label: user.name,
+  }));
 
   const {
     id,
@@ -41,6 +55,37 @@ const KanbanItem = ({
     afternoonAsignee,
     eveningAsignee,
   } = item;
+
+  const handleChange = (
+    selectedOption: MultiValue<{ value: string; label: string | null }>,
+    timeOfDay: 'morning' | 'afternoon' | 'evening',
+  ) => {
+    const asignees =
+      timeOfDay == 'morning'
+        ? morningAsignee
+        : timeOfDay == 'afternoon'
+        ? afternoonAsignee
+        : eveningAsignee;
+
+    for (const option of selectedOption) {
+      if (!asignees.some((asignee) => asignee.id == option.value)) {
+        asignees.shift();
+        asigneeMuation.mutate({
+          planningItemId: id,
+          timeOfDay,
+          asigneeId: option.value,
+        });
+      }
+    }
+
+    for (const asignee of asignees) {
+      removableAsignee.mutate({
+        planningItemId: id,
+        timeOfDay,
+        asigneeId: asignee.id,
+      });
+    }
+  };
 
   const userId = data?.user?.id;
   const isEditer = data?.user?.isEditor;
@@ -154,18 +199,32 @@ const KanbanItem = ({
               {morningAsignee.length} / {maxMorning > 0 ? maxMorning : '∞'}
             </span>
           </div>
-          {morningAsignee.map(({ id: itemId, name }) => (
-            <AsigneeBadge
-              key={itemId}
-              planningItemId={id}
-              asigneeId={itemId}
-              name={name}
-              timeOfDay="morning"
-              canRemove={!locked && (isEditer || itemId == userId)}
+          {isAdmin && (
+            <Select
+              options={options}
+              defaultValue={morningAsignee.map((item) => ({
+                value: item.id,
+                label: item.name,
+              }))}
+              onChange={(c) => handleChange(c, 'morning')}
+              isMulti
+              isSearchable
             />
-          ))}
+          )}
+          {!isAdmin &&
+            morningAsignee.map(({ id: itemId, name }) => (
+              <AsigneeBadge
+                key={itemId}
+                planningItemId={id}
+                asigneeId={itemId}
+                name={name}
+                timeOfDay="morning"
+                canRemove={!locked && (isEditer || itemId == userId)}
+              />
+            ))}
 
-          {canMorningAsign &&
+          {!isAdmin &&
+            canMorningAsign &&
             [...new Array(restMorning)].map((_, i) => (
               <a
                 key={i}
@@ -190,16 +249,30 @@ const KanbanItem = ({
               {maxAfternoon > 0 ? maxAfternoon : '∞'}
             </span>
           </div>
-          {afternoonAsignee.map(({ id: itemId, name }) => (
-            <AsigneeBadge
-              key={itemId}
-              planningItemId={id}
-              name={name}
-              timeOfDay="afternoon"
-              canRemove={!locked && (isEditer || itemId == userId)}
+          {isAdmin && (
+            <Select
+              options={options}
+              defaultValue={morningAsignee.map((item) => ({
+                value: item.id,
+                label: item.name,
+              }))}
+              onChange={(c) => handleChange(c, 'afternoon')}
+              isMulti
+              isSearchable
             />
-          ))}
-          {canAfternoonAsign &&
+          )}
+          {!isAdmin &&
+            afternoonAsignee.map(({ id: itemId, name }) => (
+              <AsigneeBadge
+                key={itemId}
+                planningItemId={id}
+                name={name}
+                timeOfDay="afternoon"
+                canRemove={!locked && (isEditer || itemId == userId)}
+              />
+            ))}
+          {!isAdmin &&
+            canAfternoonAsign &&
             [...new Array(restAfternoon)].map((_, i) => (
               <a
                 key={i}
@@ -223,16 +296,30 @@ const KanbanItem = ({
               {eveningAsignee.length} / {maxEvening > 0 ? maxEvening : '∞'}
             </span>
           </div>
-          {eveningAsignee.map(({ id: itemId, name }) => (
-            <AsigneeBadge
-              key={itemId}
-              planningItemId={id}
-              name={name}
-              timeOfDay="evening"
-              canRemove={!locked && (isEditer || itemId == userId)}
+          {isAdmin && (
+            <Select
+              options={options}
+              defaultValue={morningAsignee.map((item) => ({
+                value: item.id,
+                label: item.name,
+              }))}
+              onChange={(c) => handleChange(c, 'evening')}
+              isMulti
+              isSearchable
             />
-          ))}
-          {canEveningAsign &&
+          )}
+          {!isAdmin &&
+            eveningAsignee.map(({ id: itemId, name }) => (
+              <AsigneeBadge
+                key={itemId}
+                planningItemId={id}
+                name={name}
+                timeOfDay="evening"
+                canRemove={!locked && (isEditer || itemId == userId)}
+              />
+            ))}
+          {!isAdmin &&
+            canEveningAsign &&
             [...new Array(restEvening)].map((_, i) => (
               <a
                 key={i}
