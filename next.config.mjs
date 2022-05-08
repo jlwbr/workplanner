@@ -3,10 +3,13 @@
  * @type {import('next').NextConfig}
  */
 import { withSentryConfig } from '@sentry/nextjs';
+import withPWA from 'next-pwa';
 
-const moduleExports = {
-  // Your existing module.exports
-};
+const moduleExports = withPWA({
+  pwa: {
+    dest: 'public',
+  },
+});
 
 const sentryWebpackPluginOptions = {
   // Additional config options for the Sentry Webpack plugin. Keep in mind that
