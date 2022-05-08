@@ -40,9 +40,9 @@ const MyApp = (({
           name="viewport"
           content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=5"
         />
-        <meta name="description" content="Description" />
-        <meta name="keywords" content="Keywords" />
-        <title>Next.js PWA Example</title>
+        <meta name="description" content="Workplanner" />
+        <meta name="keywords" content="work planner workplanner" />
+        <title>Workplanner</title>
 
         <link
           rel="apple-touch-icon"
