@@ -1,9 +1,10 @@
 import { signOut, useSession } from 'next-auth/react';
 import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 import { classNames } from './DateHeader';
 import { trpc } from '~/utils/trpc';
 import Link from 'next/link';
+import { DateContext } from './DateLayout';
 
 function MyLink(props: any) {
   const { href, children, ...rest } = props;
@@ -15,7 +16,14 @@ function MyLink(props: any) {
 }
 
 export const UserMenu = ({ image }: { image: string }) => {
+  const date = useContext(DateContext);
   const { data } = useSession();
+  const context = trpc.useContext();
+  const planningMutation = trpc.useMutation(['planning.deleteDay'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
   const syncChannels = trpc.useMutation(['slack.syncChannels']);
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -57,19 +65,43 @@ export const UserMenu = ({ image }: { image: string }) => {
               </Menu.Item>
             )}
             {data?.user?.isEditor && (
-              <Menu.Item>
-                {({ active }) => (
-                  <MyLink
-                    href="/admin"
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                      'block px-4 py-2 text-sm',
-                    )}
-                  >
-                    Admin
-                  </MyLink>
-                )}
-              </Menu.Item>
+              <>
+                <Menu.Item>
+                  {({ active }) => (
+                    <a
+                      href="#"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `Dit zal de huidige planning voor ${date.toLocaleDateString()} verwijderen. Weet je het zeker?`,
+                          )
+                        ) {
+                          planningMutation.mutateAsync({ date });
+                        }
+                      }}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block px-4 py-2 text-sm',
+                      )}
+                    >
+                      Herlaad dag
+                    </a>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <MyLink
+                      href="/admin"
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block px-4 py-2 text-sm',
+                      )}
+                    >
+                      Admin
+                    </MyLink>
+                  )}
+                </Menu.Item>
+              </>
             )}
             <Menu.Item>
               {({ active }) => (

@@ -103,6 +103,8 @@ export const prologRouter = createRouter()
         ),
       );
 
+      console.log(program);
+
       type PlanningRulesByChannelId = {
         [key: string]: {
           id: string;

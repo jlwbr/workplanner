@@ -397,4 +397,25 @@ export const planningRouter = createRouter()
 
       return planning;
     },
+  })
+  .mutation('deleteDay', {
+    input: z.object({
+      date: z.date(),
+    }),
+    async resolve({ input, ctx }) {
+      const { date } = input;
+      const { session } = ctx;
+      if (!session?.user || !session.user.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be authorized',
+        });
+      }
+
+      return await prisma.planning.deleteMany({
+        where: {
+          date,
+        },
+      });
+    },
   });
