@@ -264,5 +264,6 @@ const IndexPage: NextPageWithLayout = () => {
 };
 
 IndexPage.getLayout = (page: ReactElement) => <AdminLayout>{page}</AdminLayout>;
+IndexPage.requireAuth = true;
 
 export default IndexPage;

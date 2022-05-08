@@ -12,9 +12,11 @@ import { Toaster } from 'react-hot-toast';
 import superjson from 'superjson';
 
 import '../styles/globals.css';
+import { AuthGuard } from '~/components/AuthGuard';
 
 export type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
+  requireAuth?: boolean;
 };
 
 type AppPropsWithLayout = AppProps & {
@@ -30,7 +32,12 @@ const MyApp = (({
 
   return (
     <SessionProvider session={session}>
-      {getLayout(<Component {...pageProps} />)}
+      {Component.requireAuth ? (
+        <AuthGuard>{getLayout(<Component {...pageProps} />)}</AuthGuard>
+      ) : (
+        // public page
+        getLayout(<Component {...pageProps} />)
+      )}
       <Toaster position="bottom-right" />
     </SessionProvider>
   );

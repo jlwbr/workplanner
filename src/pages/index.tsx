@@ -9,6 +9,7 @@ const IndexPage: NextPageWithLayout = () => {
 };
 
 IndexPage.getLayout = (page: ReactElement) => <DateLayout>{page}</DateLayout>;
+IndexPage.requireAuth = true;
 
 export default IndexPage;
 

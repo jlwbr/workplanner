@@ -78,5 +78,6 @@ const IndexPage: NextPageWithLayout = () => {
 IndexPage.getLayout = (page: ReactElement) => (
   <AdminLayout hasDate={true}>{page}</AdminLayout>
 );
+IndexPage.requireAuth = true;
 
 export default IndexPage;
