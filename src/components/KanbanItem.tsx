@@ -252,7 +252,7 @@ const KanbanItem = ({
           {isAdmin && (
             <Select
               options={options}
-              defaultValue={morningAsignee.map((item) => ({
+              defaultValue={afternoonAsignee.map((item) => ({
                 value: item.id,
                 label: item.name,
               }))}
@@ -299,7 +299,7 @@ const KanbanItem = ({
           {isAdmin && (
             <Select
               options={options}
-              defaultValue={morningAsignee.map((item) => ({
+              defaultValue={eveningAsignee.map((item) => ({
                 value: item.id,
                 label: item.name,
               }))}
