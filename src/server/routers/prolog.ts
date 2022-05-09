@@ -96,6 +96,7 @@ export const prologRouter = createRouter()
 
       const PlanningRules = await prisma.planningRule.findMany();
 
+      // TODO: The timezone seems to be wrong
       const program = generateProgram(
         date,
         PlanningRules.map((rule) => `task(${rule.id}) :- ${rule.rule}`).join(

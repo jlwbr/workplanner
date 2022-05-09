@@ -32,6 +32,13 @@ const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
       maxMorning: true,
       maxAfternoon: true,
       maxEvening: true,
+      done: true,
+      doneUser: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       morningAsignee: {
         select: {
           id: true,
@@ -167,6 +174,35 @@ export const planningRouter = createRouter()
             message: 'Invalid time of day',
           });
       }
+    },
+  })
+  .mutation('tasks.done', {
+    input: z.object({
+      id: z.string().cuid(),
+      done: z.boolean(),
+    }),
+    async resolve({ input, ctx }) {
+      const { id, done } = input;
+      const user = ctx.session?.user;
+      if (!user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to acces this resource',
+        });
+      }
+
+      return await prisma.planningItem.update({
+        where: { id },
+        data: {
+          done,
+          doneUserId: done ? user.id : null,
+        },
+        select: {
+          id: true,
+          name: true,
+          done: true,
+        },
+      });
     },
   })
   .mutation('tasks.upsert', {

@@ -1,5 +1,6 @@
 import { useSession } from 'next-auth/react';
 import Select, { MultiValue } from 'react-select';
+import ReactTooltip from 'react-tooltip';
 import { inferMutationInput, trpc } from '~/utils/trpc';
 import AsigneeBadge from './AsigneeBadge';
 import { KanbanRule } from './KanbanComponent';
@@ -33,6 +34,11 @@ const KanbanItem = ({
       context.invalidateQueries(['planning.byDate']);
     },
   });
+  const doneMutation = trpc.useMutation(['planning.tasks.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
 
   const options = userQuery.data?.map((user) => ({
     value: user.id,
@@ -45,6 +51,8 @@ const KanbanItem = ({
     description,
     priority,
     ownerId,
+    done,
+    doneUser,
     minMorning,
     minAfternoon,
     minEvening,
@@ -156,9 +164,24 @@ const KanbanItem = ({
 
   return (
     <div className="bg-white rounded-md shadow-md">
+      <ReactTooltip />
       <div className="p-5">
         <div className="flex justify-between content-center tracking-tight pb-2">
-          <strong className="inline-flex items-center">
+          <strong className="inline-flex items-center gap-2">
+            <div
+              data-tip={doneUser && `${doneUser.name} heeft deze taak afgerond`}
+              className="text-xs inline-flex items-center font-bold leading-sm uppercase px-2 py-1 bg-orange-200 text-orange-700 rounded-full"
+            >
+              <input
+                type="checkbox"
+                checked={done}
+                disabled={
+                  doneMutation.status !== 'idle' &&
+                  doneMutation.status !== 'success'
+                }
+                onChange={() => doneMutation.mutateAsync({ id, done: !!!done })}
+              />
+            </div>
             <h2 className="font-bold text-gray-900">{name}</h2>
           </strong>
           <div className="flex items-center gap-2">
@@ -207,6 +230,8 @@ const KanbanItem = ({
                 label: item.name,
               }))}
               onChange={(c) => handleChange(c, 'morning')}
+              menuPortalTarget={document.body}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               isMulti
               isSearchable
             />
@@ -257,6 +282,8 @@ const KanbanItem = ({
                 label: item.name,
               }))}
               onChange={(c) => handleChange(c, 'afternoon')}
+              menuPortalTarget={document.body}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               isMulti
               isSearchable
             />
@@ -304,6 +331,8 @@ const KanbanItem = ({
                 label: item.name,
               }))}
               onChange={(c) => handleChange(c, 'evening')}
+              menuPortalTarget={document.body}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               isMulti
               isSearchable
             />

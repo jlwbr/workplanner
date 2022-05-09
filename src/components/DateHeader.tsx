@@ -37,6 +37,7 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
           onClick={() => {
             setDate(addDays(date, -1));
           }}
+          aria-label="Previous day"
           className="inline-flex items-center justify-center w-10 h-10 mr-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
         >
           <svg
@@ -60,6 +61,7 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
             : date.toLocaleDateString()}
         </h5>
         <button
+          aria-label="Next day"
           onClick={() => setDate(addDays(date, 1))}
           className="inline-flex items-center justify-center w-10 h-10 ml-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
         >

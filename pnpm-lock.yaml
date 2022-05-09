@@ -43,6 +43,7 @@ specifiers:
   react-hot-toast: ^2.2.0
   react-query: ^3.27.0
   react-select: ^5.3.1
+  react-tooltip: ^4.2.21
   start-server-and-test: ^1.12.0
   superjson: ^1.7.4
   tailwindcss: ^3.0.23
@@ -76,6 +77,7 @@ dependencies:
   react-hot-toast: 2.2.0_383bc679f6b8b3c30a924b2c4a84e8d7
   react-query: 3.34.17_react-dom@17.0.2+react@17.0.2
   react-select: 5.3.1_b5d7bf22a7b46dd4876f0e926ab0c987
+  react-tooltip: 4.2.21_react-dom@17.0.2+react@17.0.2
   start-server-and-test: 1.14.0
   superjson: 1.8.1
   tailwindcss: 3.0.23_b89136460714832cdda11d1e9d57d1ff
@@ -6868,6 +6870,19 @@ packages:
       react: 17.0.2
     dev: false
 
+  /react-tooltip/4.2.21_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-zSLprMymBDowknr0KVDiJ05IjZn9mQhhg4PRsqln0OZtURAJ1snt1xi5daZfagsh6vfsziZrc9pErPTDY1ACig==}
+    engines: {npm: '>=6.13'}
+    peerDependencies:
+      react: '>=16.0.0'
+      react-dom: '>=16.0.0'
+    dependencies:
+      prop-types: 15.8.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      uuid: 7.0.3
+    dev: false
+
   /react-transition-group/4.4.2_react-dom@17.0.2+react@17.0.2:
     resolution: {integrity: sha512-/RNYfRAMlZwDSr6z4zNKV6xu53/e2BuaBbGhbyYIXTrmgu/bGHzmqOs7mJSJBHy9Ud+ApHx3QjrkKSp1pxvlFg==}
     peerDependencies:
@@ -7932,6 +7947,11 @@ packages:
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=}
+    dev: false
+
+  /uuid/7.0.3:
+    resolution: {integrity: sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg==}
+    hasBin: true
     dev: false
 
   /uuid/8.3.2:

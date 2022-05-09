@@ -70,10 +70,15 @@ model PlanningItem {
   afternoonAsignee User[]  @relation(name: "PlanningItem_afternoonAsignee")
   eveningAsignee   User[]  @relation(name: "PlanningItem_eveningAsignee")
   ownerId          String?
+  done             Boolean @default(false)
+  doneUserId       String?
 
-  owner        User?         @relation(fields: [ownerId], references: [id])
+  owner        User?         @relation(fields: [ownerId], references: [id], name: "PlanningItem_owner")
+  doneUser     User?         @relation(fields: [doneUserId], references: [id], name: "PlanningItem_doneUser")
   Planning     Planning      @relation(fields: [planningId], references: [id])
   PlanningRule PlanningRule? @relation(fields: [planningRuleId], references: [id])
+  User         User?         @relation(fields: [userId], references: [id])
+  userId       String?
 }
 
 model PlanningRule {
@@ -130,22 +135,24 @@ model Session {
 }
 
 model User {
-  id               String          @id @default(cuid())
-  name             String?
-  email            String?         @unique
-  emailVerified    DateTime?
-  image            String?
-  admin            Boolean         @default(false)
-  editor           Boolean         @default(false)
-  accounts         Account[]
-  sessions         Session[]
-  channels         Channel[]
-  MorningAsignee   PlanningItem[]  @relation(name: "PlanningItem_morningAsignee")
-  AfternoonAsignee PlanningItem[]  @relation(name: "PlanningItem_afternoonAsignee")
-  EveningAsignee   PlanningItem[]  @relation(name: "PlanningItem_eveningAsignee")
-  PlanningItem     PlanningItem[]
-  Communication    Communication[]
-  Break            Break[]
+  id                   String          @id @default(cuid())
+  name                 String?
+  email                String?         @unique
+  emailVerified        DateTime?
+  image                String?
+  admin                Boolean         @default(false)
+  editor               Boolean         @default(false)
+  accounts             Account[]
+  sessions             Session[]
+  channels             Channel[]
+  MorningAsignee       PlanningItem[]  @relation(name: "PlanningItem_morningAsignee")
+  AfternoonAsignee     PlanningItem[]  @relation(name: "PlanningItem_afternoonAsignee")
+  EveningAsignee       PlanningItem[]  @relation(name: "PlanningItem_eveningAsignee")
+  PlanningItem         PlanningItem[]
+  Communication        Communication[]
+  Break                Break[]
+  PlanningItemOwner    PlanningItem[]  @relation(name: "PlanningItem_owner")
+  PlanningItemDoneUser PlanningItem[]  @relation(name: "PlanningItem_doneUser")
 }
 
 model VerificationToken {
