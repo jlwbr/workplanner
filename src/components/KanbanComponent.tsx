@@ -246,7 +246,7 @@ const KanbanList = ({
   const currentPrio = parseInt(currentPrioString || '0') || 0;
 
   return (
-    <div className="md:min-w-[16rem] md:w-[16rem]">
+    <div className="md:min-w-[22rem] md:w-[22rem]">
       <div className="bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
         <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
         <div className="flex w-full flex-col gap-4 p-2 overflow-auto sm:max-h-[67vh]">
