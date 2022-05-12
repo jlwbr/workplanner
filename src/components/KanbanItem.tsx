@@ -230,7 +230,7 @@ const KanbanItem = ({
             )}
           </div>
         </div>
-        <p>{description}</p>
+        <div className="whitespace-pre-wrap">{description}</div>
 
         {item.subTask.length > 0 && (
           <div className="pt-2">
