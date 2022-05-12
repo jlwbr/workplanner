@@ -30,18 +30,23 @@ const defaultEditingRuleData: PlanningRule = {
 
 const IndexPage: NextPageWithLayout = () => {
   const context = trpc.useContext();
+  const options = {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.rules.all']);
+    },
+  };
   const RulesQuery = trpc.useQuery(['planning.rules.all']);
   const checkMutation = trpc.useMutation(['prolog.Check']);
-  const UpsertRule = trpc.useMutation(['planning.rules.upsert'], {
-    onSuccess: () => {
-      context.invalidateQueries(['planning.rules.all']);
-    },
-  });
-  const deleteMutation = trpc.useMutation(['planning.rules.delete'], {
-    onSuccess: () => {
-      context.invalidateQueries(['planning.rules.all']);
-    },
-  });
+  const addSubTaskMutation = trpc.useMutation(
+    ['planning.rules.addSubTask'],
+    options,
+  );
+  const removeSubTaskMutation = trpc.useMutation(
+    ['planning.rules.removeSubTask'],
+    options,
+  );
+  const UpsertRule = trpc.useMutation(['planning.rules.upsert'], options);
+  const deleteMutation = trpc.useMutation(['planning.rules.delete'], options);
 
   const [open, setOpen] = useState(false);
   const [editingRuleData, setEditingRuleData] = useState<
@@ -95,6 +100,16 @@ const IndexPage: NextPageWithLayout = () => {
 
     await UpsertRule.mutateAsync(editingRuleData);
     setOpen(false);
+  };
+
+  const onAddSubTask = async (planningRuleId: string) => {
+    const name = prompt('Naam van de subtaak');
+
+    if (!name) {
+      return;
+    }
+
+    await addSubTaskMutation.mutateAsync({ planningRuleId, name });
   };
 
   const onDelete = async (id: string) => {
@@ -218,23 +233,83 @@ const IndexPage: NextPageWithLayout = () => {
             >
               <ul>
                 {PlanningRule.map((rule) => (
-                  <li
-                    key={rule.id}
-                    className="relative p-3 rounded-md hover:bg-coolGray-100"
-                    onClick={() => openRule(rule)}
-                  >
-                    <h3 className="text-sm font-medium leading-5">
-                      {rule.name}
-                    </h3>
+                  <div key={rule.id}>
+                    <li className="relative flex justify-between p-3 rounded-md">
+                      <h3 className="text-sm font-medium leading-5">
+                        {rule.name}
+                      </h3>
 
-                    <a
-                      href="#"
-                      className={classNames(
-                        'absolute inset-0 rounded-md',
-                        'focus:z-10 focus:outline-none focus:ring-2 ring-blue-400',
-                      )}
-                    />
-                  </li>
+                      <div className="flex items-center gap-4">
+                        <button onClick={() => onAddSubTask(rule.id)}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </button>
+
+                        <button onClick={() => openRule(rule)}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </li>
+                    {rule.subTask &&
+                      rule.subTask.map((subTask) => (
+                        <li
+                          key={subTask.id}
+                          className="relative flex justify-between p-3 rounded-md"
+                        >
+                          <h3 className="text-sm font-medium leading-5 pl-5">
+                            {subTask.name}
+                          </h3>
+
+                          <button
+                            onClick={() =>
+                              removeSubTaskMutation.mutateAsync({
+                                id: subTask.id,
+                              })
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-6 w-6"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </li>
+                      ))}
+                  </div>
                 ))}
               </ul>
             </Tab.Panel>

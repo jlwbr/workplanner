@@ -94,7 +94,25 @@ export const prologRouter = createRouter()
       const { date } = input;
       const session = pl.create();
 
-      const PlanningRules = await prisma.planningRule.findMany();
+      const PlanningRules = await prisma.planningRule.findMany({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          rule: true,
+          maxMorning: true,
+          maxAfternoon: true,
+          maxEvening: true,
+          priority: true,
+          channelId: true,
+          subTask: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
 
       // TODO: The timezone seems to be wrong
       const program = generateProgram(
@@ -116,6 +134,7 @@ export const prologRouter = createRouter()
           maxEvening: number;
           priority: number;
           channelId: string;
+          subTask: { id: string; name: string }[];
         }[];
       };
 
@@ -136,7 +155,7 @@ export const prologRouter = createRouter()
             const filteredRules = rules.filter((rule) => ids.includes(rule.id));
 
             if (filteredRules.length > 0) {
-              await prisma.planning.create({
+              const planning = await prisma.planning.create({
                 data: {
                   channelId: channel,
                   date,
@@ -154,6 +173,39 @@ export const prologRouter = createRouter()
                     },
                   },
                 },
+                select: {
+                  PlanningItem: {
+                    select: {
+                      id: true,
+                      planningRuleId: true,
+                    },
+                  },
+                },
+              });
+
+              planning.PlanningItem.forEach(async (item) => {
+                const subTasks =
+                  filteredRules.find((rule) => rule.id === item.planningRuleId)
+                    ?.subTask || [];
+
+                console.log(subTasks);
+
+                if (subTasks.length > 0) return;
+
+                await prisma.planningItem.update({
+                  where: {
+                    id: item.id,
+                  },
+                  data: {
+                    subTask: {
+                      createMany: {
+                        data: subTasks.map((subTask) => ({
+                          name: subTask.name,
+                        })),
+                      },
+                    },
+                  },
+                });
               });
             }
           }

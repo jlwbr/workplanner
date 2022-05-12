@@ -79,6 +79,7 @@ model PlanningItem {
   PlanningRule PlanningRule? @relation(fields: [planningRuleId], references: [id])
   User         User?         @relation(fields: [userId], references: [id])
   userId       String?
+  subTask      subTask[]
 }
 
 model PlanningRule {
@@ -97,6 +98,20 @@ model PlanningRule {
 
   channel      Channel        @relation(fields: [channelId], references: [id])
   PlanningItem PlanningItem[]
+  subTask      subTask[]
+}
+
+model subTask {
+  id             String  @id @default(cuid())
+  name           String
+  done           Boolean @default(false)
+  doneUserId     String?
+  planningItemId String?
+  planningRuleId String?
+
+  doneUser     User?         @relation(fields: [doneUserId], references: [id])
+  planningItem PlanningItem? @relation(fields: [planningItemId], references: [id])
+  planningRule PlanningRule? @relation(fields: [planningRuleId], references: [id])
 }
 
 model Channel {
@@ -153,6 +168,7 @@ model User {
   Break                Break[]
   PlanningItemOwner    PlanningItem[]  @relation(name: "PlanningItem_owner")
   PlanningItemDoneUser PlanningItem[]  @relation(name: "PlanningItem_doneUser")
+  subTask              subTask[]
 }
 
 model VerificationToken {

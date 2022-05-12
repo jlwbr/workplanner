@@ -33,6 +33,14 @@ const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
       maxAfternoon: true,
       maxEvening: true,
       done: true,
+      subTask: {
+        select: {
+          id: true,
+          name: true,
+          done: true,
+          doneUser: true,
+        },
+      },
       doneUser: {
         select: {
           id: true,
@@ -271,6 +279,44 @@ export const planningRouter = createRouter()
       });
     },
   })
+  .mutation('rules.addSubTask', {
+    input: z.object({
+      planningItemId: z.string().cuid().optional(),
+      planningRuleId: z.string().cuid().optional(),
+      name: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      if (!ctx.session?.user?.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      return await prisma.subTask.create({
+        data: input,
+      });
+    },
+  })
+  .mutation('rules.removeSubTask', {
+    input: z.object({
+      id: z.string().cuid(),
+    }),
+    async resolve({ input, ctx }) {
+      if (!ctx.session?.user?.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      return await prisma.subTask.delete({
+        where: {
+          id: input.id,
+        },
+      });
+    },
+  })
   .mutation('rules.delete', {
     input: z.object({
       id: z.string(),
@@ -345,6 +391,12 @@ export const planningRouter = createRouter()
               maxEvening: true,
               rule: true,
               channelId: true,
+              subTask: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
             },
           },
         },
