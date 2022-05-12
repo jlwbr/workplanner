@@ -183,26 +183,31 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row w-full h-full px-4 sm:gap-6">
-      <PlanningEditor
-        open={open}
-        onClose={onClose}
-        value={editingRuleData}
-        onChange={(e: unknown) => setEditingRuleData(e as PlanningItem)}
-        inputs={PlanningInputs}
-        onDelete={onDelete}
-      />
-      {planing.data.map((plan) => (
-        <KanbanList
-          key={plan.id}
-          id={plan.id}
-          locked={plan.locked}
-          title={plan.channel.name}
-          rules={plan.PlanningItem}
-          isAdmin={isAdmin}
-          newTask={openTask}
-        />
-      ))}
+    <div className="overflow-hidden">
+      <div className="overflow-auto">
+        <div className="flex flex-col sm:flex-row w-full h-full px-4 sm:gap-6 pb-5">
+          <PlanningEditor
+            open={open}
+            onClose={onClose}
+            value={editingRuleData}
+            onChange={(e: unknown) => setEditingRuleData(e as PlanningItem)}
+            inputs={PlanningInputs}
+            onDelete={onDelete}
+          />
+          {planing.data.map((plan) => (
+            <KanbanList
+              key={plan.id}
+              id={plan.id}
+              locked={plan.locked}
+              title={plan.channel.name}
+              rules={plan.PlanningItem}
+              isAdmin={isAdmin}
+              newTask={openTask}
+            />
+          ))}
+          <div className="w-0 h-full">&nbsp;</div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -241,7 +246,7 @@ const KanbanList = ({
   const currentPrio = parseInt(currentPrioString || '0') || 0;
 
   return (
-    <div className="grow max-w-sm min-w-[16rem]">
+    <div className="md:min-w-[16rem] md:w-[16rem]">
       <div className="bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
         <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
         <div className="flex w-full flex-col gap-4 p-2 overflow-auto sm:max-h-[67vh]">
