@@ -183,14 +183,12 @@ export const prologRouter = createRouter()
                 },
               });
 
-              planning.PlanningItem.forEach(async (item) => {
+              await planning.PlanningItem.forEach(async (item) => {
                 const subTasks =
                   filteredRules.find((rule) => rule.id === item.planningRuleId)
                     ?.subTask || [];
 
-                console.log(subTasks);
-
-                if (subTasks.length > 0) return;
+                if (subTasks.length <= 0) return;
 
                 await prisma.planningItem.update({
                   where: {

@@ -39,6 +39,11 @@ const KanbanItem = ({
       context.invalidateQueries(['planning.byDate']);
     },
   });
+  const subTaskdoneMutation = trpc.useMutation(['planning.subTask.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
 
   const options = userQuery.data?.map((user) => ({
     value: user.id,
@@ -214,11 +219,37 @@ const KanbanItem = ({
           </div>
         </div>
         <p>{description}</p>
-        <ul>
-          {item.subTask.map((subTask) => (
-            <li key={subTask.id}>{subTask.name}</li>
-          ))}
-        </ul>
+        <div className="pt-2">
+          <h2 className="font-bold text-gray-900">Subtaken</h2>
+          <ul className="">
+            {item.subTask.map((subTask) => (
+              <li
+                key={subTask.id}
+                data-tip={
+                  subTask.doneUser &&
+                  `${subTask.doneUser.name} heeft deze taak afgerond`
+                }
+                className="inline-flex items-center gap-2"
+              >
+                <input
+                  type="checkbox"
+                  checked={subTask.done}
+                  disabled={
+                    subTaskdoneMutation.status !== 'idle' &&
+                    subTaskdoneMutation.status !== 'success'
+                  }
+                  onChange={() =>
+                    subTaskdoneMutation.mutateAsync({
+                      id: subTask.id,
+                      done: !!!subTask.done,
+                    })
+                  }
+                />
+                {subTask.name}
+              </li>
+            ))}
+          </ul>
+        </div>
         <div className="pt-2">
           <div className="flex gap-2 content-center tracking-tight my-2">
             <h2 className="font-bold text-gray-900">Ochtend</h2>
