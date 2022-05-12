@@ -185,7 +185,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
   return (
     <div className="overflow-hidden">
       <div className="overflow-auto">
-        <div className="flex flex-col sm:flex-row w-full h-full px-4 sm:gap-6 pb-5">
+        <div className="flex flex-col sm:flex-row w-full h-full px-4 sm:gap-6 pb-2">
           <PlanningEditor
             open={open}
             onClose={onClose}
@@ -247,9 +247,9 @@ const KanbanList = ({
 
   return (
     <div className="md:min-w-[22rem] md:w-[22rem]">
-      <div className="flex flex-col bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
+      <div className="bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
         <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
-        <div className="flex w-full flex-col gap-4 p-2 overflow-auto">
+        <div className="flex w-full flex-col gap-4 p-2 overflow-auto sm:max-h-[68vh]">
           {rules.map((rule) => (
             <KanbanItem
               key={rule.id}
