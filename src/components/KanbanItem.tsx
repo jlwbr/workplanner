@@ -44,6 +44,14 @@ const KanbanItem = ({
       context.invalidateQueries(['planning.byDate']);
     },
   });
+  const subTaskFinishAllMutation = trpc.useMutation(
+    ['planning.subTasks.finishAll'],
+    {
+      onSuccess: () => {
+        context.invalidateQueries(['planning.byDate']);
+      },
+    },
+  );
 
   const options = userQuery.data?.map((user) => ({
     value: user.id,
@@ -174,7 +182,11 @@ const KanbanItem = ({
         <div className="flex justify-between content-center tracking-tight pb-2">
           <strong className="inline-flex items-center gap-2">
             <div
-              data-tip={doneUser && `${doneUser.name} heeft deze taak afgerond`}
+              data-tip={
+                doneUser
+                  ? `${doneUser.name} heeft deze taak afgerond`
+                  : 'Deze taak is nog niet afgerond'
+              }
               className="text-xs inline-flex items-center font-bold leading-sm uppercase px-2 py-1 bg-orange-200 text-orange-700 rounded-full"
             >
               <input
@@ -222,14 +234,25 @@ const KanbanItem = ({
 
         {item.subTask.length > 0 && (
           <div className="pt-2">
-            <h2 className="font-bold text-gray-900">Subtaken</h2>
+            <div className="flex gap-1 items-baseline justify-between">
+              <h2 className="font-bold text-gray-900">Subtaken</h2>
+              <button
+                onClick={() =>
+                  subTaskFinishAllMutation.mutateAsync({ id, done: true })
+                }
+                className="text-xs text-gray-600"
+              >
+                Alles afronden
+              </button>
+            </div>
             <ul>
               {item.subTask.map((subTask) => (
                 <li
                   key={subTask.id}
                   data-tip={
-                    subTask.doneUser &&
-                    `${subTask.doneUser.name} heeft deze taak afgerond`
+                    subTask.doneUser
+                      ? `${subTask.doneUser.name} heeft deze taak afgerond`
+                      : 'Deze taak is nog niet afgerond'
                   }
                   className="inline-flex items-center gap-2"
                 >
@@ -237,8 +260,10 @@ const KanbanItem = ({
                     type="checkbox"
                     checked={subTask.done}
                     disabled={
-                      subTaskdoneMutation.status !== 'idle' &&
-                      subTaskdoneMutation.status !== 'success'
+                      (subTaskdoneMutation.status !== 'idle' &&
+                        subTaskdoneMutation.status !== 'success') ||
+                      (subTaskFinishAllMutation.status !== 'idle' &&
+                        subTaskFinishAllMutation.status !== 'success')
                     }
                     onChange={() =>
                       subTaskdoneMutation.mutateAsync({

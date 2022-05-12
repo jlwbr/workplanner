@@ -279,6 +279,32 @@ export const planningRouter = createRouter()
       });
     },
   })
+  .mutation('subTasks.finishAll', {
+    input: z.object({
+      id: z.string().cuid(),
+      done: z.boolean(),
+    }),
+    async resolve({ input, ctx }) {
+      const { id, done } = input;
+      const user = ctx.session?.user;
+      if (!user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to acces this resource',
+        });
+      }
+
+      return await prisma.subTask.updateMany({
+        where: {
+          planningItemId: id,
+        },
+        data: {
+          done,
+          doneUserId: done ? user.id : null,
+        },
+      });
+    },
+  })
   .mutation('subTask.done', {
     input: z.object({
       id: z.string().cuid(),
