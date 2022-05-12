@@ -241,50 +241,52 @@ const KanbanList = ({
   const currentPrio = parseInt(currentPrioString || '0') || 0;
 
   return (
-    <div className="grow max-w-sm min-w-[16rem] bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
-      <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
-      <div className="flex w-full flex-col gap-4 p-2 overflow-auto sm:max-h-[67vh]">
-        {rules.map((rule) => (
-          <KanbanItem
-            key={rule.id}
-            currentPrio={currentPrio}
-            editTask={newTask}
-            item={rule}
-            locked={locked}
-            isAdmin={isAdmin}
-          />
-        ))}
-      </div>
-      {!locked && (
-        <button
-          onClick={() => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { planningId, ownerId, ...data } = defaultEditingRuleData;
-            newTask({
-              ownerId: user?.user?.id || '',
-              planningId: id,
-              ...data,
-            });
-          }}
-          className="inline-flex justify-center items-center gap-1 w-full p-4 text-gray-900 font-medium"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4v16m8-8H4"
+    <div className="grow max-w-sm min-w-[16rem]">
+      <div className="bg-gray-200 rounded-lg shadow-lg mb-4 sm:mb-0">
+        <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
+        <div className="flex w-full flex-col gap-4 p-2 overflow-auto sm:max-h-[67vh]">
+          {rules.map((rule) => (
+            <KanbanItem
+              key={rule.id}
+              currentPrio={currentPrio}
+              editTask={newTask}
+              item={rule}
+              locked={locked}
+              isAdmin={isAdmin}
             />
-          </svg>
-          Nieuwe taak
-        </button>
-      )}
+          ))}
+        </div>
+        {!locked && (
+          <button
+            onClick={() => {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { planningId, ownerId, ...data } = defaultEditingRuleData;
+              newTask({
+                ownerId: user?.user?.id || '',
+                planningId: id,
+                ...data,
+              });
+            }}
+            className="inline-flex justify-center items-center gap-1 w-full p-4 text-gray-900 font-medium"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Nieuwe taak
+          </button>
+        )}
+      </div>
     </div>
   );
 };

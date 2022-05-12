@@ -191,7 +191,7 @@ const KanbanItem = ({
           </strong>
           <div className="flex items-center gap-2">
             {priority > 0 && (
-              <div className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-blue-200 text-blue-700 rounded-full">
+              <div className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-blue-200 text-blue-700 rounded-full whitespace-nowrap">
                 Prio {priority}
               </div>
             )}
