@@ -1,5 +1,5 @@
 import { TimeOffDay } from '@prisma/client';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { trpc } from '~/utils/trpc';
 
 const groupByKey = (list: any[], key: string) =>
