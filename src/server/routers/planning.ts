@@ -422,13 +422,6 @@ export const planningRouter = createRouter()
       }
 
       return await prisma.channel.findMany({
-        where: {
-          members: {
-            some: {
-              id: ctx.session.user.id,
-            },
-          },
-        },
         select: {
           id: true,
           name: true,
@@ -477,15 +470,6 @@ export const planningRouter = createRouter()
       const planning = await prisma.planning.findMany({
         where: {
           date: date,
-          channel: {
-            is: {
-              members: {
-                some: {
-                  id: session.user.id,
-                },
-              },
-            },
-          },
         },
         select: defaultTaskSelect,
       });
