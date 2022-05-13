@@ -10,7 +10,13 @@ import { trpc } from '~/utils/trpc';
 
 const IndexPage: NextPageWithLayout = () => {
   const date = useContext(AdminDateContext);
-  const mutateLock = trpc.useMutation(['planning.lockbyDate']);
+  const context = trpc.useContext();
+  const mutateLock = trpc.useMutation(['planning.lockbyDate'], {
+    onSuccess: () => {
+      context.invalidateQueries('planning.isLocked');
+    },
+  });
+  const isLockedQuery = trpc.useQuery(['planning.isLocked', { date }]);
   const [currentStep, setCurrentStep] = useState(1);
   const stepArray = [
     'Planning',
@@ -27,6 +33,9 @@ const IndexPage: NextPageWithLayout = () => {
       setCurrentStep(newStep);
     }
   };
+
+  const isLocked = isLockedQuery.data || false;
+
   return (
     <>
       <div className="container horizontal">
@@ -40,20 +49,28 @@ const IndexPage: NextPageWithLayout = () => {
         )}
         {currentStep == 2 && (
           <div className="text-center px-10">
-            <h2 className="text-2xl m-5">Vergrendel planning</h2>
+            <h2 className="text-2xl m-5">
+              {isLocked ? 'Ontgrendel' : 'Vergrendel'} planning
+            </h2>
             <p>
               Je staat op het punt de planning van {date.toLocaleDateString()}{' '}
-              te vergrendelen.
+              te {isLocked ? 'ontgrendelen' : 'vergrendelen'}.
             </p>
-            <p>
-              Dit is definitief en betekend dat niemand de planning meer kan
-              wijzigen.
-            </p>
+            {isLocked ? (
+              <p>Dit betekend dat de planning weer gewijzigd kan worden.</p>
+            ) : (
+              <p>Dit betekend dat niemand de planning meer kan wijzigen.</p>
+            )}
             <button
-              onClick={() => mutateLock.mutateAsync({ date })}
+              onClick={() =>
+                mutateLock.mutateAsync({ date, locked: !isLocked })
+              }
+              disabled={
+                mutateLock.status !== 'idle' && mutateLock.status !== 'success'
+              }
               className="mt-7 btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline bg-blue-700 hover:bg-blue-900 text-white font-normal py-2 px-4 mr-1 rounded"
             >
-              Vergrendel planning
+              {isLocked ? 'Ontgrendel' : 'Vergrendel'} planning
             </button>
           </div>
         )}

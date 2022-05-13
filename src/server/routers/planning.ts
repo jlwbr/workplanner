@@ -518,7 +518,7 @@ export const planningRouter = createRouter()
       return sortedPlanning;
     },
   })
-  .mutation('lockbyDate', {
+  .query('isLocked', {
     input: z.object({
       date: z.date(),
     }),
@@ -532,12 +532,39 @@ export const planningRouter = createRouter()
         });
       }
 
+      const planning = await prisma.planning.findFirst({
+        where: {
+          date,
+        },
+        select: {
+          locked: true,
+        },
+      });
+
+      return planning?.locked ? true : false;
+    },
+  })
+  .mutation('lockbyDate', {
+    input: z.object({
+      date: z.date(),
+      locked: z.boolean(),
+    }),
+    async resolve({ input, ctx }) {
+      const { date, locked } = input;
+      const { session } = ctx;
+      if (!session?.user || !session.user.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be authorized',
+        });
+      }
+
       const planning = await prisma.planning.updateMany({
         where: {
           date,
         },
         data: {
-          locked: true,
+          locked,
         },
       });
 
