@@ -6,6 +6,7 @@ declare module 'next-auth' {
       id: string;
       isAdmin: boolean;
       isEditor: boolean;
+      isShared: boolean;
     };
   }
 }

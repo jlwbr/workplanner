@@ -157,6 +157,7 @@ model User {
   image                String?
   admin                Boolean         @default(false)
   editor               Boolean         @default(false)
+  shared               Boolean         @default(false)
   accounts             Account[]
   sessions             Session[]
   channels             Channel[]

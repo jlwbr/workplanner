@@ -31,6 +31,7 @@ export default withSentry(
           if (prismaUser) {
             session.user.isAdmin = prismaUser.admin;
             session.user.isEditor = prismaUser.editor || prismaUser.admin;
+            session.user.isShared = prismaUser.shared;
           }
         }
         return session;

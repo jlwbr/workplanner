@@ -1,3 +1,4 @@
+import { useSession } from 'next-auth/react';
 import { ReactElement, useContext } from 'react';
 import { DateContext, DateLayout } from '~/components/DateLayout';
 import KanbanComponent from '~/components/KanbanComponent';
@@ -5,7 +6,10 @@ import { NextPageWithLayout } from './_app';
 
 const IndexPage: NextPageWithLayout = () => {
   const date = useContext(DateContext);
-  return <KanbanComponent date={date} isAdmin={false} />;
+  const { data } = useSession();
+  return (
+    <KanbanComponent date={date} isAdmin={data?.user?.isShared || false} />
+  );
 };
 
 IndexPage.getLayout = (page: ReactElement) => <DateLayout>{page}</DateLayout>;
