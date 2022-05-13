@@ -45,10 +45,15 @@ export const AdminLayout = ({ children, hasDate }: AdminLayoutProps) => {
       <main>
         <div className="min-h-screen bg-slate-100">
           {hasDate ? <DateHeader date={date} setDate={setDate} /> : <Header />}
-          <div className="flex md:hidden items-center justify-center w-full h-full">
-            <h1 className="text-center text-2xl text-slate-200">
+          <div className="flex flex-col gap-2 md:hidden items-center justify-center w-full h-[60vh]">
+            <h1 className="text-center text-2xl">
               Deze pagina werk niet op een mobiele telefoon
             </h1>
+            <Link href="/">
+              <h1 className="btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline bg-blue-700 hover:bg-blue-900 text-white font-normal py-2 px-4 mr-1 rounded">
+                Terug naar de homepage
+              </h1>
+            </Link>
           </div>
           <div className="hidden md:flex gap-4 mr-4">
             <Sidebar />
