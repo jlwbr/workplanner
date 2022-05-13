@@ -33,7 +33,11 @@ const IndexPage: NextPageWithLayout = () => {
         <Stepper steps={stepArray} currentStepNumber={currentStep} />
       </div>
       <div className="container flex justify-around my-8 pt-4">
-        {currentStep == 1 && <KanbanComponent date={date} isAdmin={true} />}
+        {currentStep == 1 && (
+          <div style={{ width: 'calc(100vw - 16rem)' }}>
+            <KanbanComponent date={date} isAdmin={true} />
+          </div>
+        )}
         {currentStep == 2 && (
           <div className="text-center px-10">
             <h2 className="text-2xl m-5">Vergrendel planning</h2>
@@ -58,18 +62,26 @@ const IndexPage: NextPageWithLayout = () => {
         {currentStep == 5 && <Planningpage date={date} />}
       </div>
       <div className="container flex justify-around my-8 ">
-        <button
-          onClick={() => handleClick()}
-          className="btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline bg-blue-700 hover:bg-blue-900 text-white font-normal py-2 px-4 mr-1 rounded"
-        >
-          Vorige
-        </button>
-        <button
-          onClick={() => handleClick('next')}
-          className="btn-outline-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline border border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white font-normal py-2 px-4 rounded"
-        >
-          Volgende
-        </button>
+        {currentStep > 1 ? (
+          <button
+            onClick={() => handleClick()}
+            className="btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline bg-blue-700 hover:bg-blue-900 text-white font-normal py-2 px-4 mr-1 rounded"
+          >
+            Vorige
+          </button>
+        ) : (
+          <div />
+        )}
+        {currentStep < 5 ? (
+          <button
+            onClick={() => handleClick('next')}
+            className="btn-outline-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline border border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white font-normal py-2 px-4 rounded"
+          >
+            Volgende
+          </button>
+        ) : (
+          <div />
+        )}
       </div>
     </>
   );

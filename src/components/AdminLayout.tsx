@@ -108,7 +108,7 @@ const menuItems = [
 
 const Sidebar = () => (
   <aside className="w-64" aria-label="Sidebar">
-    <div className="overflow-y-auto h-[90vh] py-4 px-3 bg-white">
+    <div className="overflow-y-auto min-h-[90vh] h-full py-4 px-3 bg-white">
       <ul className="space-y-2">
         {menuItems.map(({ name, location, Icon }, i) => (
           <li key={i}>
