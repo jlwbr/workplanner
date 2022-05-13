@@ -353,6 +353,25 @@ export const planningRouter = createRouter()
       });
     },
   })
+  .mutation('rules.editSubTask', {
+    input: z.object({
+      id: z.string().cuid(),
+      name: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      if (!ctx.session?.user?.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      return await prisma.subTask.update({
+        where: { id: input.id },
+        data: input,
+      });
+    },
+  })
   .mutation('rules.removeSubTask', {
     input: z.object({
       id: z.string().cuid(),
