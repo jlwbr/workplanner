@@ -102,12 +102,21 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
       context.invalidateQueries(['planning.byDate']);
     },
   });
-  const planing = trpc.useQuery([
-    'planning.byDate',
+  const planing = trpc.useQuery(
+    [
+      'planning.byDate',
+      {
+        date: date,
+      },
+    ],
     {
-      date: date,
+      onSuccess(data) {
+        if (data !== false) return;
+
+        filterDay.mutate({ date });
+      },
     },
-  ]);
+  );
 
   const UpsertRule = trpc.useMutation(['planning.tasks.upsert'], {
     onSuccess: () => {
@@ -169,7 +178,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
     setOpen(false);
   };
 
-  if (!planing.isSuccess)
+  if (!planing.isSuccess || planing.data == false)
     return (
       <div className="flex flex-col items-center justify-center h-[60vh]">
         <svg
@@ -194,17 +203,6 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
         </svg>
       </div>
     );
-
-  if (planing.data == false) {
-    return (
-      <button
-        className="w-full h-full"
-        onClick={() => filterDay.mutate({ date })}
-      >
-        Create new day
-      </button>
-    );
-  }
 
   return (
     <div className="overflow-hidden">
