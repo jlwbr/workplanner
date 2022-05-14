@@ -132,12 +132,6 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                 </thead>
                 <tbody className="bg-white">
                   {data.map((Planning) => {
-                    if (
-                      Planning.morningAsignee.length === 0 &&
-                      Planning.afternoonAsignee.length === 0 &&
-                      Planning.eveningAsignee.length === 0
-                    )
-                      return null;
 
                     return (
                       <tr key={Planning.id}>
