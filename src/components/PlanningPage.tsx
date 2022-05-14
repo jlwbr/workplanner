@@ -1,6 +1,8 @@
 import { forwardRef, useRef } from 'react';
 import ReactToPrint from 'react-to-print';
 import { trpc } from '~/utils/trpc';
+import Image from 'next/image';
+import Logo from '../../public/Karwei_logo.png';
 
 const groupByKey = (list: any[], key: string) =>
   list.reduce(
@@ -104,6 +106,9 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
             <span>p1: Koffie 10:15; Lunch: 12:30; Thee: 15:00 </span>
             <span>p2: Koffie 10:30; Lunch: 13:00; Thee: 15:15 </span>
             <span>p3: Koffie 10:45; Lunch: 13:30; Thee: 15:30 </span>
+          </div>
+          <div>
+            <Image src={Logo} />
           </div>
         </div>
         <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
