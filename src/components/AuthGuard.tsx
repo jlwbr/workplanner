@@ -9,7 +9,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
       //auth is initialized and there is no user
       if (status !== 'authenticated') {
         // remember the page that user tried to access
-        signIn();
+        signIn('slack');
       }
     }
   }, [status]);
