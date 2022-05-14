@@ -1,6 +1,6 @@
-import { forwardRef, useRef } from "react";
-import ReactToPrint from "react-to-print";
-import { trpc } from "~/utils/trpc";
+import { forwardRef, useRef } from 'react';
+import ReactToPrint from 'react-to-print';
+import { trpc } from '~/utils/trpc';
 
 const groupByKey = (list: any[], key: string) =>
   list.reduce(
@@ -8,7 +8,7 @@ const groupByKey = (list: any[], key: string) =>
       ...hash,
       [obj[key]]: (hash[obj[key]] || []).concat(obj),
     }),
-    {}
+    {},
   );
 
 type PrintComponentType = {
@@ -18,43 +18,43 @@ type PrintComponentType = {
 const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
   ({ date }, ref) => {
     const planing = trpc.useQuery([
-      "planning.byDate",
+      'planning.byDate',
       {
         date: date,
       },
     ]);
     const MorningBreak = trpc.useQuery([
-      "break.getAll",
+      'break.getAll',
       {
         date: date,
-        TimeOffDay: "MORNING",
+        TimeOffDay: 'MORNING',
       },
     ]);
     const AfternoonBreak = trpc.useQuery([
-      "break.getAll",
+      'break.getAll',
       {
         date: date,
-        TimeOffDay: "AFTERNOON",
+        TimeOffDay: 'AFTERNOON',
       },
     ]);
     const EveningBreak = trpc.useQuery([
-      "break.getAll",
+      'break.getAll',
       {
         date: date,
-        TimeOffDay: "EVENING",
+        TimeOffDay: 'EVENING',
       },
     ]);
     const MorningCommunication = trpc.useQuery([
-      "communication.getAll",
-      { date, TimeOffDay: "MORNING" },
+      'communication.getAll',
+      { date, TimeOffDay: 'MORNING' },
     ]);
     const AfternoonCommunication = trpc.useQuery([
-      "communication.getAll",
-      { date, TimeOffDay: "AFTERNOON" },
+      'communication.getAll',
+      { date, TimeOffDay: 'AFTERNOON' },
     ]);
     const EveningCommunication = trpc.useQuery([
-      "communication.getAll",
-      { date, TimeOffDay: "EVENING" },
+      'communication.getAll',
+      { date, TimeOffDay: 'EVENING' },
     ]);
 
     if (!planing.isSuccess || !planing.data) return null;
@@ -69,21 +69,21 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
       return null;
 
     const data = planing.data.flatMap(({ PlanningItem }) => PlanningItem);
-    const MorningBreakData = groupByKey(MorningBreak.data, "userId");
-    const AfternoonBreakData = groupByKey(AfternoonBreak.data, "userId");
-    const EveningBreakData = groupByKey(EveningBreak.data, "userId");
+    const MorningBreakData = groupByKey(MorningBreak.data, 'userId');
+    const AfternoonBreakData = groupByKey(AfternoonBreak.data, 'userId');
+    const EveningBreakData = groupByKey(EveningBreak.data, 'userId');
 
     const MorningCommunicationData = groupByKey(
       MorningCommunication.data,
-      "userId"
+      'userId',
     );
     const AfternoonCommunicationData = groupByKey(
       AfternoonCommunication.data,
-      "userId"
+      'userId',
     );
     const EveningCommunicationData = groupByKey(
       EveningCommunication.data,
-      "userId"
+      'userId',
     );
 
     return (
@@ -92,11 +92,11 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
           <div className="flex-1">
             <h1 className="text-2xl font-bold">Dagverdeling</h1>
             <h2 className="text-lg">
-              {date.toLocaleDateString("nl-NL", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
+              {date.toLocaleDateString('nl-NL', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
               })}
             </h2>
           </div>
@@ -108,7 +108,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
         </div>
         <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
           <div
-            style={{ backgroundPosition: "10px 10px" }}
+            style={{ backgroundPosition: '10px 10px' }}
             className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"
           ></div>
           <div className="relative rounded-xl overflow-auto">
@@ -149,13 +149,13 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               <span className="whitespace-nowrap">
                                 {MorningCommunicationData[item.id] &&
                                   MorningCommunicationData[item.id][0]?.HT &&
-                                  "P "}
+                                  'P '}
                                 {MorningCommunicationData[item.id] &&
                                   MorningCommunicationData[item.id][0]
                                     ?.phoneNumber}
                                 {MorningCommunicationData[item.id] &&
                                   MorningBreakData[item.id] &&
-                                  " / "}
+                                  ' / '}
                                 {MorningBreakData[item.id] &&
                                   `p${MorningBreakData[item.id][0]?.number}`}
                               </span>
@@ -174,13 +174,13 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               <span className="whitespace-nowrap">
                                 {AfternoonCommunicationData[item.id] &&
                                   AfternoonCommunicationData[item.id][0]?.HT &&
-                                  "P "}
+                                  'P '}
                                 {AfternoonCommunicationData[item.id] &&
                                   AfternoonCommunicationData[item.id][0]
                                     ?.phoneNumber}
                                 {AfternoonCommunicationData[item.id] &&
                                   AfternoonBreakData[item.id] &&
-                                  "/"}
+                                  '/'}
                                 {AfternoonBreakData[item.id] &&
                                   `P${AfternoonBreakData[item.id][0]?.number}`}
                               </span>
@@ -199,13 +199,13 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               <span className="whitespace-nowrap">
                                 {EveningCommunicationData[item.id] &&
                                   EveningCommunicationData[item.id][0]?.HT &&
-                                  "P "}
+                                  'P '}
                                 {EveningCommunicationData[item.id] &&
                                   EveningCommunicationData[item.id][0]
                                     ?.phoneNumber}
                                 {EveningCommunicationData[item.id] &&
                                   EveningBreakData[item.id] &&
-                                  "/"}
+                                  '/'}
                                 {EveningBreakData[item.id] &&
                                   `P${EveningBreakData[item.id][0]?.number}`}
                               </span>
@@ -223,9 +223,9 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
         </div>
       </div>
     );
-  }
+  },
 );
-PrintComponent.displayName = "PrintComponent";
+PrintComponent.displayName = 'PrintComponent';
 
 type PlanningPageType = {
   date: Date;
