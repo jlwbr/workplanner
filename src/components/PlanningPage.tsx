@@ -100,10 +100,10 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
               })}
             </h2>
           </div>
-          <div className="flex-1 flex flex-col text-right text-sm">
-            <span>Pauze 1: Koffie 10:15; Lunch: 12:30; Thee: 15:00 </span>
-            <span>Pauze 2: Koffie 10:30; Lunch: 13:00; Thee: 15:15 </span>
-            <span>Pauze 3: Koffie 10:45; Lunch: 13:30; Thee: 15:30 </span>
+          <div className="flex-1 flex flex-col text-xs">
+            <span>p 1: Koffie 10:15; Lunch: 12:30; Thee: 15:00 </span>
+            <span>p 2: Koffie 10:30; Lunch: 13:00; Thee: 15:15 </span>
+            <span>p 3: Koffie 10:45; Lunch: 13:30; Thee: 15:30 </span>
           </div>
         </div>
         <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
@@ -116,16 +116,16 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
               <table className="border-collapse table-auto w-full text-sm">
                 <thead>
                   <tr>
-                    <th className="border-b font-medium p-4 pl-8 pt-0 pb-3 text-slate-600 text-left">
+                    <th className="border-b font-bold p-4 pl-8 pt-0 pb-3 text-slate-600 text-left">
                       Taak
                     </th>
-                    <th className="border-b font-medium p-4 pt-0 pb-3 text-slate-600 text-center">
+                    <th className="border-b font-bold p-4 pt-0 pb-3 text-slate-600 text-center">
                       Ochtend
                     </th>
-                    <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
+                    <th className="border-b font-bold p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
                       Middag
                     </th>
-                    <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
+                    <th className="border-b font-bold p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
                       Avond
                     </th>
                   </tr>
@@ -162,9 +162,9 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                                     ?.phoneNumber}
                                 {MorningCommunicationData[item.id] &&
                                   MorningBreakData[item.id] &&
-                                  '/'}
+                                  ' / '}
                                 {MorningBreakData[item.id] &&
-                                  `P${MorningBreakData[item.id][0]?.number}`}
+                                  `p${MorningBreakData[item.id][0]?.number}`}
                               </span>
                             </div>
                           ))}
