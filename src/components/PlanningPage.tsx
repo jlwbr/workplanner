@@ -108,7 +108,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
             <span>p3: Koffie 10:45; Lunch: 13:30; Thee: 15:30 </span>
           </div>
           <div>
-            <Image src={Logo} />
+            <Image src={Logo} width={130} height={130} />
           </div>
         </div>
         <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
