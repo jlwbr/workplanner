@@ -90,7 +90,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
 
     return (
       <div ref={ref} className="p-8">
-        <div className="flex pb-5">
+        <div className="flex gap-2 pb-5">
           <div className="flex-1">
             <h1 className="text-2xl font-bold">Dagverdeling</h1>
             <h2 className="text-lg">
@@ -108,7 +108,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
             <span>p3: Koffie 10:45; Lunch: 13:30; Thee: 15:30 </span>
           </div>
           <div>
-            <Image src={Logo} width={130} height={130} />
+            <Image src={Logo} width={116} height={130} />
           </div>
         </div>
         <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
