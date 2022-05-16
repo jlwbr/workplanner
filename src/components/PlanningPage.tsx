@@ -89,7 +89,8 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
     );
 
     return (
-      <div ref={ref} className="p-8">
+      <div ref={ref}>
+        <style>{'@page { margin: 2rem !important; }'}</style>
         <div className="flex gap-2 pb-5">
           <div className="flex-1">
             <h1 className="text-2xl font-bold">Dagverdeling</h1>
