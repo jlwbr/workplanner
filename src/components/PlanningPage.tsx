@@ -1,4 +1,4 @@
-import { forwardRef, useRef } from 'react';
+import { forwardRef, Fragment, useRef } from 'react';
 import ReactToPrint from 'react-to-print';
 import { trpc } from '~/utils/trpc';
 import Image from 'next/image';
@@ -133,7 +133,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                 </thead>
                 <tbody className="bg-white">
                   {planing.data.map((task) => (
-                    <>
+                    <Fragment key={task.id}>
                       <tr>
                         <td
                           colSpan={4}
@@ -155,7 +155,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             </div>
                           </td>
                           <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
-                            <div className="flex justify-start gap-1">
+                            <div className="flex flex-col justify-start gap-1">
                               {Planning.morningAsignee.map((item) => (
                                 <div
                                   key={item.id}
@@ -193,7 +193,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             </div>
                           </td>
                           <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
-                            <div className="flex flex-col justify-start gap-2">
+                            <div className="flex flex-col justify-start gap-1">
                               {Planning.afternoonAsignee.map((item) => (
                                 <div
                                   key={item.id}
@@ -231,7 +231,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             </div>
                           </td>
                           <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
-                            <div className="flex flex-col justify-start gap-2">
+                            <div className="flex flex-col justify-start gap-1">
                               {Planning.eveningAsignee.map((item) => (
                                 <div
                                   key={item.id}
@@ -270,7 +270,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                           </td>
                         </tr>
                       ))}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
