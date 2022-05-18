@@ -38,7 +38,7 @@ const defaultEditingRuleData: inferMutationInput<'planning.tasks.upsert'> = {
 const PlanningInputs: PlanningInputsType = [
   {
     field: 'name',
-    label: 'Naam',
+    label: 'Taak',
     input: 'text',
   },
   {

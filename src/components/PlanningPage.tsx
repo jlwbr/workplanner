@@ -70,7 +70,6 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
     if (!EveningCommunication.isSuccess || !EveningCommunication.data)
       return null;
 
-    const data = planing.data.flatMap(({ PlanningItem }) => PlanningItem);
     const MorningBreakData = groupByKey(MorningBreak.data, 'userId');
     const AfternoonBreakData = groupByKey(AfternoonBreak.data, 'userId');
     const EveningBreakData = groupByKey(EveningBreak.data, 'userId');
@@ -113,10 +112,6 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
           </div>
         </div>
         <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
-          <div
-            style={{ backgroundPosition: '10px 10px' }}
-            className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"
-          ></div>
           <div className="relative rounded-xl overflow-auto">
             <div className="shadow-sm overflow-hidden my-8">
               <table className="border-collapse table-auto w-full text-sm">
@@ -137,90 +132,146 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {data.map((Planning) => {
-                    return (
-                      <tr key={Planning.id}>
-                        <td className="border-b border-slate-100 p-4 pl-8 w-full text-slate-700">
-                          {Planning.name}
-                        </td>
-                        <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
-                          {Planning.morningAsignee.map((item) => (
-                            <div
-                              key={item.id}
-                              className="text-xs inline-flex flex-col items-center font-bold leading-sm px-3 py-1 mr-2 bg-lime-200 text-lime-700 rounded-full"
-                            >
-                              <span className="whitespace-nowrap">
-                                {item.name}
-                              </span>
-                              <span className="whitespace-nowrap">
-                                {MorningCommunicationData[item.id] &&
-                                  MorningCommunicationData[item.id][0]?.HT &&
-                                  'P '}
-                                {MorningCommunicationData[item.id] &&
-                                  MorningCommunicationData[item.id][0]
-                                    ?.phoneNumber}
-                                {MorningCommunicationData[item.id] &&
-                                  MorningBreakData[item.id] &&
-                                  ' / '}
-                                {MorningBreakData[item.id] &&
-                                  `p${MorningBreakData[item.id][0]?.number}`}
-                              </span>
-                            </div>
-                          ))}
-                        </td>
-                        <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
-                          {Planning.afternoonAsignee.map((item) => (
-                            <div
-                              key={item.id}
-                              className="text-xs inline-flex flex-col items-center font-bold leading-sm px-3 py-1 mr-2 bg-lime-200 text-lime-700 rounded-full"
-                            >
-                              <span className="whitespace-nowrap">
-                                {item.name}
-                              </span>
-                              <span className="whitespace-nowrap">
-                                {AfternoonCommunicationData[item.id] &&
-                                  AfternoonCommunicationData[item.id][0]?.HT &&
-                                  'P '}
-                                {AfternoonCommunicationData[item.id] &&
-                                  AfternoonCommunicationData[item.id][0]
-                                    ?.phoneNumber}
-                                {AfternoonCommunicationData[item.id] &&
-                                  AfternoonBreakData[item.id] &&
-                                  '/'}
-                                {AfternoonBreakData[item.id] &&
-                                  `P${AfternoonBreakData[item.id][0]?.number}`}
-                              </span>
-                            </div>
-                          ))}
-                        </td>
-                        <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
-                          {Planning.eveningAsignee.map((item) => (
-                            <div
-                              key={item.id}
-                              className="text-xs inline-flex flex-col items-center font-bold leading-sm px-3 py-1 mr-2 bg-lime-200 text-lime-700 rounded-full"
-                            >
-                              <span className="whitespace-nowrap">
-                                {item.name}
-                              </span>
-                              <span className="whitespace-nowrap">
-                                {EveningCommunicationData[item.id] &&
-                                  EveningCommunicationData[item.id][0]?.HT &&
-                                  'P '}
-                                {EveningCommunicationData[item.id] &&
-                                  EveningCommunicationData[item.id][0]
-                                    ?.phoneNumber}
-                                {EveningCommunicationData[item.id] &&
-                                  EveningBreakData[item.id] &&
-                                  '/'}
-                                {EveningBreakData[item.id] &&
-                                  `P${EveningBreakData[item.id][0]?.number}`}
-                              </span>
-                            </div>
-                          ))}
+                  {planing.data.map((task) => (
+                    <>
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="border-b border-slate-100 bg-slate-200 font-bold p-2 pl-8 w-full text-slate-700"
+                        >
+                          {task.channel.name}
                         </td>
                       </tr>
-                    );
-                  })}
+                      {task.PlanningItem.map((Planning) => (
+                        <tr key={Planning.id}>
+                          <td className="border-b border-slate-100 p-4 pl-8 w-full text-slate-700">
+                            <div className="flex flex-col gap-2">
+                              <span>{Planning.name}</span>
+                              {Planning.description && (
+                                <span className="text-xs">
+                                  {Planning.description}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
+                            <div className="flex justify-start gap-1">
+                              {Planning.morningAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="text-xs inline-flex flex-col items-center font-bold leading-sm px-3 py-1 bg-lime-200 text-lime-700 rounded-full"
+                                >
+                                  <span className="whitespace-nowrap">
+                                    {item.name}
+                                  </span>
+                                  <span className="flex gap-1 whitespace-nowrap">
+                                    {MorningCommunicationData[item.id] &&
+                                      MorningCommunicationData[item.id][0]
+                                        ?.HT && (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="h-4"
+                                          data-name="Layer 1"
+                                          viewBox="0 0 55.37 122.88"
+                                        >
+                                          <path d="M4.26,80.11a21.36,21.36,0,0,0,.92,4.45l0,.09a23.46,23.46,0,0,1,1.18,8.14v24.35a1.44,1.44,0,0,0,.44,1,1.48,1.48,0,0,0,1,.44H47.5A1.49,1.49,0,0,0,49,117.14V92.73a23.86,23.86,0,0,1,1.21-8.17h0A20.65,20.65,0,0,0,51.11,80V47.12a1.47,1.47,0,0,0-.42-1h0a1.48,1.48,0,0,0-1-.44H5.74a1.47,1.47,0,0,0-1,.43h0a1.47,1.47,0,0,0-.43,1v33Zm31.5,23H40a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H35.76a.78.78,0,0,1-.78-.78V103.9a.78.78,0,0,1,.78-.77Zm-10.18,0h4.21a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H25.58a.78.78,0,0,1-.78-.78V103.9a.78.78,0,0,1,.78-.77Zm-10.19,0H19.6a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H15.39a.78.78,0,0,1-.77-.78V103.9a.78.78,0,0,1,.77-.77ZM35.76,92.62H40a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H35.76a.78.78,0,0,1-.78-.77V93.39a.78.78,0,0,1,.78-.77Zm-10.18,0h4.21a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H25.58a.78.78,0,0,1-.78-.77V93.39a.78.78,0,0,1,.78-.77Zm-10.19,0H19.6a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H15.39a.78.78,0,0,1-.77-.77V93.39a.78.78,0,0,1,.77-.77ZM35.76,82.11H40a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H35.76A.78.78,0,0,1,35,87.1V82.89a.78.78,0,0,1,.78-.78Zm-10.18,0h4.21a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H25.58a.78.78,0,0,1-.78-.77V82.89a.78.78,0,0,1,.78-.78Zm-10.19,0H19.6a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H15.39a.78.78,0,0,1-.77-.77V82.89a.78.78,0,0,1,.77-.78Zm-4.9-50.66V2.93a2.93,2.93,0,0,1,5.86,0V31.45h1.16a2.45,2.45,0,0,1,1.65.64l.09.08A2.46,2.46,0,0,1,20,33.92v7.46H33.75l1.33-7.46a1.38,1.38,0,0,1,1.27-1.27h8.18a1.37,1.37,0,0,1,1.27,1.27l1.33,7.46h2.5a5.75,5.75,0,0,1,5.74,5.74V80h0v.08a23.28,23.28,0,0,1-1.08,5.6,20,20,0,0,0-1.06,6.81v24.61a5.74,5.74,0,0,1-5.73,5.74H7.87a5.75,5.75,0,0,1-5.74-5.74V92.68a20.08,20.08,0,0,0-1-6.87l0-.09A23.49,23.49,0,0,1,0,80.32L0,80V47.12a5.7,5.7,0,0,1,1.68-4h0a5.73,5.73,0,0,1,4.05-1.69H6.86V33.92a2.48,2.48,0,0,1,.72-1.74h0a2.44,2.44,0,0,1,1.74-.72Zm2.68,19.77h29a3.35,3.35,0,0,1,2.36,1l.13.15a3.35,3.35,0,0,1,.84,2.21V68.61a3.28,3.28,0,0,1-1,2.35h0a3.35,3.35,0,0,1-2.35,1h-29a3.32,3.32,0,0,1-2.35-1h0a3.34,3.34,0,0,1-1-2.36V54.55a3.33,3.33,0,0,1,3.34-3.33ZM41.8,55H13.56V68.22H41.8V55Z" />
+                                        </svg>
+                                      )}
+                                    {MorningCommunicationData[item.id] &&
+                                      MorningCommunicationData[item.id][0]
+                                        ?.phoneNumber}
+                                    {MorningCommunicationData[item.id] &&
+                                      MorningBreakData[item.id] &&
+                                      '/'}
+                                    {MorningBreakData[item.id] &&
+                                      `p${
+                                        MorningBreakData[item.id][0]?.number
+                                      }`}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
+                            <div className="flex flex-col justify-start gap-2">
+                              {Planning.afternoonAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="text-xs inline-flex flex-col items-center font-bold leading-sm px-3 py-1 mr-2 bg-lime-200 text-lime-700 rounded-full"
+                                >
+                                  <span className="whitespace-nowrap">
+                                    {item.name}
+                                  </span>
+                                  <span className="flex gap-1 whitespace-nowrap">
+                                    {AfternoonCommunicationData[item.id] &&
+                                      AfternoonCommunicationData[item.id][0]
+                                        ?.HT && (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="h-4"
+                                          data-name="Layer 1"
+                                          viewBox="0 0 55.37 122.88"
+                                        >
+                                          <path d="M4.26,80.11a21.36,21.36,0,0,0,.92,4.45l0,.09a23.46,23.46,0,0,1,1.18,8.14v24.35a1.44,1.44,0,0,0,.44,1,1.48,1.48,0,0,0,1,.44H47.5A1.49,1.49,0,0,0,49,117.14V92.73a23.86,23.86,0,0,1,1.21-8.17h0A20.65,20.65,0,0,0,51.11,80V47.12a1.47,1.47,0,0,0-.42-1h0a1.48,1.48,0,0,0-1-.44H5.74a1.47,1.47,0,0,0-1,.43h0a1.47,1.47,0,0,0-.43,1v33Zm31.5,23H40a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H35.76a.78.78,0,0,1-.78-.78V103.9a.78.78,0,0,1,.78-.77Zm-10.18,0h4.21a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H25.58a.78.78,0,0,1-.78-.78V103.9a.78.78,0,0,1,.78-.77Zm-10.19,0H19.6a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H15.39a.78.78,0,0,1-.77-.78V103.9a.78.78,0,0,1,.77-.77ZM35.76,92.62H40a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H35.76a.78.78,0,0,1-.78-.77V93.39a.78.78,0,0,1,.78-.77Zm-10.18,0h4.21a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H25.58a.78.78,0,0,1-.78-.77V93.39a.78.78,0,0,1,.78-.77Zm-10.19,0H19.6a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H15.39a.78.78,0,0,1-.77-.77V93.39a.78.78,0,0,1,.77-.77ZM35.76,82.11H40a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H35.76A.78.78,0,0,1,35,87.1V82.89a.78.78,0,0,1,.78-.78Zm-10.18,0h4.21a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H25.58a.78.78,0,0,1-.78-.77V82.89a.78.78,0,0,1,.78-.78Zm-10.19,0H19.6a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H15.39a.78.78,0,0,1-.77-.77V82.89a.78.78,0,0,1,.77-.78Zm-4.9-50.66V2.93a2.93,2.93,0,0,1,5.86,0V31.45h1.16a2.45,2.45,0,0,1,1.65.64l.09.08A2.46,2.46,0,0,1,20,33.92v7.46H33.75l1.33-7.46a1.38,1.38,0,0,1,1.27-1.27h8.18a1.37,1.37,0,0,1,1.27,1.27l1.33,7.46h2.5a5.75,5.75,0,0,1,5.74,5.74V80h0v.08a23.28,23.28,0,0,1-1.08,5.6,20,20,0,0,0-1.06,6.81v24.61a5.74,5.74,0,0,1-5.73,5.74H7.87a5.75,5.75,0,0,1-5.74-5.74V92.68a20.08,20.08,0,0,0-1-6.87l0-.09A23.49,23.49,0,0,1,0,80.32L0,80V47.12a5.7,5.7,0,0,1,1.68-4h0a5.73,5.73,0,0,1,4.05-1.69H6.86V33.92a2.48,2.48,0,0,1,.72-1.74h0a2.44,2.44,0,0,1,1.74-.72Zm2.68,19.77h29a3.35,3.35,0,0,1,2.36,1l.13.15a3.35,3.35,0,0,1,.84,2.21V68.61a3.28,3.28,0,0,1-1,2.35h0a3.35,3.35,0,0,1-2.35,1h-29a3.32,3.32,0,0,1-2.35-1h0a3.34,3.34,0,0,1-1-2.36V54.55a3.33,3.33,0,0,1,3.34-3.33ZM41.8,55H13.56V68.22H41.8V55Z" />
+                                        </svg>
+                                      )}
+                                    {AfternoonCommunicationData[item.id] &&
+                                      AfternoonCommunicationData[item.id][0]
+                                        ?.phoneNumber}
+                                    {AfternoonCommunicationData[item.id] &&
+                                      AfternoonBreakData[item.id] &&
+                                      '/'}
+                                    {AfternoonBreakData[item.id] &&
+                                      `p${
+                                        AfternoonBreakData[item.id][0]?.number
+                                      }`}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
+                            <div className="flex flex-col justify-start gap-2">
+                              {Planning.eveningAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="text-xs inline-flex flex-col items-center font-bold leading-sm px-3 py-1 mr-2 bg-lime-200 text-lime-700 rounded-full"
+                                >
+                                  <span className="whitespace-nowrap">
+                                    {item.name}
+                                  </span>
+                                  <span className="flex gap-1 whitespace-nowrap">
+                                    {EveningCommunicationData[item.id] &&
+                                      EveningCommunicationData[item.id][0]
+                                        ?.HT && (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="h-4"
+                                          data-name="Layer 1"
+                                          viewBox="0 0 55.37 122.88"
+                                        >
+                                          <path d="M4.26,80.11a21.36,21.36,0,0,0,.92,4.45l0,.09a23.46,23.46,0,0,1,1.18,8.14v24.35a1.44,1.44,0,0,0,.44,1,1.48,1.48,0,0,0,1,.44H47.5A1.49,1.49,0,0,0,49,117.14V92.73a23.86,23.86,0,0,1,1.21-8.17h0A20.65,20.65,0,0,0,51.11,80V47.12a1.47,1.47,0,0,0-.42-1h0a1.48,1.48,0,0,0-1-.44H5.74a1.47,1.47,0,0,0-1,.43h0a1.47,1.47,0,0,0-.43,1v33Zm31.5,23H40a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H35.76a.78.78,0,0,1-.78-.78V103.9a.78.78,0,0,1,.78-.77Zm-10.18,0h4.21a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H25.58a.78.78,0,0,1-.78-.78V103.9a.78.78,0,0,1,.78-.77Zm-10.19,0H19.6a.78.78,0,0,1,.78.77v4.21a.78.78,0,0,1-.78.78H15.39a.78.78,0,0,1-.77-.78V103.9a.78.78,0,0,1,.77-.77ZM35.76,92.62H40a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H35.76a.78.78,0,0,1-.78-.77V93.39a.78.78,0,0,1,.78-.77Zm-10.18,0h4.21a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H25.58a.78.78,0,0,1-.78-.77V93.39a.78.78,0,0,1,.78-.77Zm-10.19,0H19.6a.78.78,0,0,1,.78.77v4.22a.78.78,0,0,1-.78.77H15.39a.78.78,0,0,1-.77-.77V93.39a.78.78,0,0,1,.77-.77ZM35.76,82.11H40a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H35.76A.78.78,0,0,1,35,87.1V82.89a.78.78,0,0,1,.78-.78Zm-10.18,0h4.21a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H25.58a.78.78,0,0,1-.78-.77V82.89a.78.78,0,0,1,.78-.78Zm-10.19,0H19.6a.78.78,0,0,1,.78.78V87.1a.78.78,0,0,1-.78.77H15.39a.78.78,0,0,1-.77-.77V82.89a.78.78,0,0,1,.77-.78Zm-4.9-50.66V2.93a2.93,2.93,0,0,1,5.86,0V31.45h1.16a2.45,2.45,0,0,1,1.65.64l.09.08A2.46,2.46,0,0,1,20,33.92v7.46H33.75l1.33-7.46a1.38,1.38,0,0,1,1.27-1.27h8.18a1.37,1.37,0,0,1,1.27,1.27l1.33,7.46h2.5a5.75,5.75,0,0,1,5.74,5.74V80h0v.08a23.28,23.28,0,0,1-1.08,5.6,20,20,0,0,0-1.06,6.81v24.61a5.74,5.74,0,0,1-5.73,5.74H7.87a5.75,5.75,0,0,1-5.74-5.74V92.68a20.08,20.08,0,0,0-1-6.87l0-.09A23.49,23.49,0,0,1,0,80.32L0,80V47.12a5.7,5.7,0,0,1,1.68-4h0a5.73,5.73,0,0,1,4.05-1.69H6.86V33.92a2.48,2.48,0,0,1,.72-1.74h0a2.44,2.44,0,0,1,1.74-.72Zm2.68,19.77h29a3.35,3.35,0,0,1,2.36,1l.13.15a3.35,3.35,0,0,1,.84,2.21V68.61a3.28,3.28,0,0,1-1,2.35h0a3.35,3.35,0,0,1-2.35,1h-29a3.32,3.32,0,0,1-2.35-1h0a3.34,3.34,0,0,1-1-2.36V54.55a3.33,3.33,0,0,1,3.34-3.33ZM41.8,55H13.56V68.22H41.8V55Z" />
+                                        </svg>
+                                      )}
+                                    {EveningCommunicationData[item.id] &&
+                                      EveningCommunicationData[item.id][0]
+                                        ?.phoneNumber}
+                                    {EveningCommunicationData[item.id] &&
+                                      EveningBreakData[item.id] &&
+                                      '/'}
+                                    {EveningBreakData[item.id] &&
+                                      `p${
+                                        EveningBreakData[item.id][0]?.number
+                                      }`}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -250,7 +301,7 @@ const Planningpage = ({ date }: PlanningPageType) => {
         )}
         content={() => componentRef.current}
       />
-      <div className="bg-white border rounded mt-5">
+      <div className="bg-white border rounded mt-5 p-8">
         <PrintComponent ref={componentRef} date={date} />
       </div>
     </div>
