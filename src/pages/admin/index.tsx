@@ -42,12 +42,25 @@ const IndexPage: NextPageWithLayout = () => {
     }
   };
 
+  const handleStepClick = (stepNumber: number) => {
+    if (stepNumber > 0 && stepNumber <= stepArray.length) {
+      setCurrentStep(stepNumber);
+      router.replace({
+        query: { ...router.query, step: stepNumber.toString() },
+      });
+    }
+  };
+
   const isLocked = isLockedQuery.data || false;
 
   return (
     <>
       <div className="container horizontal">
-        <Stepper steps={stepArray} currentStepNumber={currentStep} />
+        <Stepper
+          steps={stepArray}
+          currentStepNumber={currentStep}
+          onClick={handleStepClick}
+        />
       </div>
       <div className="container flex justify-around my-8 pt-4">
         {currentStep == 1 && (

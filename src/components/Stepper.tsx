@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 type StepperType = {
   steps: Array<string>;
   currentStepNumber: number;
+  onClick?: (stepNumber: number) => void;
 };
 
 type StepType = {
@@ -12,7 +13,7 @@ type StepType = {
   selected: boolean;
 }[];
 
-const Stepper = ({ steps, currentStepNumber }: StepperType) => {
+const Stepper = ({ steps, currentStepNumber, onClick }: StepperType) => {
   const [stepperSteps, setStep] = useState<StepType>([]);
   const stepsStateRef = useRef<StepType>();
   useEffect(() => {
@@ -83,7 +84,10 @@ const Stepper = ({ steps, currentStepNumber }: StepperType) => {
             : 'flex items-center'
         }
       >
-        <div className="relative flex flex-col items-center text-teal-600">
+        <div
+          className="relative flex flex-col items-center text-teal-600 cursor-pointer"
+          onClick={() => onClick && onClick(index + 1)}
+        >
           <div
             className={`rounded-full transition duration-500 ease-in-out border-2 border-gray-300 h-12 w-12 flex items-center justify-center py-3  ${
               step.selected ? 'bg-green-600 text-white font-bold' : ''
