@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { ReactElement, useContext, useState } from 'react';
 import { AdminDateContext, AdminLayout } from '~/components/AdminLayout';
 import BreakComponent from '~/components/BreakComponent';
@@ -9,6 +10,8 @@ import { NextPageWithLayout } from '~/pages/_app';
 import { trpc } from '~/utils/trpc';
 
 const IndexPage: NextPageWithLayout = () => {
+  const router = useRouter();
+  const { step } = router.query;
   const date = useContext(AdminDateContext);
   const context = trpc.useContext();
   const mutateLock = trpc.useMutation(['planning.lockbyDate'], {
@@ -17,7 +20,9 @@ const IndexPage: NextPageWithLayout = () => {
     },
   });
   const isLockedQuery = trpc.useQuery(['planning.isLocked', { date }]);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(
+    step ? parseInt(step as string) : 1,
+  );
   const stepArray = [
     'Planning',
     'Vergrendel planning',
@@ -31,6 +36,9 @@ const IndexPage: NextPageWithLayout = () => {
     // Check if steps are within the boundary
     if (newStep > 0 && newStep <= stepArray.length) {
       setCurrentStep(newStep);
+      router.replace({
+        query: { ...router.query, step: newStep.toString() },
+      });
     }
   };
 
