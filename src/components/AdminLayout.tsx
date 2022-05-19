@@ -45,7 +45,7 @@ export const AdminLayout = ({ children, hasDate }: AdminLayoutProps) => {
       <main>
         <div className="min-h-screen bg-slate-100">
           {hasDate ? <DateHeader date={date} setDate={setDate} /> : <Header />}
-          {/* <div className="flex flex-col gap-2 md:hidden items-center justify-center w-full h-[60vh]">
+          <div className="flex flex-col gap-2 md:hidden items-center justify-center w-full h-[60vh]">
             <h1 className="text-center text-2xl">
               Deze pagina werk niet op een mobiele telefoon
             </h1>
@@ -54,7 +54,7 @@ export const AdminLayout = ({ children, hasDate }: AdminLayoutProps) => {
                 Terug naar de homepage
               </h1>
             </Link>
-          </div> */}
+          </div>
           <div className="hidden md:flex gap-4 mr-4">
             <Sidebar />
             <div className="container mx-auto px-1 py-4">
