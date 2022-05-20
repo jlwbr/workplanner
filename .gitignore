@@ -44,3 +44,6 @@ playwright/test-results
 
 # Sentry
 .sentryclirc
+
+# Service Worker
+/public/sw.js.map
