@@ -12,19 +12,46 @@ import { Prisma } from '@prisma/client';
 const defaultUserSelect = Prisma.validator<Prisma.UserSelect>()({
   id: true,
   name: true,
+  editor: true,
+  admin: true,
 });
 
-export const userRouter = createRouter().query('all', {
-  async resolve({ ctx }) {
-    if (!ctx.session?.user?.isEditor) {
-      throw new TRPCError({
-        code: 'UNAUTHORIZED',
-        message: 'You must be an admin or editor to acces this resource',
+export const userRouter = createRouter()
+  .query('all', {
+    async resolve({ ctx }) {
+      if (!ctx.session?.user?.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      return prisma.user.findMany({
+        select: defaultUserSelect,
       });
-    }
+    },
+  })
+  .mutation('update', {
+    input: z.object({
+      id: z.string(),
+      admin: z.boolean().optional(),
+      editor: z.boolean().optional(),
+    }),
+    async resolve({ ctx, input }) {
+      if (!ctx.session?.user?.isAdmin) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin to acces this resource',
+        });
+      }
+      const { id, admin, editor } = input;
 
-    return prisma.user.findMany({
-      select: defaultUserSelect,
-    });
-  },
-});
+      return prisma.user.update({
+        where: { id },
+        data: {
+          admin,
+          editor,
+        },
+      });
+    },
+  });
