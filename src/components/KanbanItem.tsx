@@ -300,7 +300,7 @@ const KanbanItem = ({
               onChange={(c) => handleChange(c, 'morning')}
               menuPortalTarget={document.body}
               styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              placeholder="Selecteer..."
+              placeholder="Start met typen om te zoeken..."
               isMulti
               isSearchable
             />
@@ -353,7 +353,7 @@ const KanbanItem = ({
               onChange={(c) => handleChange(c, 'afternoon')}
               menuPortalTarget={document.body}
               styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              placeholder="Selecteer..."
+              placeholder="Start met typen om te zoeken..."
               isMulti
               isSearchable
             />
@@ -403,7 +403,7 @@ const KanbanItem = ({
               onChange={(c) => handleChange(c, 'evening')}
               menuPortalTarget={document.body}
               styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              placeholder="Selecteer..."
+              placeholder="Start met typen om te zoeken..."
               isMulti
               isSearchable
             />
