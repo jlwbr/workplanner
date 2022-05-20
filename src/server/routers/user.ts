@@ -28,6 +28,9 @@ export const userRouter = createRouter()
 
       return prisma.user.findMany({
         select: defaultUserSelect,
+        orderBy: {
+          name: 'asc',
+        },
       });
     },
   })

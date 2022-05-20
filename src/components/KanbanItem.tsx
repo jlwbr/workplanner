@@ -55,12 +55,10 @@ const KanbanItem = ({
     },
   );
 
-  const options = userQuery.data
-    ?.map((user) => ({
-      value: user.id,
-      label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  const options = userQuery.data?.map((user) => ({
+    value: user.id,
+    label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
+  }));
 
   const {
     id,
