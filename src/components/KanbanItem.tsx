@@ -22,7 +22,9 @@ const KanbanItem = ({
 }: KanbanItemType) => {
   const context = trpc.useContext();
   const { data, status } = useSession();
-  const userQuery = trpc.useQuery(['user.all']);
+  const userQuery = trpc.useQuery(['user.all'], {
+    enabled: isAdmin,
+  });
   // FIXME: We are invalidating a lot of data all over the app, we should only invalidate the data we need to.
   const asigneeMuation = trpc.useMutation(['planning.asignee.add'], {
     onSuccess: () => {
@@ -53,10 +55,12 @@ const KanbanItem = ({
     },
   );
 
-  const options = userQuery.data?.map((user) => ({
-    value: user.id,
-    label: user.name,
-  }));
+  const options = userQuery.data
+    ?.map((user) => ({
+      value: user.id,
+      label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const {
     id,
