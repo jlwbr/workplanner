@@ -1,5 +1,5 @@
 import { TimeOffDay } from '@prisma/client';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { trpc } from '~/utils/trpc';
 
 const groupByKey = (list: any[], key: string) =>
@@ -17,14 +17,26 @@ type BreakComponentType = {
 
 const numbers = ['1', '2', '3'];
 
+const TimeOffDayType = TimeOffDay;
+
 const Input: FC<{
   user: any;
   date: Date;
   TimeOffDay: TimeOffDay;
   defaultNumber: string;
 }> = ({ user, date, TimeOffDay, defaultNumber }) => {
-  const upsertMutation = trpc.useMutation(['break.upsert']);
+  const context = trpc.useContext();
+  const upsertMutation = trpc.useMutation(['break.upsert'], {
+    onSuccess: () => {
+      context.invalidateQueries(['break.getAll']);
+    },
+  });
   const [number, setNumber] = useState(defaultNumber);
+  useEffect(() => setNumber(defaultNumber), [defaultNumber]);
+
+  const othertimes = Object.values(TimeOffDayType).filter(
+    (time) => time !== TimeOffDay,
+  );
 
   return (
     <tr key={user.id}>
@@ -53,6 +65,22 @@ const Input: FC<{
           ))}
         </select>
       </td>
+      <td>
+        <button
+          onClick={() => {
+            othertimes.forEach((othertime) => {
+              upsertMutation.mutateAsync({
+                date,
+                userId: user.id,
+                TimeOffDay: othertime as TimeOffDay,
+                number: parseInt(number),
+              });
+            });
+          }}
+        >
+          Neem over
+        </button>
+      </td>
     </tr>
   );
 };
@@ -70,7 +98,7 @@ const Table: FC<{
     <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
       <div
         style={{ backgroundPosition: '10px 10px' }}
-        className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]"
+        className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))]"
       ></div>
       <div className="relative rounded-xl overflow-auto">
         <div className="shadow-sm overflow-hidden my-8">
@@ -82,6 +110,9 @@ const Table: FC<{
                 </th>
                 <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
                   Pauze
+                </th>
+                <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
+                  Kopieer
                 </th>
               </tr>
             </thead>
@@ -148,7 +179,7 @@ const BreakComponent = ({ date }: BreakComponentType) => {
 
   return (
     <div className="w-full p-4 px-10">
-      <h2 className="text-xl mb-4 mt-2">Ochtend</h2>
+      <h2 className=" flex-1 text-xl mb-4 mt-2">Ochtend</h2>
       {users.morning && (
         <Table users={users.morning} date={date} TimeOffDay={'MORNING'} />
       )}

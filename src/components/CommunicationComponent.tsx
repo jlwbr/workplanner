@@ -1,5 +1,5 @@
 import { TimeOffDay } from '@prisma/client';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { trpc } from '~/utils/trpc';
 
 const groupByKey = (list: any[], key: string) =>
@@ -29,6 +29,8 @@ const numbers = [
   '240',
 ];
 
+const TimeOffDayType = TimeOffDay;
+
 const Input: FC<{
   user: any;
   date: Date;
@@ -36,9 +38,19 @@ const Input: FC<{
   defaultphoneNumber: string;
   defaultHT: boolean;
 }> = ({ user, date, TimeOffDay, defaultphoneNumber, defaultHT }) => {
-  const upsertMutation = trpc.useMutation(['communication.upsert']);
+  const context = trpc.useContext();
+  const upsertMutation = trpc.useMutation(['communication.upsert'], {
+    onSuccess: () => {
+      context.invalidateQueries(['communication.getAll']);
+    },
+  });
   const [selected, setSelected] = useState(defaultHT);
   const [phone, setPhone] = useState<string>(defaultphoneNumber);
+  const othertimes = Object.values(TimeOffDayType).filter(
+    (time) => time !== TimeOffDay,
+  );
+  useEffect(() => setSelected(defaultHT), [defaultHT]);
+  useEffect(() => setPhone(defaultphoneNumber), [defaultphoneNumber]);
 
   return (
     <tr key={user.id}>
@@ -85,6 +97,23 @@ const Input: FC<{
           ))}
         </select>
       </td>
+      <td>
+        <button
+          onClick={() => {
+            othertimes.forEach((othertime) => {
+              upsertMutation.mutateAsync({
+                date,
+                userId: user.id,
+                TimeOffDay: othertime as TimeOffDay,
+                phoneNumber: phone,
+                HT: selected,
+              });
+            });
+          }}
+        >
+          Neem over
+        </button>
+      </td>
     </tr>
   );
 };
@@ -117,6 +146,9 @@ const Table: FC<{
                 </th>
                 <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
                   Telefoon
+                </th>
+                <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
+                  Kopieer
                 </th>
               </tr>
             </thead>
