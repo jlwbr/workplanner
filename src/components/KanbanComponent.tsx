@@ -42,51 +42,9 @@ const PlanningInputs: PlanningInputsType = [
     input: 'text',
   },
   {
-    field: 'priority',
-    label: 'Prioriteit',
-    input: 'number',
-    placeholder: 'Geen prioriteit',
-  },
-  {
     field: 'description',
     label: 'Beschrijving',
     input: 'textarea',
-  },
-  {
-    field: 'minMorning',
-    label: 'Min. aantal ochtend',
-    input: 'number',
-    placeholder: 'Geen limiet',
-  },
-  {
-    field: 'minAfternoon',
-    label: 'Min. aantal middag',
-    input: 'number',
-    placeholder: 'Geen limiet',
-  },
-  {
-    field: 'minEvening',
-    label: 'Min. aantal avond',
-    input: 'number',
-    placeholder: 'Geen limiet',
-  },
-  {
-    field: 'maxMorning',
-    label: 'Max. aantal ochtend',
-    input: 'number',
-    placeholder: 'Geen limiet',
-  },
-  {
-    field: 'maxAfternoon',
-    label: 'Max. aantal middag',
-    input: 'number',
-    placeholder: 'Geen limiet',
-  },
-  {
-    field: 'maxEvening',
-    label: 'Max. aantal avond',
-    input: 'number',
-    placeholder: 'Geen limiet',
   },
 ];
 
