@@ -5,6 +5,7 @@ import { FileUploader } from 'react-drag-drop-files';
 import * as XLSX from 'xlsx';
 import { trpc } from '~/utils/trpc';
 import Select from 'react-select';
+import toast from 'react-hot-toast';
 
 const fileTypes = ['CSV', 'XLS', 'TSV', 'XLSX', 'ODS'];
 
@@ -107,23 +108,30 @@ const ImportPage: NextPageWithLayout = () => {
         <button
           className="btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline bg-blue-700 hover:bg-blue-900 text-white font-normal py-2 px-4 mr-1 rounded"
           onClick={() =>
-            scheduleMutation.mutateAsync({
-              week,
-              data:
-                data?.map((row) => ({
-                  id: row.id,
-                  name: row.name,
-                  data: [
-                    row.monday,
-                    row.tuesday,
-                    row.wednesday,
-                    row.thursday,
-                    row.friday,
-                    row.saturday,
-                    row.sunday,
-                  ],
-                })) || [],
-            })
+            toast.promise(
+              scheduleMutation.mutateAsync({
+                week,
+                data:
+                  data?.map((row) => ({
+                    id: row.id,
+                    name: row.name,
+                    data: [
+                      row.monday,
+                      row.tuesday,
+                      row.wednesday,
+                      row.thursday,
+                      row.friday,
+                      row.saturday,
+                      row.sunday,
+                    ],
+                  })) || [],
+              }),
+              {
+                loading: 'Laden...',
+                success: 'Rooster succesvol geimporteerd!',
+                error: 'Er is iets fout gegaan!',
+              },
+            )
           }
         >
           Importeer
