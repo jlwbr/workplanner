@@ -53,6 +53,16 @@ model Break {
   @@unique([userId, date, TimeOffDay])
 }
 
+model Schedule {
+  id       String   @id @default(cuid())
+  userId   String
+  date     DateTime
+  schedule String
+
+  user User @relation(fields: [userId], references: [id])
+  @@unique([userId, date])
+}
+
 model PlanningItem {
   id               String  @id @default(cuid())
   planningId       String
@@ -170,6 +180,7 @@ model User {
   PlanningItemOwner    PlanningItem[]  @relation(name: "PlanningItem_owner")
   PlanningItemDoneUser PlanningItem[]  @relation(name: "PlanningItem_doneUser")
   subTask              subTask[]
+  Schedule             Schedule[]
 }
 
 model VerificationToken {

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';
+import { GeneratePlanning } from './prolog';
 
 /**
  * Default selector for Tasks.
@@ -494,15 +495,13 @@ export const planningRouter = createRouter()
       });
 
       if (planning.length === 0) {
-        const hasPlanning = await prisma.planning.findMany({
+        await GeneratePlanning(date);
+        return await prisma.planning.findMany({
           where: {
             date: date,
           },
+          select: defaultTaskSelect,
         });
-
-        if (hasPlanning.length === 0) {
-          return false;
-        }
       }
 
       // FIXME: we should be sorting in the prisma query

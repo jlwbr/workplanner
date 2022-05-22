@@ -1,16 +1,91 @@
 import { useSession } from 'next-auth/react';
-import Select, { MultiValue } from 'react-select';
 import ReactTooltip from 'react-tooltip';
 import { inferMutationInput, trpc } from '~/utils/trpc';
-import AsigneeBadge from './AsigneeBadge';
+import AsigneeBadge, { ItemTypes } from './AsigneeBadge';
 import { KanbanRule } from './KanbanComponent';
+import { inferQueryOutput } from '~/utils/trpc';
+import { useDrop } from 'react-dnd';
 
 type KanbanItemType = {
   item: KanbanRule;
   currentPrio: number;
   locked: boolean;
   isAdmin: boolean;
+  schedule?: inferQueryOutput<'schedule.getAll'>;
   editTask: (item: inferMutationInput<'planning.tasks.upsert'>) => void;
+};
+
+type assigneeType = {
+  id: string;
+  asignees: KanbanRule['morningAsignee'];
+  canAssign: boolean;
+  userId: string;
+  timeOfDay: 'morning' | 'afternoon' | 'evening';
+  isAdmin: boolean;
+  locked: boolean;
+  rest: number;
+};
+
+const Assignees = ({
+  id,
+  asignees,
+  canAssign,
+  userId,
+  timeOfDay,
+  isAdmin,
+  locked,
+  rest,
+}: assigneeType) => {
+  const context = trpc.useContext();
+  const asigneeMuation = trpc.useMutation(['planning.asignee.add'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+
+  const [, drop] = useDrop(() => ({
+    accept: ItemTypes.BADGE,
+    drop: (item: { id: string }) => {
+      asigneeMuation.mutate({
+        planningItemId: id,
+        timeOfDay,
+        asigneeId: item.id,
+      });
+    },
+  }));
+
+  return (
+    <div ref={drop} className="flex gap-2">
+      {asignees.map(({ id: itemId, name }) => (
+        <AsigneeBadge
+          key={itemId}
+          planningItemId={id}
+          asigneeId={itemId}
+          name={name}
+          timeOfDay={timeOfDay}
+          canRemove={!locked && (isAdmin || itemId == userId)}
+        />
+      ))}
+      {canAssign &&
+        [...new Array(rest)].map((_, i) => (
+          <div
+            key={i}
+            onClick={() => {
+              if (isAdmin) return;
+              asigneeMuation.mutate({
+                planningItemId: id,
+                timeOfDay,
+              });
+            }}
+            className={`inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full ${
+              !isAdmin && 'cursor-pointer'
+            } `}
+          >
+            Leeg
+          </div>
+        ))}
+    </div>
+  );
 };
 
 const KanbanItem = ({
@@ -22,20 +97,6 @@ const KanbanItem = ({
 }: KanbanItemType) => {
   const context = trpc.useContext();
   const { data, status } = useSession();
-  const userQuery = trpc.useQuery(['user.all'], {
-    enabled: isAdmin,
-  });
-  // FIXME: We are invalidating a lot of data all over the app, we should only invalidate the data we need to.
-  const asigneeMuation = trpc.useMutation(['planning.asignee.add'], {
-    onSuccess: () => {
-      context.invalidateQueries(['planning.byDate']);
-    },
-  });
-  const removableAsignee = trpc.useMutation(['planning.asignee.remove'], {
-    onSuccess: () => {
-      context.invalidateQueries(['planning.byDate']);
-    },
-  });
   const doneMutation = trpc.useMutation(['planning.tasks.done'], {
     onSuccess: () => {
       context.invalidateQueries(['planning.byDate']);
@@ -55,11 +116,6 @@ const KanbanItem = ({
     },
   );
 
-  const options = userQuery.data?.map((user) => ({
-    value: user.id,
-    label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
-  }));
-
   const {
     id,
     name,
@@ -78,37 +134,6 @@ const KanbanItem = ({
     afternoonAsignee,
     eveningAsignee,
   } = item;
-
-  const handleChange = (
-    selectedOption: MultiValue<{ value: string; label: string | null }>,
-    timeOfDay: 'morning' | 'afternoon' | 'evening',
-  ) => {
-    const asignees =
-      timeOfDay == 'morning'
-        ? morningAsignee
-        : timeOfDay == 'afternoon'
-        ? afternoonAsignee
-        : eveningAsignee;
-
-    for (const option of selectedOption) {
-      if (!asignees.some((asignee) => asignee.id == option.value)) {
-        asignees.shift();
-        asigneeMuation.mutate({
-          planningItemId: id,
-          timeOfDay,
-          asigneeId: option.value,
-        });
-      }
-    }
-
-    for (const asignee of asignees) {
-      removableAsignee.mutate({
-        planningItemId: id,
-        timeOfDay,
-        asigneeId: asignee.id,
-      });
-    }
-  };
 
   const userId = data?.user?.id;
   const isEditer = data?.user?.isEditor;
@@ -153,18 +178,18 @@ const KanbanItem = ({
   const canMorningAsign =
     isCorrectPrio &&
     !locked &&
-    !morningAsignee.some((item) => item.id === userId) &&
+    (isAdmin || !morningAsignee.some((item) => item.id === userId)) &&
     (maxMorning == 0 || morningAsignee.length < maxMorning) &&
     (maxMorning == 0 || morningAsignee.length < maxMorning);
   const canAfternoonAsign =
     isCorrectPrio &&
     !locked &&
-    !afternoonAsignee.some((item) => item.id === userId) &&
+    (isAdmin || !afternoonAsignee.some((item) => item.id === userId)) &&
     (maxAfternoon == 0 || afternoonAsignee.length < maxAfternoon);
   const canEveningAsign =
     isCorrectPrio &&
     !locked &&
-    !eveningAsignee.some((item) => item.id === userId) &&
+    (isAdmin || !eveningAsignee.some((item) => item.id === userId)) &&
     (maxEvening == 0 || eveningAsignee.length < maxEvening);
 
   if (!isCorrectPrio)
@@ -288,50 +313,16 @@ const KanbanItem = ({
               {morningAsignee.length} / {maxMorning > 0 ? maxMorning : '∞'}
             </span>
           </div>
-          {isAdmin && (
-            <Select
-              options={options}
-              defaultValue={morningAsignee.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
-              onChange={(c) => handleChange(c, 'morning')}
-              menuPortalTarget={document.body}
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              placeholder="Start met typen om te zoeken..."
-              isMulti
-              isSearchable
-            />
-          )}
-          {!isAdmin &&
-            morningAsignee.map(({ id: itemId, name }) => (
-              <AsigneeBadge
-                key={itemId}
-                planningItemId={id}
-                asigneeId={itemId}
-                name={name}
-                timeOfDay="morning"
-                canRemove={!locked && (isEditer || itemId == userId)}
-              />
-            ))}
-
-          {!isAdmin &&
-            canMorningAsign &&
-            [...new Array(restMorning)].map((_, i) => (
-              <a
-                key={i}
-                href="#"
-                onClick={() => {
-                  asigneeMuation.mutate({
-                    planningItemId: id,
-                    timeOfDay: 'morning',
-                  });
-                }}
-                className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-              >
-                Leeg
-              </a>
-            ))}
+          <Assignees
+            id={id}
+            asignees={morningAsignee}
+            canAssign={canMorningAsign}
+            userId={userId}
+            locked={locked}
+            isAdmin={isAdmin}
+            timeOfDay="morning"
+            rest={restMorning}
+          />
         </div>
         <div className="pt-2">
           <div className="flex gap-2 content-center tracking-tight my-2">
@@ -341,48 +332,16 @@ const KanbanItem = ({
               {maxAfternoon > 0 ? maxAfternoon : '∞'}
             </span>
           </div>
-          {isAdmin && (
-            <Select
-              options={options}
-              defaultValue={afternoonAsignee.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
-              onChange={(c) => handleChange(c, 'afternoon')}
-              menuPortalTarget={document.body}
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              placeholder="Start met typen om te zoeken..."
-              isMulti
-              isSearchable
-            />
-          )}
-          {!isAdmin &&
-            afternoonAsignee.map(({ id: itemId, name }) => (
-              <AsigneeBadge
-                key={itemId}
-                planningItemId={id}
-                name={name}
-                timeOfDay="afternoon"
-                canRemove={!locked && (isEditer || itemId == userId)}
-              />
-            ))}
-          {!isAdmin &&
-            canAfternoonAsign &&
-            [...new Array(restAfternoon)].map((_, i) => (
-              <a
-                key={i}
-                href="#"
-                onClick={() => {
-                  asigneeMuation.mutate({
-                    planningItemId: id,
-                    timeOfDay: 'afternoon',
-                  });
-                }}
-                className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-              >
-                Leeg
-              </a>
-            ))}
+          <Assignees
+            id={id}
+            asignees={afternoonAsignee}
+            canAssign={canAfternoonAsign}
+            userId={userId}
+            locked={locked}
+            isAdmin={isAdmin}
+            timeOfDay="afternoon"
+            rest={restAfternoon}
+          />
         </div>
         <div className="pt-2">
           <div className="flex gap-2 content-center tracking-tight my-2">
@@ -391,48 +350,16 @@ const KanbanItem = ({
               {eveningAsignee.length} / {maxEvening > 0 ? maxEvening : '∞'}
             </span>
           </div>
-          {isAdmin && (
-            <Select
-              options={options}
-              defaultValue={eveningAsignee.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
-              onChange={(c) => handleChange(c, 'evening')}
-              menuPortalTarget={document.body}
-              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              placeholder="Start met typen om te zoeken..."
-              isMulti
-              isSearchable
-            />
-          )}
-          {!isAdmin &&
-            eveningAsignee.map(({ id: itemId, name }) => (
-              <AsigneeBadge
-                key={itemId}
-                planningItemId={id}
-                name={name}
-                timeOfDay="evening"
-                canRemove={!locked && (isEditer || itemId == userId)}
-              />
-            ))}
-          {!isAdmin &&
-            canEveningAsign &&
-            [...new Array(restEvening)].map((_, i) => (
-              <a
-                key={i}
-                href="#"
-                onClick={() => {
-                  asigneeMuation.mutate({
-                    planningItemId: id,
-                    timeOfDay: 'evening',
-                  });
-                }}
-                className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full"
-              >
-                Leeg
-              </a>
-            ))}
+          <Assignees
+            id={id}
+            asignees={eveningAsignee}
+            canAssign={canEveningAsign}
+            userId={userId}
+            locked={locked}
+            isAdmin={isAdmin}
+            timeOfDay="evening"
+            rest={restEvening}
+          />
         </div>
       </div>
     </div>

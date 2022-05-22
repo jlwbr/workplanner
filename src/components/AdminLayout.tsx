@@ -12,12 +12,14 @@ type AdminLayoutProps = {
 };
 
 export const AdminDateContext = createContext(
-  new Date(new Date().setHours(0, 0, 0, 0)),
+  new Date(new Date().setUTCHours(0, 0, 0, 0)),
 );
 
 export const AdminLayout = ({ children, hasDate }: AdminLayoutProps) => {
   const { data, status } = useSession();
-  const [value, setValue] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
+  const [value, setValue] = useState(
+    new Date(new Date().setUTCHours(0, 0, 0, 0)),
+  );
   const { value: date, setValue: setDate } = useMemo(
     () => ({
       value,
@@ -105,6 +107,26 @@ const menuItems = [
           strokeLinecap="round"
           strokeLinejoin="round"
           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
+      </svg>
+    ),
+  },
+  {
+    name: 'Importeer rooster',
+    location: '/admin/import',
+    Icon: () => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6 text-gray-500 transition duration-75  group-hover:text-gray-900"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
         />
       </svg>
     ),

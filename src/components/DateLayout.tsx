@@ -6,11 +6,13 @@ import DateHeader from './DateHeader';
 type DefaultLayoutProps = { children: ReactNode };
 
 export const DateContext = createContext(
-  new Date(new Date().setHours(0, 0, 0, 0)),
+  new Date(new Date().setUTCHours(0, 0, 0, 0)),
 );
 
 export const DateLayout = ({ children }: DefaultLayoutProps) => {
-  const [value, setValue] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
+  const [value, setValue] = useState(
+    new Date(new Date().setUTCHours(0, 0, 0, 0)),
+  );
   const { value: date, setValue: setDate } = useMemo(
     () => ({
       value,

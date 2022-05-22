@@ -9,6 +9,7 @@ import { prologRouter } from './prolog';
 import { communicationRouter } from './communication';
 import { breakRouter } from './break';
 import { userRouter } from './user';
+import { scheduleRouter } from './schedule';
 /**
  * Create your application's root router
  * If you want to use SSG, you need export this
@@ -39,6 +40,7 @@ export const appRouter = createRouter()
   .merge('communication.', communicationRouter)
   .merge('break.', breakRouter)
   .merge('user.', userRouter)
-  .merge('prolog.', prologRouter);
+  .merge('prolog.', prologRouter)
+  .merge('schedule.', scheduleRouter);
 
 export type AppRouter = typeof appRouter;

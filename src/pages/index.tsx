@@ -1,5 +1,7 @@
 import { useSession } from 'next-auth/react';
 import { ReactElement, useContext } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DateContext, DateLayout } from '~/components/DateLayout';
 import KanbanComponent from '~/components/KanbanComponent';
 import { NextPageWithLayout } from './_app';
@@ -8,7 +10,9 @@ const IndexPage: NextPageWithLayout = () => {
   const date = useContext(DateContext);
   const { data } = useSession();
   return (
-    <KanbanComponent date={date} isAdmin={data?.user?.isShared || false} />
+    <DndProvider backend={HTML5Backend}>
+      <KanbanComponent date={date} isAdmin={data?.user?.isShared || false} />
+    </DndProvider>
   );
 };
 

@@ -55,24 +55,21 @@ type KanbanComponentType = {
 
 const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
   const context = trpc.useContext();
-  const filterDay = trpc.useMutation(['prolog.FilterDay'], {
-    onSuccess: () => {
-      context.invalidateQueries(['planning.byDate']);
+  const planing = trpc.useQuery([
+    'planning.byDate',
+    {
+      date: date,
     },
-  });
-  const planing = trpc.useQuery(
+  ]);
+  const schedule = trpc.useQuery(
     [
-      'planning.byDate',
+      'schedule.getAll',
       {
         date: date,
       },
     ],
     {
-      onSuccess(data) {
-        if (data !== false) return;
-
-        filterDay.mutate({ date });
-      },
+      enabled: isAdmin,
     },
   );
 
@@ -136,7 +133,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
     setOpen(false);
   };
 
-  if (!planing.isSuccess || planing.data == false)
+  if (!planing.isSuccess)
     return (
       <div className="flex flex-col items-center justify-center h-[60vh]">
         <svg
@@ -181,6 +178,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
               locked={plan.locked}
               title={plan.channel.name}
               rules={plan.PlanningItem}
+              schedule={schedule.data}
               isAdmin={isAdmin}
               newTask={openTask}
             />
@@ -198,6 +196,7 @@ type KanbanListType = {
   rules: KanbanRule[];
   locked: boolean;
   isAdmin: boolean;
+  schedule?: inferQueryOutput<'schedule.getAll'>;
   newTask: (data?: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
@@ -207,6 +206,7 @@ const KanbanList = ({
   rules,
   locked,
   isAdmin,
+  schedule,
   newTask,
 }: KanbanListType) => {
   const { data: user } = useSession();
@@ -236,6 +236,7 @@ const KanbanList = ({
               currentPrio={currentPrio}
               editTask={newTask}
               item={rule}
+              schedule={schedule}
               locked={locked}
               isAdmin={isAdmin}
             />

@@ -1,6 +1,9 @@
 import { useRouter } from 'next/router';
 import { ReactElement, useContext, useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AdminDateContext, AdminLayout } from '~/components/AdminLayout';
+import AsigneeBadge from '~/components/AsigneeBadge';
 import BreakComponent from '~/components/BreakComponent';
 import CommunicationComponent from '~/components/CommunicationComponent';
 import KanbanComponent from '~/components/KanbanComponent';
@@ -14,6 +17,8 @@ const IndexPage: NextPageWithLayout = () => {
   const { step } = router.query;
   const date = useContext(AdminDateContext);
   const context = trpc.useContext();
+  const userQuery = trpc.useQuery(['user.all']);
+  const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
   const mutateLock = trpc.useMutation(['planning.lockbyDate'], {
     onSuccess: () => {
       context.invalidateQueries('planning.isLocked');
@@ -52,6 +57,21 @@ const IndexPage: NextPageWithLayout = () => {
   };
 
   const isLocked = isLockedQuery.data || false;
+  const users = userQuery.data || [];
+  const schedule = scheduleQuery.data || [];
+
+  const options =
+    schedule && schedule.length > 0
+      ? schedule.map((user) => ({
+          value: user.userId,
+          label: `${
+            user.user?.name || `Anoniem (${user.userId.slice(0, 4)})`
+          } (${user.schedule})`,
+        }))
+      : users.map((user) => ({
+          value: user.id,
+          label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
+        }));
 
   return (
     <>
@@ -65,7 +85,20 @@ const IndexPage: NextPageWithLayout = () => {
       <div className="container flex justify-around my-8 pt-4">
         {currentStep == 1 && (
           <div style={{ width: 'calc(100vw - 16rem)' }}>
-            <KanbanComponent date={date} isAdmin={true} />
+            <DndProvider backend={HTML5Backend}>
+              <div className="flex gap-2 p-5">
+                {options.map((option) => (
+                  <AsigneeBadge
+                    key={option.value}
+                    canRemove={false}
+                    name={option.label}
+                    asigneeId={option.value}
+                    draggable={true}
+                  />
+                ))}
+              </div>
+              <KanbanComponent date={date} isAdmin={true} />
+            </DndProvider>
           </div>
         )}
         {currentStep == 2 && (
