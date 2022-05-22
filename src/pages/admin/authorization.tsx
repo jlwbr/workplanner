@@ -15,13 +15,28 @@ const Input: FC<{
   });
   const [admin, setAdmin] = useState(user.admin);
   const [editor, setEditor] = useState(user.editor);
+  const [shared, setShared] = useState(user.shared);
 
   return (
     <tr key={user.id}>
       <td className="border-b border-slate-100 p-4 pl-8 w-full text-slate-700">
         {user.name}
       </td>
-      <td className="border-b border-slate-100 p-4 pr-8 text-slate-700">
+      <td className="border-b border-slate-100 p-4 pr-8 text-center text-slate-700">
+        <input
+          checked={shared}
+          onChange={() => {
+            upsertMutation.mutateAsync({
+              id: user.id,
+              shared: !shared,
+            });
+            setShared(!shared);
+          }}
+          type="checkbox"
+          className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300"
+        />
+      </td>
+      <td className="border-b border-slate-100 p-4 pr-8 text-center text-slate-700">
         <input
           checked={editor}
           onChange={() => {
@@ -35,7 +50,7 @@ const Input: FC<{
           className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300"
         />
       </td>
-      <td className="border-b border-slate-100 p-4 pr-8 text-slate-700">
+      <td className="border-b border-slate-100 p-4 pr-8 text-center text-slate-700">
         <input
           checked={admin}
           onChange={() => {
@@ -73,6 +88,9 @@ const Table: FC<{
               <tr>
                 <th className="border-b font-medium p-4 pl-8 pt-0 pb-3 text-slate-600 text-left">
                   Naam
+                </th>
+                <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
+                  Gedeeld
                 </th>
                 <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
                   Editor

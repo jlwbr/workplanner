@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client';
 const defaultUserSelect = Prisma.validator<Prisma.UserSelect>()({
   id: true,
   name: true,
+  shared: true,
   editor: true,
   admin: true,
 });
@@ -39,6 +40,7 @@ export const userRouter = createRouter()
       id: z.string(),
       admin: z.boolean().optional(),
       editor: z.boolean().optional(),
+      shared: z.boolean().optional(),
     }),
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.isAdmin) {
@@ -47,13 +49,14 @@ export const userRouter = createRouter()
           message: 'You must be an admin to acces this resource',
         });
       }
-      const { id, admin, editor } = input;
+      const { id, admin, editor, shared } = input;
 
       return prisma.user.update({
         where: { id },
         data: {
           admin,
           editor,
+          shared,
         },
       });
     },
