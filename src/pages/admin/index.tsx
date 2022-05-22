@@ -86,7 +86,7 @@ const IndexPage: NextPageWithLayout = () => {
         {currentStep == 1 && (
           <div style={{ width: 'calc(100vw - 16rem)' }}>
             <DndProvider backend={HTML5Backend}>
-              <div className="flex gap-2 p-5">
+              <div className="flex gap-2 p-5 overflow-auto">
                 {options.map((option) => (
                   <AsigneeBadge
                     key={option.value}
