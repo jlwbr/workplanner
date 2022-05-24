@@ -2,7 +2,7 @@ import { createRouter } from '~/server/createRouter';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
-import { Prisma, TimeOffDay } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 /**
  * Default selector for Tasks.
@@ -20,7 +20,6 @@ export const breakRouter = createRouter()
   .query('getAll', {
     input: z.object({
       date: z.date(),
-      TimeOffDay: z.nativeEnum(TimeOffDay),
     }),
     async resolve({ input, ctx }) {
       if (!ctx.session?.user?.isEditor) {
@@ -40,11 +39,10 @@ export const breakRouter = createRouter()
     input: z.object({
       date: z.date(),
       userId: z.string(),
-      TimeOffDay: z.nativeEnum(TimeOffDay),
       number: z.number(),
     }),
     async resolve({ input, ctx }) {
-      const { date, userId, TimeOffDay, number } = input;
+      const { date, userId, number } = input;
       if (!ctx.session?.user?.isEditor) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -54,16 +52,14 @@ export const breakRouter = createRouter()
 
       return prisma.break.upsert({
         where: {
-          userId_date_TimeOffDay: {
+          userId_date: {
             userId,
             date,
-            TimeOffDay,
           },
         },
         create: {
           userId,
           date,
-          TimeOffDay,
           number,
         },
         update: {

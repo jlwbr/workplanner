@@ -1,15 +1,5 @@
-import { TimeOffDay } from '@prisma/client';
 import { FC, useEffect, useState } from 'react';
 import { trpc } from '~/utils/trpc';
-
-const groupByKey = (list: any[], key: string) =>
-  list.reduce(
-    (hash, obj) => ({
-      ...hash,
-      [obj[key]]: (hash[obj[key]] || []).concat(obj),
-    }),
-    {},
-  );
 
 type BreakComponentType = {
   date: Date;
@@ -17,14 +7,11 @@ type BreakComponentType = {
 
 const numbers = ['1', '2', '3'];
 
-const TimeOffDayType = TimeOffDay;
-
 const Input: FC<{
   user: any;
   date: Date;
-  TimeOffDay: TimeOffDay;
   defaultNumber: string;
-}> = ({ user, date, TimeOffDay, defaultNumber }) => {
+}> = ({ user, date, defaultNumber }) => {
   const context = trpc.useContext();
   const upsertMutation = trpc.useMutation(['break.upsert'], {
     onSuccess: () => {
@@ -33,10 +20,6 @@ const Input: FC<{
   });
   const [number, setNumber] = useState(defaultNumber);
   useEffect(() => setNumber(defaultNumber), [defaultNumber]);
-
-  const othertimes = Object.values(TimeOffDayType).filter(
-    (time) => time !== TimeOffDay,
-  );
 
   return (
     <tr key={user.id}>
@@ -50,7 +33,6 @@ const Input: FC<{
             upsertMutation.mutateAsync({
               date,
               userId: user.id,
-              TimeOffDay,
               number: parseInt(e.target.value),
             });
             setNumber(e.target.value);
@@ -65,22 +47,6 @@ const Input: FC<{
           ))}
         </select>
       </td>
-      <td>
-        <button
-          onClick={() => {
-            othertimes.forEach((othertime) => {
-              upsertMutation.mutateAsync({
-                date,
-                userId: user.id,
-                TimeOffDay: othertime as TimeOffDay,
-                number: parseInt(number),
-              });
-            });
-          }}
-        >
-          Neem over
-        </button>
-      </td>
     </tr>
   );
 };
@@ -88,9 +54,8 @@ const Input: FC<{
 const Table: FC<{
   users: any[];
   date: Date;
-  TimeOffDay: TimeOffDay;
-}> = ({ users, date, TimeOffDay }) => {
-  const query = trpc.useQuery(['break.getAll', { date, TimeOffDay }]);
+}> = ({ users, date }) => {
+  const query = trpc.useQuery(['break.getAll', { date }]);
 
   if (!query.isSuccess) return null;
 
@@ -111,9 +76,6 @@ const Table: FC<{
                 <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
                   Pauze
                 </th>
-                <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
-                  Kopieer
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -122,7 +84,6 @@ const Table: FC<{
                   key={user.id}
                   user={user}
                   date={date}
-                  TimeOffDay={TimeOffDay}
                   defaultNumber={
                     query.data
                       .find((d) => d.userId === user.id)
@@ -149,48 +110,23 @@ const BreakComponent = ({ date }: BreakComponentType) => {
 
   if (!planing.isSuccess || !planing.data) return null;
 
-  const users = groupByKey(
-    planing.data
-      .flatMap((p) =>
-        p.PlanningItem.flatMap((i) => [
-          ...i.morningAsignee.map((a) => ({
-            ...a,
-            timeOfDay: 'morning',
-          })),
-          ...i.afternoonAsignee.map((a) => ({
-            ...a,
-            timeOfDay: 'afternoon',
-          })),
-          ...i.eveningAsignee.map((a) => ({
-            ...a,
-            timeOfDay: 'evening',
-          })),
-        ]),
-      )
-      .filter(
-        (value, index, self) =>
-          index ===
-          self.findIndex(
-            (t) => t.id === value.id && t.timeOfDay === value.timeOfDay,
-          ),
-      ),
-    'timeOfDay',
-  );
+  const users = planing.data
+    .flatMap((p) =>
+      p.PlanningItem.flatMap((i) => [
+        ...i.morningAsignee,
+        ...i.afternoonAsignee,
+        ...i.eveningAsignee,
+      ]),
+    )
+    .filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.id === value.id),
+    );
 
   return (
     <div className="w-full p-4 px-10">
-      <h2 className=" flex-1 text-xl mb-4 mt-2">Ochtend</h2>
-      {users.morning && (
-        <Table users={users.morning} date={date} TimeOffDay={'MORNING'} />
-      )}
-      <h2 className="text-xl mb-4 mt-2">Middag</h2>
-      {users.afternoon && (
-        <Table users={users.afternoon} date={date} TimeOffDay={'AFTERNOON'} />
-      )}
-      <h2 className="text-xl mb-4 mt-2">Avond</h2>
-      {users.evening && (
-        <Table users={users.evening} date={date} TimeOffDay={'EVENING'} />
-      )}
+      <h2 className=" flex-1 text-xl mb-4 mt-2">Pauzes</h2>
+      <Table users={users} date={date} />
     </div>
   );
 };

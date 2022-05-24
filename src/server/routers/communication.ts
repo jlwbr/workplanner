@@ -2,7 +2,7 @@ import { createRouter } from '~/server/createRouter';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
-import { Prisma, TimeOffDay } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 /**
  * Default selector for Tasks.
@@ -22,7 +22,6 @@ export const communicationRouter = createRouter()
   .query('getAll', {
     input: z.object({
       date: z.date(),
-      TimeOffDay: z.nativeEnum(TimeOffDay),
     }),
     async resolve({ input, ctx }) {
       if (!ctx.session?.user?.isEditor) {
@@ -42,12 +41,11 @@ export const communicationRouter = createRouter()
     input: z.object({
       date: z.date(),
       userId: z.string(),
-      TimeOffDay: z.nativeEnum(TimeOffDay),
       phoneNumber: z.string(),
       HT: z.boolean(),
     }),
     async resolve({ input, ctx }) {
-      const { date, userId, TimeOffDay, phoneNumber, HT } = input;
+      const { date, userId, phoneNumber, HT } = input;
       if (!ctx.session?.user?.isEditor) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -57,16 +55,14 @@ export const communicationRouter = createRouter()
 
       return prisma.communication.upsert({
         where: {
-          userId_date_TimeOffDay: {
+          userId_date: {
             userId,
             date,
-            TimeOffDay,
           },
         },
         create: {
           userId,
           date,
-          TimeOffDay,
           phoneNumber,
           HT,
         },

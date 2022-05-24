@@ -1,15 +1,5 @@
-import { TimeOffDay } from '@prisma/client';
 import { FC, useEffect, useState } from 'react';
 import { trpc } from '~/utils/trpc';
-
-const groupByKey = (list: any[], key: string) =>
-  list.reduce(
-    (hash, obj) => ({
-      ...hash,
-      [obj[key]]: (hash[obj[key]] || []).concat(obj),
-    }),
-    {},
-  );
 
 type CommunicationComponentType = {
   date: Date;
@@ -29,15 +19,12 @@ const numbers = [
   '240',
 ];
 
-const TimeOffDayType = TimeOffDay;
-
 const Input: FC<{
   user: any;
   date: Date;
-  TimeOffDay: TimeOffDay;
   defaultphoneNumber: string;
   defaultHT: boolean;
-}> = ({ user, date, TimeOffDay, defaultphoneNumber, defaultHT }) => {
+}> = ({ user, date, defaultphoneNumber, defaultHT }) => {
   const context = trpc.useContext();
   const upsertMutation = trpc.useMutation(['communication.upsert'], {
     onSuccess: () => {
@@ -46,9 +33,6 @@ const Input: FC<{
   });
   const [selected, setSelected] = useState(defaultHT);
   const [phone, setPhone] = useState<string>(defaultphoneNumber);
-  const othertimes = Object.values(TimeOffDayType).filter(
-    (time) => time !== TimeOffDay,
-  );
   useEffect(() => setSelected(defaultHT), [defaultHT]);
   useEffect(() => setPhone(defaultphoneNumber), [defaultphoneNumber]);
 
@@ -64,7 +48,6 @@ const Input: FC<{
             upsertMutation.mutateAsync({
               date,
               userId: user.id,
-              TimeOffDay,
               phoneNumber: phone,
               HT: !selected,
             });
@@ -81,7 +64,6 @@ const Input: FC<{
             upsertMutation.mutateAsync({
               date,
               userId: user.id,
-              TimeOffDay,
               phoneNumber: e.target.value,
               HT: selected,
             });
@@ -97,23 +79,6 @@ const Input: FC<{
           ))}
         </select>
       </td>
-      <td>
-        <button
-          onClick={() => {
-            othertimes.forEach((othertime) => {
-              upsertMutation.mutateAsync({
-                date,
-                userId: user.id,
-                TimeOffDay: othertime as TimeOffDay,
-                phoneNumber: phone,
-                HT: selected,
-              });
-            });
-          }}
-        >
-          Neem over
-        </button>
-      </td>
     </tr>
   );
 };
@@ -121,9 +86,8 @@ const Input: FC<{
 const Table: FC<{
   users: any[];
   date: Date;
-  TimeOffDay: TimeOffDay;
-}> = ({ users, date, TimeOffDay }) => {
-  const query = trpc.useQuery(['communication.getAll', { date, TimeOffDay }]);
+}> = ({ users, date }) => {
+  const query = trpc.useQuery(['communication.getAll', { date }]);
 
   if (!query.isSuccess) return null;
 
@@ -147,9 +111,6 @@ const Table: FC<{
                 <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
                   Telefoon
                 </th>
-                <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
-                  Kopieer
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -158,7 +119,6 @@ const Table: FC<{
                   key={user.id}
                   user={user}
                   date={date}
-                  TimeOffDay={TimeOffDay}
                   defaultphoneNumber={
                     query.data.find((d) => d.userId === user.id)?.phoneNumber ??
                     ''
@@ -187,50 +147,25 @@ const CommunicationComponent = ({ date }: CommunicationComponentType) => {
 
   if (!planing.isSuccess || !planing.data) return null;
 
-  const users = groupByKey(
-    planing.data
-      .flatMap((p) =>
-        p.PlanningItem.flatMap((i) => [
-          ...i.morningAsignee.map((a) => ({
-            ...a,
-            timeOfDay: 'morning',
-          })),
-          ...i.afternoonAsignee.map((a) => ({
-            ...a,
-            timeOfDay: 'afternoon',
-          })),
-          ...i.eveningAsignee.map((a) => ({
-            ...a,
-            timeOfDay: 'evening',
-          })),
-        ]),
-      )
-      .filter(
-        (value, index, self) =>
-          index ===
-          self.findIndex(
-            (t) => t.id === value.id && t.timeOfDay === value.timeOfDay,
-          ),
-      ),
-    'timeOfDay',
-  );
+  const users = planing.data
+    .flatMap((p) =>
+      p.PlanningItem.flatMap((i) => [
+        ...i.morningAsignee,
+        ...i.afternoonAsignee,
+        ...i.eveningAsignee,
+      ]),
+    )
+    .filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.id === value.id),
+    );
 
   console.log(users);
 
   return (
     <div className="w-full p-4 px-10">
-      <h2 className="text-xl mb-4 mt-2">Ochtend</h2>
-      {users.morning && (
-        <Table users={users.morning} date={date} TimeOffDay={'MORNING'} />
-      )}
-      <h2 className="text-xl mb-4 mt-2">Middag</h2>
-      {users.afternoon && (
-        <Table users={users.afternoon} date={date} TimeOffDay={'AFTERNOON'} />
-      )}
-      <h2 className="text-xl mb-4 mt-2">Avond</h2>
-      {users.evening && (
-        <Table users={users.evening} date={date} TimeOffDay={'EVENING'} />
-      )}
+      <h2 className="text-xl mb-4 mt-2">Comunicatiemiddelen</h2>
+      <Table users={users} date={date} />
     </div>
   );
 };

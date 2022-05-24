@@ -82,11 +82,15 @@ const IndexPage: NextPageWithLayout = () => {
           onClick={handleStepClick}
         />
       </div>
-      <div className="container flex justify-around my-8 pt-4">
+      <div className="container my-8 pt-4">
         {currentStep == 1 && (
-          <div style={{ width: 'calc(100vw - 16rem)' }}>
-            <DndProvider backend={HTML5Backend}>
-              <div className="flex gap-2 p-5 overflow-auto">
+          <DndProvider backend={HTML5Backend}>
+            <div
+              style={{
+                width: `calc(100vw - 16rem)`,
+              }}
+            >
+              <div className="flex flex-wrap gap-2 p-5">
                 {options.map((option) => (
                   <AsigneeBadge
                     key={option.value}
@@ -98,8 +102,8 @@ const IndexPage: NextPageWithLayout = () => {
                 ))}
               </div>
               <KanbanComponent date={date} isAdmin={true} />
-            </DndProvider>
-          </div>
+            </div>
+          </DndProvider>
         )}
         {currentStep == 2 && (
           <div className="text-center px-10">

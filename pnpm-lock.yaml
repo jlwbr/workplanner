@@ -45,6 +45,7 @@ specifiers:
   react-drag-drop-files: ^2.3.5
   react-hot-toast: ^2.2.0
   react-query: ^3.27.0
+  react-resize-detector: ^7.0.0
   react-select: ^5.3.1
   react-to-print: ^2.14.7
   react-tooltip: ^4.2.21
@@ -82,6 +83,7 @@ dependencies:
   react-drag-drop-files: 2.3.5_sfoxds7t5ydpegc3knd667wn6m
   react-hot-toast: 2.2.0_ha54m6pwxcz4gcusjmwevbhi24
   react-query: 3.34.17_sfoxds7t5ydpegc3knd667wn6m
+  react-resize-detector: 7.0.0_sfoxds7t5ydpegc3knd667wn6m
   react-select: 5.3.1_wxl36ivhwrw5jb3pb2jgvmgjq4
   react-to-print: 2.14.7_sfoxds7t5ydpegc3knd667wn6m
   react-tooltip: 4.2.21_sfoxds7t5ydpegc3knd667wn6m
@@ -2732,6 +2734,10 @@ packages:
       '@types/prop-types': 15.7.4
       '@types/scheduler': 0.16.2
       csstype: 3.0.11
+
+  /@types/resize-observer-browser/0.1.7:
+    resolution: {integrity: sha512-G9eN0Sn0ii9PWQ3Vl72jDPgeJwRWhv2Qk/nQkJuWmRmOB4HX3/BhD5SE1dZs/hzPZL/WKnvF0RHdTSG54QJFyg==}
+    dev: false
 
   /@types/resolve/1.17.1:
     resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==}
@@ -7008,6 +7014,18 @@ packages:
       '@babel/runtime': 7.17.8
       broadcast-channel: 3.7.0
       match-sorter: 6.3.1
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+    dev: false
+
+  /react-resize-detector/7.0.0_sfoxds7t5ydpegc3knd667wn6m:
+    resolution: {integrity: sha512-Xd1POfpVzH9O3F/xB/0xYy2ijtKjE/z7y4c/aJP593YSzhPy2vDhsNPjes+uQbgL1RezxJajQ679qPs8K5LAFw==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0
+      react-dom: ^16.0.0 || ^17.0.0
+    dependencies:
+      '@types/resize-observer-browser': 0.1.7
+      lodash: 4.17.21
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
     dev: false

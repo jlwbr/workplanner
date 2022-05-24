@@ -12,12 +12,6 @@ generator client {
   previewFeatures = ["referentialIntegrity"]
 }
 
-enum TimeOffDay {
-  MORNING
-  AFTERNOON
-  EVENING
-}
-
 model Planning {
   id        String   @id @default(cuid())
   date      DateTime
@@ -32,25 +26,23 @@ model Planning {
 
 model Communication {
   id          String     @id @default(cuid())
-  TimeOffDay  TimeOffDay
   date        DateTime
   userId      String
   phoneNumber String
   HT          Boolean
 
   user User @relation(fields: [userId], references: [id])
-  @@unique([userId, date, TimeOffDay])
+  @@unique([userId, date])
 }
 
 model Break {
   id         String     @id @default(cuid())
-  TimeOffDay TimeOffDay
   date       DateTime
   userId     String
   number     Int
 
   user User @relation(fields: [userId], references: [id])
-  @@unique([userId, date, TimeOffDay])
+  @@unique([userId, date])
 }
 
 model Schedule {
@@ -125,7 +117,7 @@ model subTask {
 }
 
 model Channel {
-  id           String         @id
+  id           String         @id @default(cuid())
   name         String         @unique
   members      User[]
   PlanningRule PlanningRule[]

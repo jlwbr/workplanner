@@ -217,6 +217,7 @@ const IndexPage: NextPageWithLayout = () => {
         inputs={PlanningInputs}
         onDelete={onDelete}
       />
+      <h2 className="text-2xl font-bold mb-2 text-center">Taken</h2>
       <Tab.Group>
         <Tab.List className="flex p-1 space-x-1 bg-blue-900/90 rounded-xl">
           {RulesQuery.data.map(({ id, name }) => (

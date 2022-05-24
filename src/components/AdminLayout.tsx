@@ -132,6 +132,26 @@ const menuItems = [
     ),
   },
   {
+    name: 'Categorieën',
+    location: '/admin/channels',
+    Icon: () => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6 text-gray-500 transition duration-75  group-hover:text-gray-900"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+        />
+      </svg>
+    ),
+  },
+  {
     name: 'Authorisatie',
     location: '/admin/authorization',
     Icon: () => (
@@ -153,21 +173,47 @@ const menuItems = [
   },
 ];
 
-const Sidebar = () => (
-  <aside className="w-64" aria-label="Sidebar">
-    <div className="overflow-y-auto min-h-[90vh] h-full py-4 px-3 bg-white">
-      <ul className="space-y-2">
-        {menuItems.map(({ name, location, Icon }, i) => (
-          <li key={i}>
-            <Link href={location}>
-              <a className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg  hover:bg-gray-100">
-                <Icon />
-                <span className="ml-3">{name}</span>
-              </a>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </aside>
-);
+const Sidebar = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [open, setOpen] = useState(true);
+  return (
+    <aside aria-label="Sidebar">
+      <div className="overflow-y-auto min-h-[90vh] h-full py-4 px-3 bg-white">
+        <ul className="space-y-2">
+          {/* <li>
+            <a
+              onClick={() => setOpen(!open)}
+              className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg  hover:bg-gray-100 cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-gray-500 transition duration-75  group-hover:text-gray-900"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              {open && <span className="ml-3 pr-5">Sluit menu</span>}
+            </a>
+          </li> */}
+          {menuItems.map(({ name, location, Icon }, i) => (
+            <li key={i}>
+              <Link href={location}>
+                <a className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg  hover:bg-gray-100 whitespace-nowrap">
+                  <Icon />
+                  {open && <span className="ml-3 pr-5">{name}</span>}
+                </a>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </aside>
+  );
+};
