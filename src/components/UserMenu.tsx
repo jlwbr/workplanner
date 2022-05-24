@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { signOut, useSession } from 'next-auth/react';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment, useContext } from 'react';
@@ -5,7 +6,6 @@ import { classNames } from './DateHeader';
 import { trpc } from '~/utils/trpc';
 import Link from 'next/link';
 import { DateContext } from './DateLayout';
-import Image from 'next/image';
 
 function MyLink(props: any) {
   const { href, children, ...rest } = props;
@@ -29,7 +29,7 @@ export const UserMenu = ({ image }: { image: string }) => {
     <Menu as="div" className="relative inline-block text-left">
       <div className="mr-6">
         <Menu.Button>
-          <Image
+          <img
             className="inline object-cover w-8 h-8 rounded-full shadow-md hover:ring"
             src={image}
             alt="Profile image"
