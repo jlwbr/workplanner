@@ -49,7 +49,9 @@ const ImportPage: NextPageWithLayout = () => {
         data = json
           .map((row: any) => {
             if (!row['Naam']) return;
-            const user = users.data.find((u) => u.name === row['Naam']);
+            const user = users.data.find(
+              (u) => u.name?.toLowerCase() === row['Naam']?.toLowerCase(),
+            );
             return {
               id: user ? user.id : false,
               name: row['Naam'],
