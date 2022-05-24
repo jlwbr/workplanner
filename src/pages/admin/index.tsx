@@ -85,22 +85,24 @@ const IndexPage: NextPageWithLayout = () => {
       <div className="container my-8 pt-4">
         {currentStep == 1 && (
           <DndProvider backend={HTML5Backend}>
+            <div className="flex flex-wrap gap-2 p-5">
+              {options.map((option) => (
+                <AsigneeBadge
+                  key={option.value}
+                  canRemove={false}
+                  name={option.label}
+                  asigneeId={option.value}
+                  draggable={true}
+                />
+              ))}
+            </div>
             <div
               style={{
                 width: `calc(100vw - 16rem)`,
+                height: `100vh`,
+                overflow: 'auto',
               }}
             >
-              <div className="flex flex-wrap gap-2 p-5">
-                {options.map((option) => (
-                  <AsigneeBadge
-                    key={option.value}
-                    canRemove={false}
-                    name={option.label}
-                    asigneeId={option.value}
-                    draggable={true}
-                  />
-                ))}
-              </div>
               <KanbanComponent date={date} isAdmin={true} />
             </div>
           </DndProvider>
