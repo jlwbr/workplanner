@@ -5,6 +5,7 @@ import { classNames } from './DateHeader';
 import { trpc } from '~/utils/trpc';
 import Link from 'next/link';
 import { DateContext } from './DateLayout';
+import Image from 'next/image';
 
 function MyLink(props: any) {
   const { href, children, ...rest } = props;
@@ -24,12 +25,11 @@ export const UserMenu = ({ image }: { image: string }) => {
       context.invalidateQueries(['planning.byDate']);
     },
   });
-  const syncChannels = trpc.useMutation(['slack.syncChannels']);
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div className="mr-6">
         <Menu.Button>
-          <img
+          <Image
             className="inline object-cover w-8 h-8 rounded-full shadow-md hover:ring"
             src={image}
             alt="Profile image"
@@ -48,22 +48,6 @@ export const UserMenu = ({ image }: { image: string }) => {
       >
         <Menu.Items className="origin-top-right z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
-            {data?.user?.isAdmin && (
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href="#"
-                    onClick={() => syncChannels.mutateAsync()}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                      'block px-4 py-2 text-sm',
-                    )}
-                  >
-                    Sync rollen
-                  </a>
-                )}
-              </Menu.Item>
-            )}
             {data?.user?.isEditor && (
               <>
                 <Menu.Item>
