@@ -52,7 +52,7 @@ model Schedule {
   schedule String
 
   user User @relation(fields: [userId], references: [id])
-  @@unique([userId, date])
+  @@unique([userId, date, schedule])
 }
 
 model PlanningItem {
