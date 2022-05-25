@@ -78,9 +78,7 @@ const IndexPage: NextPageWithLayout = () => {
     schedule &&
     schedule.length > 0 &&
     users
-      .filter((x) => {
-        return !schedule.some((t) => t.id === x.id);
-      })
+      .filter((user) => !schedule.find((s) => s.userId === user.id))
       .map((user) => ({
         value: user.id,
         label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
@@ -120,8 +118,41 @@ const IndexPage: NextPageWithLayout = () => {
                   />
                 ))}
               {excess && (
-                <button onClick={() => setOpen(!open)} className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap">
-                  { open ? <>&#x25C0;</> : <>&#x25B6;</> }
+                <button
+                  onClick={() => setOpen(!open)}
+                  className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap"
+                >
+                  {open ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                      />
+                    </svg>
+                  )}
                 </button>
               )}
             </div>
