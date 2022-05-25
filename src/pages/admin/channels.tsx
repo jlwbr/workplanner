@@ -14,6 +14,7 @@ const IndexPage: NextPageWithLayout = () => {
   const addChannel = trpc.useMutation(['channel.add'], options);
   const editChannel = trpc.useMutation(['channel.edit'], options);
   const deleteChannel = trpc.useMutation(['channel.remove'], options);
+  const moveChannel = trpc.useMutation(['channel.move'], options);
 
   const onAdd = async () => {
     const name = prompt('Naam van de categorie');
@@ -48,6 +49,47 @@ const IndexPage: NextPageWithLayout = () => {
             className="relative flex gap-2 justify-between p-3 mb-2 bg-white border-2 rounded-md"
           >
             <h3 className="pl-2 font-medium leading-5 flex-1">{name}</h3>
+            {/* TODO: look at this */}
+            {/* <button
+              onClick={() =>
+                moveChannel.mutateAsync({ id, direction: 'increment' })
+              }
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 10l7-7m0 0l7 7m-7-7v18"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() =>
+                moveChannel.mutateAsync({ id, direction: 'decrement' })
+              }
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                />
+              </svg>
+            </button> */}
             <button onClick={() => onEdit(id, name)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

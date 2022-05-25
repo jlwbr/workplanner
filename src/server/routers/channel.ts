@@ -67,4 +67,30 @@ export const ChannelRouter = createRouter()
         },
       });
     },
+  })
+  .mutation('move', {
+    input: z.object({
+      id: z.string(),
+      direction: z.enum(['increment', 'decrement']),
+    }),	
+    async resolve({ input, ctx }) {
+      const { id, direction } = input;
+      if (!ctx.session?.user?.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      return prisma.channel.update({
+        where: {
+          id,
+        },
+        data: {
+          sort: {
+            [direction]: 1,
+          }
+        },
+      });
+    }
   });

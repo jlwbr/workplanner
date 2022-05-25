@@ -25,7 +25,7 @@ model Planning {
 }
 
 model Communication {
-  id          String     @id @default(cuid())
+  id          String   @id @default(cuid())
   date        DateTime
   userId      String
   phoneNumber String
@@ -36,10 +36,10 @@ model Communication {
 }
 
 model Break {
-  id         String     @id @default(cuid())
-  date       DateTime
-  userId     String
-  number     Int
+  id     String   @id @default(cuid())
+  date   DateTime
+  userId String
+  number Int
 
   user User @relation(fields: [userId], references: [id])
   @@unique([userId, date])
@@ -119,6 +119,7 @@ model subTask {
 model Channel {
   id           String         @id @default(cuid())
   name         String         @unique
+  sort         Int            @default(0)
   members      User[]
   PlanningRule PlanningRule[]
   Planning     Planning[]

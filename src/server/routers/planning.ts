@@ -469,7 +469,7 @@ export const planningRouter = createRouter()
           },
         },
         orderBy: {
-          name: 'asc',
+          sort: 'asc',
         },
       });
     },

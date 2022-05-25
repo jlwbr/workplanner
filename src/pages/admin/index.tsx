@@ -28,6 +28,7 @@ const IndexPage: NextPageWithLayout = () => {
   const [currentStep, setCurrentStep] = useState(
     step ? parseInt(step as string) : 1,
   );
+  const [open, setOpen] = useState(false);
   const stepArray = [
     'Planning',
     'Vergrendel planning',
@@ -73,6 +74,18 @@ const IndexPage: NextPageWithLayout = () => {
           label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
         }));
 
+  const excess =
+    schedule &&
+    schedule.length > 0 &&
+    users
+      .filter((x) => {
+        return !schedule.some((t) => t.id === x.id);
+      })
+      .map((user) => ({
+        value: user.id,
+        label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
+      }));
+
   return (
     <>
       <div className="container horizontal">
@@ -95,6 +108,22 @@ const IndexPage: NextPageWithLayout = () => {
                   draggable={true}
                 />
               ))}
+              {excess &&
+                open &&
+                excess.map((option) => (
+                  <AsigneeBadge
+                    key={option.value}
+                    canRemove={false}
+                    name={option.label}
+                    asigneeId={option.value}
+                    draggable={true}
+                  />
+                ))}
+              {excess && (
+                <button onClick={() => setOpen(!open)} className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap">
+                  { open ? <>&#x25C0;</> : <>&#x25B6;</> }
+                </button>
+              )}
             </div>
             <div
               style={{

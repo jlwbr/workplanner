@@ -26,7 +26,7 @@ export const slackRouter = createRouter()
           name: true,
         },
         orderBy: {
-          name: 'asc',
+          sort: 'asc',
         },
       });
     },
