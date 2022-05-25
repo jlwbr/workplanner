@@ -27,7 +27,6 @@ const ImportPage: NextPageWithLayout = () => {
   const [week, setWeek] = useState('');
   const scheduleMutation = trpc.useMutation(['schedule.import']);
   const handleChange = (file: File) => {
-    console.log(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       if (!e.target) return;
@@ -55,25 +54,25 @@ const ImportPage: NextPageWithLayout = () => {
             return {
               id: user ? user.id : false,
               name: row['Naam'],
-              monday: row['Maandag'],
-              tuesday: row['Dinsdag'],
-              wednesday: row['Woensdag'],
-              thursday: row['Donderdag'],
-              friday: row['Vrijdag'],
-              saturday: row['Zaterdag'],
-              sunday: row['Zondag'],
+              monday: typeof row['Maandag'] == 'string' && row['Maandag'] ? row['Maandag'] : '',
+              tuesday: typeof row['Dinsdag'] == 'string' && row['Dinsdag'] ? row['Dinsdag'] : '',
+              wednesday: typeof row['Woensdag'] == 'string' && row['Woensdag'] ? row['Woensdag'] : '',
+              thursday: typeof row['Donderdag'] == 'string' && row['Donderdag'] ? row['Donderdag'] : '',
+              friday: typeof row['Vrijdag'] == 'string' && row['Vrijdag'] ? row['Vrijdag'] : '',
+              saturday: typeof row['Zaterdag'] == 'string' && row['Zaterdag'] ? row['Zaterdag'] : '',
+              sunday: typeof row['Zondag'] == 'string' && row['Zondag'] ? row['Zondag'] : '',
             };
           })
           .filter(
             (row): row is day =>
               row !== undefined &&
-              (row.monday ||
-                row.tuesday ||
-                row.wednesday ||
-                row.thursday ||
-                row.friday ||
-                row.saturday ||
-                row.sunday),
+              (!!row.monday ||
+                !!row.tuesday ||
+                !!row.wednesday ||
+                !!row.thursday ||
+                !!row.friday ||
+                !!row.saturday ||
+                !!row.sunday),
           );
       default:
         break;
