@@ -5,6 +5,7 @@ import AsigneeBadge, { ItemTypes } from './AsigneeBadge';
 import { KanbanRule } from './KanbanComponent';
 import { inferQueryOutput } from '~/utils/trpc';
 import { useDrop } from 'react-dnd';
+import { useState } from 'react';
 
 type KanbanItemType = {
   item: KanbanRule;
@@ -115,6 +116,7 @@ const KanbanItem = ({
       },
     },
   );
+  const [open, setOpen] = useState(false);
 
   const {
     id,
@@ -262,7 +264,7 @@ const KanbanItem = ({
         {item.subTask.length > 0 && (
           <div className="pt-2">
             <div className="flex gap-1 items-baseline justify-between">
-              <h2 className="font-bold text-gray-900">Subtaken</h2>
+              <h2 className="font-bold">Subtaken</h2>
               <button
                 onClick={() =>
                   subTaskFinishAllMutation.mutateAsync({ id, done: true })
@@ -273,36 +275,75 @@ const KanbanItem = ({
               </button>
             </div>
             <ul className="flex flex-col">
-              {item.subTask.map((subTask) => (
-                <li
-                  key={subTask.id}
-                  data-tip={
-                    subTask.doneUser
-                      ? `${subTask.doneUser.name} heeft deze taak afgerond`
-                      : 'Deze taak is nog niet afgerond'
-                  }
-                  className="inline-flex items-center gap-2"
-                >
-                  <input
-                    type="checkbox"
-                    checked={subTask.done}
-                    disabled={
-                      (subTaskdoneMutation.status !== 'idle' &&
-                        subTaskdoneMutation.status !== 'success') ||
-                      (subTaskFinishAllMutation.status !== 'idle' &&
-                        subTaskFinishAllMutation.status !== 'success')
+              {open &&
+                item.subTask.map((subTask) => (
+                  <li
+                    key={subTask.id}
+                    data-tip={
+                      subTask.doneUser
+                        ? `${subTask.doneUser.name} heeft deze taak afgerond`
+                        : 'Deze taak is nog niet afgerond'
                     }
-                    onChange={() =>
-                      subTaskdoneMutation.mutateAsync({
-                        id: subTask.id,
-                        done: !!!subTask.done,
-                      })
-                    }
-                  />
-                  {subTask.name}
-                </li>
-              ))}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={subTask.done}
+                      disabled={
+                        (subTaskdoneMutation.status !== 'idle' &&
+                          subTaskdoneMutation.status !== 'success') ||
+                        (subTaskFinishAllMutation.status !== 'idle' &&
+                          subTaskFinishAllMutation.status !== 'success')
+                      }
+                      onChange={() =>
+                        subTaskdoneMutation.mutateAsync({
+                          id: subTask.id,
+                          done: !!!subTask.done,
+                        })
+                      }
+                    />
+                    {subTask.name}
+                  </li>
+                ))}
             </ul>
+            <div className="w-full flex justify-center">
+              <button
+                className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap"
+                onClick={() => setOpen(!open)}
+              >
+                {open ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 11l7-7 7 7M5 19l7-7 7 7"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         )}
         <div className="pt-2">
