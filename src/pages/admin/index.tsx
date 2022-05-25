@@ -134,7 +134,7 @@ const IndexPage: NextPageWithLayout = () => {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                        d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
                       />
                     </svg>
                   ) : (
@@ -149,7 +149,7 @@ const IndexPage: NextPageWithLayout = () => {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                        d="M13 5l7 7-7 7M5 5l7 7-7 7"
                       />
                     </svg>
                   )}
