@@ -55,7 +55,7 @@ const Assignees = ({
   }));
 
   return (
-    <div ref={drop} className="flex gap-2">
+    <div ref={drop} className="flex flex-wrap gap-2">
       {asignees.map(({ id: itemId, name }) => (
         <AsigneeBadge
           key={itemId}
@@ -272,7 +272,7 @@ const KanbanItem = ({
                 Alles afronden
               </button>
             </div>
-            <ul>
+            <ul className="flex flex-col">
               {item.subTask.map((subTask) => (
                 <li
                   key={subTask.id}
