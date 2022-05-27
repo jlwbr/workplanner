@@ -158,7 +158,7 @@ const IndexPage: NextPageWithLayout = () => {
             </div>
             <div
               style={{
-                width: `calc(100vw - 16rem)`,
+                width: `calc(100vw - 19rem)`,
                 height: `100vh`,
                 overflow: 'auto',
               }}
