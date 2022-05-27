@@ -5,7 +5,7 @@ import { prisma } from '../prisma';
 
 export const ChannelRouter = createRouter()
   // update
-  .query('channels.all', {
+  .query('all', {
     async resolve({ ctx }) {
       if (!ctx.session?.user?.isAdmin && !ctx.session?.user?.isEditor) {
         throw new TRPCError({
@@ -21,6 +21,7 @@ export const ChannelRouter = createRouter()
         select: {
           id: true,
           name: true,
+          sort: true,
         },
         orderBy: {
           sort: 'asc',
@@ -31,9 +32,9 @@ export const ChannelRouter = createRouter()
   .mutation('add', {
     input: z.object({
       name: z.string(),
+      sort: z.number(),
     }),
     async resolve({ input, ctx }) {
-      const { name } = input;
       if (!ctx.session?.user?.isEditor) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -42,9 +43,7 @@ export const ChannelRouter = createRouter()
       }
 
       return prisma.channel.create({
-        data: {
-          name,
-        },
+        data: input,
       });
     },
   })
@@ -98,10 +97,10 @@ export const ChannelRouter = createRouter()
   .mutation('move', {
     input: z.object({
       id: z.string(),
-      direction: z.enum(['increment', 'decrement']),
+      sort: z.number(),
     }),
     async resolve({ input, ctx }) {
-      const { id, direction } = input;
+      const { id, sort } = input;
       if (!ctx.session?.user?.isEditor) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -114,9 +113,7 @@ export const ChannelRouter = createRouter()
           id,
         },
         data: {
-          sort: {
-            [direction]: 1,
-          },
+          sort,
         },
       });
     },

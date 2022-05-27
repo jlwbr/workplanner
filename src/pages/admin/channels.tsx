@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { AdminLayout } from '~/components/AdminLayout';
 import { NextPageWithLayout } from '~/pages/_app';
 import { trpc } from '~/utils/trpc';
@@ -8,13 +8,19 @@ const IndexPage: NextPageWithLayout = () => {
   const options = {
     onSuccess: () => {
       context.invalidateQueries(['planning.rules.all']);
+      context.invalidateQueries(['channel.all']);
     },
   };
-  const RulesQuery = trpc.useQuery(['planning.rules.all']);
+  const RulesQuery = trpc.useQuery(['channel.all']);
   const addChannel = trpc.useMutation(['channel.add'], options);
   const editChannel = trpc.useMutation(['channel.edit'], options);
   const deleteChannel = trpc.useMutation(['channel.remove'], options);
   const moveChannel = trpc.useMutation(['channel.move'], options);
+
+  // FIXME: Better loading page
+  if (!RulesQuery.isSuccess) return null;
+
+  const data = RulesQuery.data;
 
   const onAdd = async () => {
     const name = prompt('Naam van de categorie');
@@ -23,7 +29,10 @@ const IndexPage: NextPageWithLayout = () => {
       return;
     }
 
-    await addChannel.mutateAsync({ name });
+    await addChannel.mutateAsync({
+      name,
+      sort: ((data.length > 0 && data[data.length - 1].sort) || 0) + 1,
+    });
   };
 
   const onEdit = async (id: string, currentName: string) => {
@@ -36,24 +45,28 @@ const IndexPage: NextPageWithLayout = () => {
     await editChannel.mutateAsync({ id, name });
   };
 
-  // FIXME: Better loading page
-  if (!RulesQuery.isSuccess) return null;
-
   return (
     <div className="px-2 sm:px-0">
       <h2 className="text-2xl font-bold mb-2 text-center">Categorieën</h2>
       <ul className="my-4 py-2 px-4 rounded-lg">
-        {RulesQuery.data.map(({ id, name }) => (
+        {data.map(({ id, name, sort }, i) => (
           <li
             key={id}
             className="relative flex gap-2 justify-between p-3 mb-2 bg-white border-2 rounded-md"
           >
-            <h3 className="pl-2 font-medium leading-5 flex-1">{name}</h3>
+            <h3 className="pl-2 font-medium leading-5 flex-1">
+              {sort}: {name}
+            </h3>
             {/* TODO: look at this */}
-            {/* <button
-              onClick={() =>
-                moveChannel.mutateAsync({ id, direction: 'increment' })
-              }
+            <button
+              onClick={() => {
+                moveChannel.mutateAsync({ id, sort: sort - 1 });
+                if (data[i - 1])
+                  moveChannel.mutateAsync({
+                    id: data[i - 1].id,
+                    sort: sort,
+                  });
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -71,9 +84,14 @@ const IndexPage: NextPageWithLayout = () => {
               </svg>
             </button>
             <button
-              onClick={() =>
-                moveChannel.mutateAsync({ id, direction: 'decrement' })
-              }
+              onClick={() => {
+                moveChannel.mutateAsync({ id, sort: sort + 1 });
+                if (data[i + 1])
+                  moveChannel.mutateAsync({
+                    id: data[i + 1].id,
+                    sort: sort,
+                  });
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +107,7 @@ const IndexPage: NextPageWithLayout = () => {
                   d="M19 14l-7 7m0 0l-7-7m7 7V3"
                 />
               </svg>
-            </button> */}
+            </button>
             <button onClick={() => onEdit(id, name)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
