@@ -89,6 +89,11 @@ export const GeneratePlanning = async (date: Date) => {
   const session = pl.create();
 
   const PlanningRules = await prisma.planningRule.findMany({
+    where: {
+      channel: {
+        removed: false,
+      },
+    },
     select: {
       id: true,
       name: true,

@@ -442,6 +442,9 @@ export const planningRouter = createRouter()
       }
 
       return await prisma.channel.findMany({
+        where: {
+          removed: false,
+        },
         select: {
           id: true,
           name: true,
