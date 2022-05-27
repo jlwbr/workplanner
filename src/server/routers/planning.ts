@@ -504,13 +504,11 @@ export const planningRouter = createRouter()
             date: date,
           },
           select: defaultTaskSelect,
-          orderBy: [
-            {
-              channel: {
-                sort: 'asc',
-              }
+          orderBy: {
+            channel: {
+              sort: 'asc',
             },
-          ],
+          },
         });
       }
 
