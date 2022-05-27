@@ -54,9 +54,7 @@ const IndexPage: NextPageWithLayout = () => {
             key={id}
             className="relative flex gap-2 justify-between p-3 mb-2 bg-white border-2 rounded-md"
           >
-            <h3 className="pl-2 font-medium leading-5 flex-1">
-              {name}
-            </h3>
+            <h3 className="pl-2 font-medium leading-5 flex-1">{name}</h3>
             {/* TODO: look at this */}
             <button
               onClick={() => {
