@@ -50,12 +50,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
         date: date,
       },
     ]);
-    const Break = trpc.useQuery([
-      'break.getAll',
-      {
-        date: date,
-      },
-    ]);
+    const Break = trpc.useQuery(['break.getAll', { date }]);
     const Communication = trpc.useQuery(['communication.getAll', { date }]);
 
     if (!planing.isSuccess || !planing.data) return <Loading />;

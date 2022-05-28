@@ -72,6 +72,12 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
       enabled: isAdmin,
     },
   );
+  const Break = trpc.useQuery(['break.getAll', { date }], {
+    enabled: planing.data?.some((item) => item.locked),
+  });
+  const Communication = trpc.useQuery(['communication.getAll', { date }], {
+    enabled: planing.data?.some((item) => item.locked),
+  });
 
   const UpsertRule = trpc.useMutation(['planning.tasks.upsert'], {
     onSuccess: () => {
@@ -178,6 +184,8 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
             title={plan.channel.name}
             rules={plan.PlanningItem}
             schedule={schedule.data}
+            Break={Break.data}
+            Communication={Communication.data}
             isAdmin={isAdmin}
             newTask={openTask}
           />
@@ -194,6 +202,8 @@ type KanbanListType = {
   rules: KanbanRule[];
   locked: boolean;
   isAdmin: boolean;
+  Break?: inferQueryOutput<'break.getAll'>;
+  Communication?: inferQueryOutput<'communication.getAll'>;
   schedule?: inferQueryOutput<'schedule.getAll'>;
   newTask: (data?: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
@@ -204,11 +214,12 @@ const KanbanList = ({
   rules,
   locked,
   isAdmin,
+  Break,
+  Communication,
   schedule,
   newTask,
 }: KanbanListType) => {
   const { data: user } = useSession();
-
   const prioGroups = groupByKey(rules, 'priority');
 
   const currentPrioString = Object.keys(prioGroups).find((k) => {
@@ -233,6 +244,8 @@ const KanbanList = ({
             currentPrio={currentPrio}
             editTask={newTask}
             item={rule}
+            Break={Break}
+            Communication={Communication}
             schedule={schedule}
             locked={locked}
             isAdmin={isAdmin}

@@ -12,6 +12,8 @@ type KanbanItemType = {
   currentPrio: number;
   locked: boolean;
   isAdmin: boolean;
+  Break?: inferQueryOutput<'break.getAll'>;
+  Communication?: inferQueryOutput<'communication.getAll'>;
   schedule?: inferQueryOutput<'schedule.getAll'>;
   editTask: (item: inferMutationInput<'planning.tasks.upsert'>) => void;
 };
@@ -23,6 +25,8 @@ type assigneeType = {
   userId: string;
   timeOfDay: 'morning' | 'afternoon' | 'evening';
   isAdmin: boolean;
+  Break?: inferQueryOutput<'break.getAll'>;
+  Communication?: inferQueryOutput<'communication.getAll'>;
   locked: boolean;
   rest: number;
 };
@@ -34,6 +38,8 @@ const Assignees = ({
   userId,
   timeOfDay,
   isAdmin,
+  Break,
+  Communication,
   locked,
   rest,
 }: assigneeType) => {
@@ -57,16 +63,28 @@ const Assignees = ({
 
   return (
     <div ref={drop} className="flex flex-wrap gap-2">
-      {asignees.map(({ id: itemId, name }) => (
-        <AsigneeBadge
-          key={itemId}
-          planningItemId={id}
-          asigneeId={itemId}
-          name={name}
-          timeOfDay={timeOfDay}
-          canRemove={!locked && (isAdmin || itemId == userId)}
-        />
-      ))}
+      {asignees.map(({ id: itemId, name }) => {
+        const phone = Communication?.find(
+          ({ userId }) => userId === itemId,
+        )?.phoneNumber;
+        const br = Break?.find(({ userId }) => userId === itemId)?.number;
+        return (
+          <AsigneeBadge
+            key={itemId}
+            planningItemId={id}
+            asigneeId={itemId}
+            name={
+              !locked
+                ? name
+                : `${name}  ${(phone || br) && '('}${(phone && phone) || ''}${
+                    (phone && br && '/') || ''
+                  }${(br && `p${br}`) || ''}${(phone || br) && ')'}`
+            }
+            timeOfDay={timeOfDay}
+            canRemove={!locked && (isAdmin || itemId == userId)}
+          />
+        );
+      })}
       {canAssign &&
         [...new Array(rest)].map((_, i) => (
           <div
@@ -92,6 +110,8 @@ const Assignees = ({
 const KanbanItem = ({
   item,
   currentPrio,
+  Break,
+  Communication,
   locked,
   isAdmin,
   editTask,
@@ -359,6 +379,8 @@ const KanbanItem = ({
             asignees={morningAsignee}
             canAssign={canMorningAsign}
             userId={userId}
+            Break={Break}
+            Communication={Communication}
             locked={locked}
             isAdmin={isAdmin}
             timeOfDay="morning"
@@ -378,6 +400,8 @@ const KanbanItem = ({
             asignees={afternoonAsignee}
             canAssign={canAfternoonAsign}
             userId={userId}
+            Break={Break}
+            Communication={Communication}
             locked={locked}
             isAdmin={isAdmin}
             timeOfDay="afternoon"
@@ -396,6 +420,8 @@ const KanbanItem = ({
             asignees={eveningAsignee}
             canAssign={canEveningAsign}
             userId={userId}
+            Break={Break}
+            Communication={Communication}
             locked={locked}
             isAdmin={isAdmin}
             timeOfDay="evening"
