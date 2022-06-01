@@ -108,7 +108,10 @@ const IndexPage: NextPageWithLayout = () => {
         </div>
       )}
       <div className={!data?.user?.isAdmin ? 'pt-4' : ''}>
-        <KanbanComponent date={date} isAdmin={data?.user?.isEditor || data?.user?.isShared || false} />
+        <KanbanComponent
+          date={date}
+          isAdmin={data?.user?.isEditor || data?.user?.isShared || false}
+        />
       </div>
     </DndProvider>
   );

@@ -146,7 +146,8 @@ const PlanningEditor = ({
                               cols={50}
                               className="bg-white border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             ></textarea>
-                          )) || (input.input == 'checkbox' && (
+                          )) ||
+                          (input.input == 'checkbox' && (
                             <input
                               type={input.input}
                               name={input.field}
