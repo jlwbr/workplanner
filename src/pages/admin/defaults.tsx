@@ -100,9 +100,7 @@ const Input: FC<{
   );
 };
 
-const Table: FC<{
-  currentUserId?: string;
-}> = ({ currentUserId }) => {
+const Table = () => {
   const query = trpc.useQuery(['user.all']);
 
   if (!query.isSuccess) return null;
@@ -155,7 +153,7 @@ const AuthorizationPage: NextPageWithLayout = () => {
   return (
     <div>
       <h1 className="text-xl text-center p-4">Standaarden</h1>
-      <Table currentUserId={data?.user?.id} />
+      <Table />
     </div>
   );
 };

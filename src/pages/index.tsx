@@ -44,7 +44,7 @@ const IndexPage: NextPageWithLayout = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       {data?.user?.isAdmin && (
-        <div className="sticky top-0">
+        <div className="sticky top-0 mb-5 bg-slate-100">
           <div className="flex flex-wrap gap-2 p-5">
             {options.map((option) => (
               <AsigneeBadge
