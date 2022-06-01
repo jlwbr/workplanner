@@ -44,7 +44,7 @@ const IndexPage: NextPageWithLayout = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       {data?.user?.isAdmin && (
-        <div className="sticky top-0 mb-5 bg-slate-100">
+        <div className="hidden md:block sticky top-0 bg-slate-100">
           <div className="flex flex-wrap gap-2 p-5">
             {options.map((option) => (
               <AsigneeBadge
@@ -107,7 +107,7 @@ const IndexPage: NextPageWithLayout = () => {
           </div>
         </div>
       )}
-      <div className={!data?.user?.isAdmin ? 'pt-4' : ''}>
+      <div className={'pt-5'}>
         <KanbanComponent
           date={date}
           isAdmin={data?.user?.isEditor || data?.user?.isShared || false}
