@@ -146,6 +146,22 @@ const PlanningEditor = ({
                               cols={50}
                               className="bg-white border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             ></textarea>
+                          )) || (input.input == 'checkbox' && (
+                            <input
+                              type={input.input}
+                              name={input.field}
+                              // TODO: This is ugly, but it works
+                              checked={(value as any)[input.field] || false}
+                              placeholder={input.placeholder}
+                              onChange={() =>
+                                onChange({
+                                  ...value,
+                                  [input.field]: !(value as any)[input.field],
+                                })
+                              }
+                              id={input.field}
+                              className="bg-white border border-gray-400 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            />
                           )) || (
                             <input
                               type={input.input}

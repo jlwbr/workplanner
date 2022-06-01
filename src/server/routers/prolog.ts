@@ -102,6 +102,9 @@ export const GeneratePlanning = async (date: Date) => {
       maxMorning: true,
       maxAfternoon: true,
       maxEvening: true,
+      hasMorning: true,
+      hasAfternoon: true,
+      hasEvening: true,
       priority: true,
       channelId: true,
       subTask: {
@@ -123,6 +126,9 @@ export const GeneratePlanning = async (date: Date) => {
       id: string;
       name: string;
       description: string;
+      hasMorning: boolean;
+      hasAfternoon: boolean;
+      hasEvening: boolean;
       maxMorning: number;
       maxAfternoon: number;
       maxEvening: number;
@@ -159,6 +165,9 @@ export const GeneratePlanning = async (date: Date) => {
                     name: item.name,
                     planningRuleId: item.id,
                     priority: item.priority,
+                    hasMorning: item.hasMorning,
+                    hasAfternoon: item.hasAfternoon,
+                    hasEvening: item.hasEvening,
                     maxMorning: item.maxMorning,
                     maxAfternoon: item.maxAfternoon,
                     maxEvening: item.maxEvening,

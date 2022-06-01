@@ -15,6 +15,9 @@ const defaultUserSelect = Prisma.validator<Prisma.UserSelect>()({
   shared: true,
   editor: true,
   admin: true,
+  defaultPhoneNumber: true,
+  defaultHT: true,
+  defaultBreak: true,
 });
 
 export const userRouter = createRouter()
@@ -41,23 +44,22 @@ export const userRouter = createRouter()
       admin: z.boolean().optional(),
       editor: z.boolean().optional(),
       shared: z.boolean().optional(),
+      defaultPhoneNumber: z.string().optional(),
+      defaultHT: z.boolean().optional(),
+      defaultBreak: z.number().optional(),
     }),
     async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.isAdmin) {
+      if (!ctx.session?.user?.isEditor) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
-          message: 'You must be an admin to acces this resource',
+          message: 'You must be an editor to acces this resource',
         });
       }
-      const { id, admin, editor, shared } = input;
+      const { id, ...data } = input;
 
       return prisma.user.update({
         where: { id },
-        data: {
-          admin,
-          editor,
-          shared,
-        },
+        data,
       });
     },
   });

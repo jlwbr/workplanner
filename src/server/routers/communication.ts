@@ -4,6 +4,15 @@ import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';
 
+const groupByKey = (list: any[], key: string) =>
+  list.reduce(
+    (hash, obj) => ({
+      ...hash,
+      [obj[key]]: (hash[obj[key]] || []).concat(obj),
+    }),
+    {},
+  );
+
 /**
  * Default selector for Tasks.
  * It's important to always explicitly say which fields you want to return in order to not leak extra information
@@ -31,9 +40,26 @@ export const communicationRouter = createRouter()
         });
       }
 
-      return prisma.communication.findMany({
+      const users = await prisma.user.findMany({
+        select: { id: true, defaultHT: true, defaultPhoneNumber: true },
+      });
+      const customCommunication = await prisma.communication.findMany({
         where: input,
         select: defaultCommunicationSelect,
+      });
+
+      const communications = groupByKey(customCommunication, 'userId');
+
+      return users.map((user) => {
+        if (communications[user.id]) return communications[user.id];
+
+        return {
+          id: 'default',
+          userId: user.id,
+          date: input.date,
+          phoneNumber: user.defaultPhoneNumber,
+          HT: user.defaultHT,
+        };
       });
     },
   })

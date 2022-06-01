@@ -26,6 +26,9 @@ const defaultEditingRuleData: PlanningRule = {
   maxMorning: 0,
   maxAfternoon: 0,
   maxEvening: 0,
+  hasMorning: true,
+  hasAfternoon: true,
+  hasEvening: true,
 };
 
 const IndexPage: NextPageWithLayout = () => {
@@ -88,7 +91,12 @@ const IndexPage: NextPageWithLayout = () => {
       maxMorning: z.number().nonnegative().optional(),
       maxAfternoon: z.number().nonnegative().optional(),
       maxEvening: z.number().nonnegative().optional(),
+      hasMorning: z.boolean().optional(),
+      hasAfternoon: z.boolean().optional(),
+      hasEvening: z.boolean().optional(),
     });
+
+    console.log(editingRuleData);
 
     if (input.safeParse(editingRuleData).success === false) {
       alert('Niet alle velden zijn ingevuld');
@@ -153,6 +161,21 @@ const IndexPage: NextPageWithLayout = () => {
       field: 'rule',
       label: 'Regel',
       input: 'textarea',
+    },
+    {
+      field: 'hasMorning',
+      label: 'Ochtend',
+      input: 'checkbox',
+    },
+    {
+      field: 'hasAfternoon',
+      label: 'Middag',
+      input: 'checkbox',
+    },
+    {
+      field: 'hasEvening',
+      label: 'Avond',
+      input: 'checkbox',
     },
     {
       field: 'minMorning',

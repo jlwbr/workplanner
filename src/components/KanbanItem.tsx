@@ -90,15 +90,12 @@ const Assignees = ({
           <div
             key={i}
             onClick={() => {
-              if (isAdmin) return;
               asigneeMuation.mutate({
                 planningItemId: id,
                 timeOfDay,
               });
             }}
-            className={`inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full ${
-              !isAdmin && 'cursor-pointer'
-            } `}
+            className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-gray-700 border-dashed border-2 rounded-full cursor-pointer"
           >
             Leeg
           </div>
@@ -155,6 +152,9 @@ const KanbanItem = ({
     morningAsignee,
     afternoonAsignee,
     eveningAsignee,
+    hasMorning,
+    hasAfternoon,
+    hasEvening,
   } = item;
 
   const userId = data?.user?.id;
@@ -366,68 +366,74 @@ const KanbanItem = ({
             </div>
           </div>
         )}
-        <div className="pt-2">
-          <div className="flex gap-2 content-center tracking-tight my-2">
-            <h2 className="font-bold text-gray-900">Ochtend</h2>
-            {/* FIXME: we could make this more clear by using a progessbar, for example: https://tailwinduikit.com/components/webapp/UI_element/progress_bar */}
-            <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
-              {morningAsignee.length} / {maxMorning > 0 ? maxMorning : '∞'}
-            </span>
+        {hasMorning && (
+          <div className="pt-2">
+            <div className="flex gap-2 content-center tracking-tight my-2">
+              <h2 className="font-bold text-gray-900">Ochtend</h2>
+              {/* FIXME: we could make this more clear by using a progessbar, for example: https://tailwinduikit.com/components/webapp/UI_element/progress_bar */}
+              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
+                {morningAsignee.length} / {maxMorning > 0 ? maxMorning : '∞'}
+              </span>
+            </div>
+            <Assignees
+              id={id}
+              asignees={morningAsignee}
+              canAssign={canMorningAsign}
+              userId={userId}
+              Break={Break}
+              Communication={Communication}
+              locked={locked}
+              isAdmin={isAdmin}
+              timeOfDay="morning"
+              rest={restMorning}
+            />
           </div>
-          <Assignees
-            id={id}
-            asignees={morningAsignee}
-            canAssign={canMorningAsign}
-            userId={userId}
-            Break={Break}
-            Communication={Communication}
-            locked={locked}
-            isAdmin={isAdmin}
-            timeOfDay="morning"
-            rest={restMorning}
-          />
-        </div>
-        <div className="pt-2">
-          <div className="flex gap-2 content-center tracking-tight my-2">
-            <h2 className="font-bold text-gray-900">Middag</h2>
-            <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
-              {afternoonAsignee.length} /{' '}
-              {maxAfternoon > 0 ? maxAfternoon : '∞'}
-            </span>
+        )}
+        {hasAfternoon && (
+          <div className="pt-2">
+            <div className="flex gap-2 content-center tracking-tight my-2">
+              <h2 className="font-bold text-gray-900">Middag</h2>
+              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
+                {afternoonAsignee.length} /{' '}
+                {maxAfternoon > 0 ? maxAfternoon : '∞'}
+              </span>
+            </div>
+            <Assignees
+              id={id}
+              asignees={afternoonAsignee}
+              canAssign={canAfternoonAsign}
+              userId={userId}
+              Break={Break}
+              Communication={Communication}
+              locked={locked}
+              isAdmin={isAdmin}
+              timeOfDay="afternoon"
+              rest={restAfternoon}
+            />
           </div>
-          <Assignees
-            id={id}
-            asignees={afternoonAsignee}
-            canAssign={canAfternoonAsign}
-            userId={userId}
-            Break={Break}
-            Communication={Communication}
-            locked={locked}
-            isAdmin={isAdmin}
-            timeOfDay="afternoon"
-            rest={restAfternoon}
-          />
-        </div>
-        <div className="pt-2">
-          <div className="flex gap-2 content-center tracking-tight my-2">
-            <h2 className="font-bold text-gray-900">Avond</h2>
-            <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
-              {eveningAsignee.length} / {maxEvening > 0 ? maxEvening : '∞'}
-            </span>
+        )}
+        {hasEvening && (
+          <div className="pt-2">
+            <div className="flex gap-2 content-center tracking-tight my-2">
+              <h2 className="font-bold text-gray-900">Avond</h2>
+              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
+                {eveningAsignee.length} / {maxEvening > 0 ? maxEvening : '∞'}
+              </span>
+            </div>
+            <Assignees
+              id={id}
+              asignees={eveningAsignee}
+              canAssign={canEveningAsign}
+              userId={userId}
+              Break={Break}
+              Communication={Communication}
+              locked={locked}
+              isAdmin={isAdmin}
+              timeOfDay="evening"
+              rest={restEvening}
+            />
           </div>
-          <Assignees
-            id={id}
-            asignees={eveningAsignee}
-            canAssign={canEveningAsign}
-            userId={userId}
-            Break={Break}
-            Communication={Communication}
-            locked={locked}
-            isAdmin={isAdmin}
-            timeOfDay="evening"
-            rest={restEvening}
-          />
-        </div>
+        )}
       </div>
     </div>
   );

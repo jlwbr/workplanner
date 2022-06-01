@@ -71,6 +71,9 @@ model PlanningItem {
   morningAsignee   User[]  @relation(name: "PlanningItem_morningAsignee")
   afternoonAsignee User[]  @relation(name: "PlanningItem_afternoonAsignee")
   eveningAsignee   User[]  @relation(name: "PlanningItem_eveningAsignee")
+  hasMorning       Boolean @default(true)
+  hasAfternoon     Boolean @default(true)
+  hasEvening       Boolean @default(true)
   ownerId          String?
   done             Boolean @default(false)
   doneUserId       String?
@@ -85,18 +88,21 @@ model PlanningItem {
 }
 
 model PlanningRule {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   name         String
   description  String
   priority     Int
   rule         String
   channelId    String
-  minMorning   Int    @default(0)
-  minAfternoon Int    @default(0)
-  minEvening   Int    @default(0)
-  maxMorning   Int    @default(0)
-  maxAfternoon Int    @default(0)
-  maxEvening   Int    @default(0)
+  minMorning   Int     @default(0)
+  minAfternoon Int     @default(0)
+  minEvening   Int     @default(0)
+  maxMorning   Int     @default(0)
+  maxAfternoon Int     @default(0)
+  maxEvening   Int     @default(0)
+  hasMorning   Boolean @default(true)
+  hasAfternoon Boolean @default(true)
+  hasEvening   Boolean @default(true)
 
   channel      Channel        @relation(fields: [channelId], references: [id])
   PlanningItem PlanningItem[]
@@ -162,6 +168,9 @@ model User {
   admin                Boolean         @default(false)
   editor               Boolean         @default(false)
   shared               Boolean         @default(false)
+  defaultPhoneNumber   String?
+  defaultHT            Boolean?
+  defaultBreak         Int?
   accounts             Account[]
   sessions             Session[]
   channels             Channel[]

@@ -16,6 +16,15 @@ const defaultBreakSelect = Prisma.validator<Prisma.BreakSelect>()({
   number: true,
 });
 
+const groupByKey = (list: any[], key: string) =>
+  list.reduce(
+    (hash, obj) => ({
+      ...hash,
+      [obj[key]]: (hash[obj[key]] || []).concat(obj),
+    }),
+    {},
+  );
+
 export const breakRouter = createRouter()
   .query('getAll', {
     input: z.object({
@@ -29,9 +38,25 @@ export const breakRouter = createRouter()
         });
       }
 
-      return prisma.break.findMany({
+      const users = await prisma.user.findMany({
+        select: { id: true, defaultBreak: true },
+      });
+      const customBreak = await prisma.break.findMany({
         where: input,
         select: defaultBreakSelect,
+      });
+
+      const breaks = groupByKey(customBreak, 'userId');
+
+      return users.map((user) => {
+        if (breaks[user.id]) return breaks[user.id];
+
+        return {
+          id: 'default',
+          userId: user.id,
+          date: input.date,
+          number: user.defaultBreak,
+        };
       });
     },
   })
