@@ -51,7 +51,7 @@ export const communicationRouter = createRouter()
       const communications = groupByKey(customCommunication, 'userId');
 
       return users.map((user) => {
-        if (communications[user.id]) return communications[user.id];
+        if (communications[user.id]) return communications[user.id][0];
 
         return {
           id: 'default',

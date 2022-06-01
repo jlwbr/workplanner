@@ -49,7 +49,7 @@ export const breakRouter = createRouter()
       const breaks = groupByKey(customBreak, 'userId');
 
       return users.map((user) => {
-        if (breaks[user.id]) return breaks[user.id];
+        if (breaks[user.id]) return breaks[user.id][0];
 
         return {
           id: 'default',
