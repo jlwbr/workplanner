@@ -181,6 +181,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
             key={plan.id}
             id={plan.id}
             locked={plan.locked}
+            canAdd={plan.channel.canAdd}
             title={plan.channel.name}
             rules={plan.PlanningItem}
             schedule={schedule.data}
@@ -202,6 +203,7 @@ type KanbanListType = {
   rules: KanbanRule[];
   locked: boolean;
   isAdmin: boolean;
+  canAdd: boolean;
   Break?: inferQueryOutput<'break.getAll'>;
   Communication?: inferQueryOutput<'communication.getAll'>;
   schedule?: inferQueryOutput<'schedule.getAll'>;
@@ -214,6 +216,7 @@ const KanbanList = ({
   rules,
   locked,
   isAdmin,
+  canAdd,
   Break,
   Communication,
   schedule,
@@ -234,6 +237,8 @@ const KanbanList = ({
 
   const currentPrio = parseInt(currentPrioString || '0') || 0;
 
+  console.log(title,  canAdd);
+
   return (
     <div className="bg-gray-200 rounded-lg shadow-lg min-w-[calc(100vw_-_2rem)] w-[calc(100vw_-_2rem)] sm:min-w-[22rem] sm:w-[22rem]">
       <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
@@ -252,7 +257,7 @@ const KanbanList = ({
           />
         ))}
       </div>
-      {!locked && (
+      {!locked && (isAdmin || canAdd) && (
         <button
           onClick={() => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -18,6 +18,7 @@ const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
     select: {
       name: true,
       sort: true,
+      canAdd: true,
     },
   },
   PlanningItem: {
@@ -242,6 +243,7 @@ export const planningRouter = createRouter()
         });
       }
 
+      // FIXME: disallow editing of planning items when a user can't edit the planning
       return await prisma.planningItem.upsert({
         where: {
           id: id || '',

@@ -21,6 +21,7 @@ export const ChannelRouter = createRouter()
         select: {
           id: true,
           name: true,
+          canAdd: true,
           sort: true,
         },
         orderBy: {
@@ -50,10 +51,11 @@ export const ChannelRouter = createRouter()
   .mutation('edit', {
     input: z.object({
       id: z.string(),
-      name: z.string(),
+      name: z.string().optional(),
+      canAdd: z.boolean().optional(),
     }),
     async resolve({ input, ctx }) {
-      const { id, name } = input;
+      const { id, ...data } = input;
       if (!ctx.session?.user?.isEditor) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -65,9 +67,7 @@ export const ChannelRouter = createRouter()
         where: {
           id,
         },
-        data: {
-          name,
-        },
+        data,
       });
     },
   })

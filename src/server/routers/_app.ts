@@ -3,7 +3,6 @@
  */
 import superjson from 'superjson';
 import { createRouter } from '../createRouter';
-import { slackRouter } from './slack';
 import { planningRouter } from './planning';
 import { prologRouter } from './prolog';
 import { communicationRouter } from './communication';
@@ -37,7 +36,6 @@ export const appRouter = createRouter()
     },
   })
   .merge('planning.', planningRouter)
-  .merge('slack.', slackRouter)
   .merge('communication.', communicationRouter)
   .merge('break.', breakRouter)
   .merge('user.', userRouter)
