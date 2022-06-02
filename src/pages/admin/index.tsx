@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { ReactElement, useContext, useState } from 'react';
 import { AdminDateContext, AdminLayout } from '~/components/AdminLayout';
 import BreakComponent from '~/components/BreakComponent';
-import CommunicationComponent from '~/components/CommunicationComponent';
+import CommsBreakComponent from '~/components/CommsBreakComponent';
 import Planningpage from '~/components/PlanningPage';
 import Stepper from '~/components/Stepper';
 import { NextPageWithLayout } from '~/pages/_app';
@@ -24,8 +24,7 @@ const IndexPage: NextPageWithLayout = () => {
   );
   const stepArray = [
     'Vergrendel planning',
-    'Communicatiemiddelen',
-    'Pauzes',
+    'Communicatiemiddelen & Pauzes',
     'Print',
   ];
   const handleClick = (clickType?: string) => {
@@ -92,9 +91,8 @@ const IndexPage: NextPageWithLayout = () => {
             </button>
           </div>
         )}
-        {currentStep == 2 && <CommunicationComponent date={date} />}
-        {currentStep == 3 && <BreakComponent date={date} />}
-        {currentStep == 4 && <Planningpage date={date} />}
+        {currentStep == 2 && <CommsBreakComponent date={date} />}
+        {currentStep == 3 && <Planningpage date={date} />}
       </div>
       <div className="container flex justify-around my-8 ">
         {currentStep > 1 ? (

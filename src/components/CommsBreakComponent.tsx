@@ -5,7 +5,7 @@ type CommunicationComponentType = {
   date: Date;
 };
 
-const numbers = [
+const phoneNumbers = [
   '201',
   '212',
   '220',
@@ -19,20 +19,30 @@ const numbers = [
   '240',
 ];
 
+const numbers = ['1', '2', '3'];
+
 const Input: FC<{
   user: any;
   date: Date;
   defaultphoneNumber: string;
   defaultHT: boolean;
-}> = ({ user, date, defaultphoneNumber, defaultHT }) => {
+  defaultNumber: string;
+}> = ({ user, date, defaultphoneNumber, defaultNumber, defaultHT }) => {
   const context = trpc.useContext();
-  const upsertMutation = trpc.useMutation(['communication.upsert'], {
+  const upsertCommsMutation = trpc.useMutation(['communication.upsert'], {
     onSuccess: () => {
       context.invalidateQueries(['communication.getAll']);
     },
   });
+  const upsertBreakMutation = trpc.useMutation(['break.upsert'], {
+    onSuccess: () => {
+      context.invalidateQueries(['break.getAll']);
+    },
+  });
   const [selected, setSelected] = useState(defaultHT);
   const [phone, setPhone] = useState<string>(defaultphoneNumber);
+  const [number, setNumber] = useState(defaultNumber);
+  useEffect(() => setNumber(defaultNumber), [defaultNumber]);
   useEffect(() => setSelected(defaultHT), [defaultHT]);
   useEffect(() => setPhone(defaultphoneNumber), [defaultphoneNumber]);
 
@@ -45,7 +55,7 @@ const Input: FC<{
         <input
           checked={selected}
           onChange={() => {
-            upsertMutation.mutateAsync({
+            upsertCommsMutation.mutateAsync({
               date,
               userId: user.id,
               phoneNumber: phone,
@@ -61,13 +71,34 @@ const Input: FC<{
         <select
           value={phone}
           onChange={(e) => {
-            upsertMutation.mutateAsync({
+            upsertCommsMutation.mutateAsync({
               date,
               userId: user.id,
               phoneNumber: e.target.value,
               HT: selected,
             });
             setPhone(e.target.value);
+          }}
+          className="block bg-white border rounded-sm m-0"
+        >
+          <option value="" />
+          {phoneNumbers.map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="border-b border-slate-100 p-4 pr-8 text-slate-700">
+        <select
+          value={number}
+          onChange={(e) => {
+            upsertBreakMutation.mutateAsync({
+              date,
+              userId: user.id,
+              number: parseInt(e.target.value),
+            });
+            setNumber(e.target.value);
           }}
           className="block bg-white border rounded-sm m-0"
         >
@@ -87,9 +118,11 @@ const Table: FC<{
   users: any[];
   date: Date;
 }> = ({ users, date }) => {
-  const query = trpc.useQuery(['communication.getAll', { date }]);
+  const commsQuery = trpc.useQuery(['communication.getAll', { date }]);
+  const breakQuery = trpc.useQuery(['break.getAll', { date }]);
 
-  if (!query.isSuccess) return null;
+  if (!commsQuery.isSuccess) return null;
+  if (!breakQuery.isSuccess) return null;
 
   return (
     <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
@@ -111,6 +144,9 @@ const Table: FC<{
                 <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
                   Telefoon
                 </th>
+                <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
+                  Pauze
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -120,11 +156,16 @@ const Table: FC<{
                   user={user}
                   date={date}
                   defaultphoneNumber={
-                    query.data.find((d) => d.userId === user.id)?.phoneNumber ??
+                    commsQuery.data.find((d) => d.userId === user.id)?.phoneNumber ??
                     ''
                   }
                   defaultHT={
-                    query.data.find((d) => d.userId === user.id)?.HT ?? false
+                    commsQuery.data.find((d) => d.userId === user.id)?.HT ?? false
+                  }
+                  defaultNumber={
+                    breakQuery.data
+                      .find((d) => d.userId === user.id)
+                      ?.number?.toString() ?? ''
                   }
                 />
               ))}
@@ -137,7 +178,7 @@ const Table: FC<{
   );
 };
 
-const CommunicationComponent = ({ date }: CommunicationComponentType) => {
+const CommsBreakComponent = ({ date }: CommunicationComponentType) => {
   const planing = trpc.useQuery([
     'planning.byDate',
     {
@@ -164,10 +205,10 @@ const CommunicationComponent = ({ date }: CommunicationComponentType) => {
 
   return (
     <div className="w-full p-4 px-10">
-      <h2 className="text-xl mb-4 mt-2">Comunicatiemiddelen</h2>
+      <h2 className="text-xl mb-4 mt-2">Comunicatiemiddelen &amp; pauzes</h2>
       <Table users={users} date={date} />
     </div>
   );
 };
 
-export default CommunicationComponent;
+export default CommsBreakComponent;
