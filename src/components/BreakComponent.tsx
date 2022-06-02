@@ -87,7 +87,7 @@ const Table: FC<{
                   defaultNumber={
                     query.data
                       .find((d) => d.userId === user.id)
-                      ?.number.toString() ?? ''
+                      ?.number?.toString() ?? ''
                   }
                 />
               ))}
