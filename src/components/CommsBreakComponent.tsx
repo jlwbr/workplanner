@@ -13,7 +13,6 @@ const phoneNumbers = [
   '222',
   '230',
   '231',
-  '232',
   '233',
   '234',
   '240',
@@ -200,8 +199,6 @@ const CommsBreakComponent = ({ date }: CommunicationComponentType) => {
       (value, index, self) =>
         index === self.findIndex((t) => t.id === value.id),
     );
-
-  console.log(users);
 
   return (
     <div className="w-full p-4 px-10">
