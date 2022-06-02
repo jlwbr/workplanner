@@ -30,10 +30,10 @@ export const DateLayout = ({ children }: DefaultLayoutProps) => {
 
       <main>
         <div className="min-h-screen bg-slate-100">
-          <DateHeader date={date} setDate={setDate} />
-          <div className="px-1">
-            <DateContext.Provider value={date}>{children}</DateContext.Provider>
-          </div>
+          <DateContext.Provider value={date}>
+            <DateHeader date={date} setDate={setDate} />
+            <div className="px-1">{children}</div>
+          </DateContext.Provider>
         </div>
       </main>
 

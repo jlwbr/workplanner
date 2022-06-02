@@ -6,6 +6,7 @@ import { classNames } from './DateHeader';
 import { trpc } from '~/utils/trpc';
 import Link from 'next/link';
 import { DateContext } from './DateLayout';
+import toast from 'react-hot-toast';
 
 function MyLink(props: any) {
   const { href, children, ...rest } = props;
@@ -16,7 +17,13 @@ function MyLink(props: any) {
   );
 }
 
-export const UserMenu = ({ image }: { image: string }) => {
+export const UserMenu = ({
+  image,
+  hasDate,
+}: {
+  image: string;
+  hasDate?: boolean;
+}) => {
   const date = useContext(DateContext);
   const { data } = useSession();
   const context = trpc.useContext();
@@ -50,28 +57,39 @@ export const UserMenu = ({ image }: { image: string }) => {
           <div className="py-1">
             {data?.user?.isEditor && (
               <>
-                <Menu.Item>
-                  {({ active }) => (
-                    <a
-                      href="#"
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            `Dit zal de huidige planning voor ${date.toLocaleDateString()} verwijderen. Weet je het zeker?`,
-                          )
-                        ) {
-                          planningMutation.mutateAsync({ date });
-                        }
-                      }}
-                      className={classNames(
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'block px-4 py-2 text-sm',
-                      )}
-                    >
-                      Herlaad dag
-                    </a>
-                  )}
-                </Menu.Item>
+                {hasDate && (
+                  <Menu.Item>
+                    {({ active }) => (
+                      <a
+                        href="#"
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Dit zal de huidige planning voor ${date.toLocaleDateString()} verwijderen. Weet je het zeker?`,
+                            )
+                          ) {
+                            toast.promise(
+                              planningMutation.mutateAsync({ date }),
+                              {
+                                loading: 'Laden...',
+                                success: 'Rooster succesvol herladen!',
+                                error: 'Er is iets fout gegaan!',
+                              },
+                            );
+                          }
+                        }}
+                        className={classNames(
+                          active
+                            ? 'bg-gray-100 text-gray-900'
+                            : 'text-gray-700',
+                          'block px-4 py-2 text-sm',
+                        )}
+                      >
+                        Herlaad dag
+                      </a>
+                    )}
+                  </Menu.Item>
+                )}
                 <Menu.Item>
                   {({ active }) => (
                     <MyLink
