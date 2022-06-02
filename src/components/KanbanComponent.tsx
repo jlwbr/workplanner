@@ -135,8 +135,10 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
   };
 
   const onDelete = async (id: string) => {
-    await deleteMutation.mutateAsync({ id });
-    setOpen(false);
+    if (confirm('Weet je zeker dat je deze taak wilt verwijderen?')) {
+      await deleteMutation.mutateAsync({ id });
+      setOpen(false);
+    }
   };
 
   if (!planing.isSuccess)
@@ -237,7 +239,7 @@ const KanbanList = ({
 
   const currentPrio = parseInt(currentPrioString || '0') || 0;
 
-  console.log(title,  canAdd);
+  console.log(title, canAdd);
 
   return (
     <div className="bg-gray-200 rounded-lg shadow-lg min-w-[calc(100vw_-_2rem)] w-[calc(100vw_-_2rem)] sm:min-w-[22rem] sm:w-[22rem]">
