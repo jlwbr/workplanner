@@ -52,17 +52,7 @@ export const AdminLayout = ({ children, hasDate }: AdminLayoutProps) => {
             ) : (
               <Header />
             )}
-            <div className="flex flex-col gap-2 md:hidden items-center justify-center w-full h-[60vh]">
-              <h1 className="text-center text-2xl">
-                Deze pagina werk niet op een mobiele telefoon
-              </h1>
-              <Link href="/">
-                <h1 className="btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline bg-blue-700 hover:bg-blue-900 text-white font-normal py-2 px-4 mr-1 rounded">
-                  Terug naar de homepage
-                </h1>
-              </Link>
-            </div>
-            <div className="hidden md:flex gap-4 mr-4">
+            <div className="flex gap-4 mr-4">
               <Sidebar />
               <div className="container mx-auto px-1 py-4">{children}</div>
             </div>
@@ -197,12 +187,12 @@ const menuItems = [
 
 const Sidebar = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   return (
     <aside aria-label="Sidebar">
       <div className="overflow-y-auto min-h-[90vh] h-full py-4 px-3 bg-white">
         <ul className="space-y-2">
-          {/* <li>
+          <li>
             <a
               onClick={() => setOpen(!open)}
               className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg  hover:bg-gray-100 cursor-pointer"
@@ -223,7 +213,7 @@ const Sidebar = () => {
               </svg>
               {open && <span className="ml-3 pr-5">Sluit menu</span>}
             </a>
-          </li> */}
+          </li>
           {menuItems.map(({ name, location, Icon }, i) => (
             <li key={i}>
               <Link href={location}>
