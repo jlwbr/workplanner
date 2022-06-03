@@ -152,7 +152,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                                 className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
-                                  {item.name}
+                                  {item.name?.split(' ')[0]}
                                 </span>
                               </div>
                             ))}
@@ -164,7 +164,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                                 className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
-                                  {item.name}
+                                  {item.name?.split(' ')[0]}
                                 </span>
                               </div>
                             ))}
@@ -176,7 +176,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                                 className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
-                                  {item.name}
+                                  {item.name?.split(' ')[0]}
                                 </span>
                               </div>
                             ))}
