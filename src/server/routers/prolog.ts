@@ -105,7 +105,6 @@ export const GeneratePlanning = async (date: Date) => {
       hasMorning: true,
       hasAfternoon: true,
       hasEvening: true,
-      priority: true,
       channelId: true,
       subTask: {
         select: {
@@ -164,7 +163,6 @@ export const GeneratePlanning = async (date: Date) => {
                   data: filteredRules.map((item) => ({
                     name: item.name,
                     planningRuleId: item.id,
-                    priority: item.priority,
                     hasMorning: item.hasMorning,
                     hasAfternoon: item.hasAfternoon,
                     hasEvening: item.hasEvening,
