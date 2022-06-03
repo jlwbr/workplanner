@@ -38,6 +38,7 @@ const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
       hasAfternoon: true,
       hasEvening: true,
       done: true,
+      AssigneeText: true,
       subTask: {
         select: {
           id: true,
@@ -187,6 +188,48 @@ export const planningRouter = createRouter()
             message: 'Invalid time of day',
           });
       }
+    },
+  })
+  .mutation('tasks.AssigneeText', {
+    input: z.object({
+      id: z.string().cuid(),
+      text: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const { id, text } = input;
+      const user = ctx.session?.user;
+      if (!user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to acces this resource',
+        });
+      }
+
+      const planningItem = await prisma.planningItem.findFirst({
+        where: { id },
+        select: {
+          AssigneeText: true,
+        },
+      });
+
+      const AssigneeText =
+        (planningItem?.AssigneeText as Prisma.JsonObject) ?? {};
+
+      const newAssigneeText = {
+        ...AssigneeText,
+        [user.id]: text,
+      };
+
+      return await prisma.planningItem.update({
+        where: { id },
+        data: {
+          AssigneeText: newAssigneeText,
+        },
+        select: {
+          id: true,
+          AssigneeText: true,
+        },
+      });
     },
   })
   .mutation('tasks.done', {
@@ -516,8 +559,9 @@ export const planningRouter = createRouter()
       }
 
       // FIXME: we should be sorting in the prisma query
-      const sortedPlanning = planning
-        .sort((a, b) => a.channel.sort - b.channel.sort)
+      const sortedPlanning = planning.sort(
+        (a, b) => a.channel.sort - b.channel.sort,
+      );
 
       return sortedPlanning;
     },

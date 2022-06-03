@@ -70,6 +70,7 @@ model PlanningItem {
   morningAsignee   User[]  @relation(name: "PlanningItem_morningAsignee")
   afternoonAsignee User[]  @relation(name: "PlanningItem_afternoonAsignee")
   eveningAsignee   User[]  @relation(name: "PlanningItem_eveningAsignee")
+  AssigneeText     Json?
   hasMorning       Boolean @default(true)
   hasAfternoon     Boolean @default(true)
   hasEvening       Boolean @default(true)
