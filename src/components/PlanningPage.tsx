@@ -130,7 +130,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                       <tr>
                         <td
                           colSpan={4}
-                          className="border-b border-slate-100 bg-slate-200 font-bold p-2 pl-8 w-full text-slate-700"
+                          className="border-b border-slate-100 bg-slate-200 font-bold p-1 pl-8 w-full text-slate-700"
                         >
                           {task.channel.name}
                         </td>
