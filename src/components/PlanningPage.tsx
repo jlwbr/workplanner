@@ -84,13 +84,13 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
               })}
             </h2>
           </div>
-          <div className="flex flex-col text-xs italic">
+          <div className="flex flex-col text-[0.6rem] italic">
             <span>p1: Koffie 10:15 - Lunch: 12:30 - Thee: 15:00 </span>
             <span>p2: Koffie 10:30 - Lunch: 13:00 - Thee: 15:15 </span>
             <span>p3: Koffie 10:45 - Lunch: 13:30 - Thee: 15:30 </span>
           </div>
           <div>
-            <Image src={Logo} width={116} height={130} />
+            <Image src={Logo} width={80} height={90} />
           </div>
         </div>
         <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
@@ -134,20 +134,20 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                       </tr>
                       {items.map((Planning) => (
                         <tr key={Planning.id}>
-                          <td className="border-b border-slate-100 p-2 pl-8 w-full text-slate-700">
-                            <div>{Planning.name}</div>
+                          <td className="border-b border-slate-100 py-1 pl-8 w-full text-slate-700">
+                            <div className="text-sm">{Planning.name}</div>
                             {Planning.description && (
                               <div className="text-xs">
                                 {Planning.description}
                               </div>
                             )}
                           </td>
-                          <td className="border-b border-slate-100 p-2 text-slate-700 text-center">
+                          <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
                             <div className="flex flex-col justify-start gap-1">
                               {Planning.morningAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="text-xs inline-flex flex-col items-center leading-sm px-3 py-1 border rounded-md"
+                                  className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 border rounded-md"
                                 >
                                   <span className="whitespace-nowrap">
                                     {item.name}
@@ -156,12 +156,12 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               ))}
                             </div>
                           </td>
-                          <td className="border-b border-slate-100 p-2 text-slate-700 text-center">
+                          <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
                             <div className="flex flex-col justify-start gap-1">
                               {Planning.afternoonAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="text-xs inline-flex flex-col items-center leading-sm px-3 py-1 border rounded-md"
+                                  className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 border rounded-md"
                                 >
                                   <span className="whitespace-nowrap">
                                     {item.name}
@@ -170,12 +170,12 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               ))}
                             </div>
                           </td>
-                          <td className="border-b border-slate-100 p-2 text-slate-700 text-center">
+                          <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
                             <div className="flex flex-col justify-start gap-1">
                               {Planning.eveningAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="text-xs inline-flex flex-col items-center leading-sm px-3 py-1 border rounded-md"
+                                  className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 border rounded-md"
                                 >
                                   <span className="whitespace-nowrap">
                                     {item.name}
@@ -223,10 +223,10 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                   return (
                     <Fragment key={user.id}>
                       <tr>
-                        <td className="border-b border-slate-100 p-2 pl-8 w-full text-slate-700">
+                        <td className="border-b border-slate-100 py-1 pl-8 w-full text-slate-700">
                           {user.name}
                         </td>
-                        <td className="border-b border-slate-100 p-2 text-slate-700 text-center inline-flex justify-center w-full">
+                        <td className="border-b border-slate-100 py-1 text-slate-700 text-center inline-flex justify-center w-full">
                           {Communication.data.find((d) => d.userId === user.id)
                             ?.HT ? (
                             <svg
@@ -260,11 +260,11 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             </svg>
                           )}
                         </td>
-                        <td className="border-b border-slate-100 p-2 text-slate-700 text-center">
+                        <td className="border-b border-slate-100 py-1 text-slate-700 text-center">
                           {Communication.data.find((d) => d.userId === user.id)
                             ?.phoneNumber ?? ''}
                         </td>
-                        <td className="border-b border-slate-100 p-2 text-slate-700 text-center">
+                        <td className="border-b border-slate-100 py-1 text-slate-700 text-center">
                           {Break.data
                             .find((d) => d.userId === user.id)
                             ?.number?.toString() ?? ''}
