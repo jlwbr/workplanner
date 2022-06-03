@@ -52,9 +52,12 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
     ]);
     const Break = trpc.useQuery(['break.getAll', { date }]);
     const Communication = trpc.useQuery(['communication.getAll', { date }]);
+    const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
     if (!planing.isSuccess || !planing.data) return <Loading />;
     if (!Break.isSuccess || !Break.data) return <Loading />;
     if (!Communication.isSuccess || !Communication.data) return <Loading />;
+
+    const schedule = scheduleQuery.data || [];
 
     const users = planing.data
       .flatMap((p) =>
@@ -143,7 +146,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             )}
                           </td>
                           <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
-                            <div className="flex flex-col justify-start gap-1">
+                            <div className="flex flex-wrap justify-center gap-1">
                               {Planning.morningAsignee.map((item) => (
                                 <div
                                   key={item.id}
@@ -157,7 +160,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             </div>
                           </td>
                           <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
-                            <div className="flex flex-col justify-start gap-1">
+                            <div className="flex flex-wrap justify-center gap-1">
                               {Planning.afternoonAsignee.map((item) => (
                                 <div
                                   key={item.id}
@@ -171,7 +174,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             </div>
                           </td>
                           <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
-                            <div className="flex flex-col justify-start gap-1">
+                            <div className="flex flex-wrap justify-center gap-1">
                               {Planning.eveningAsignee.map((item) => (
                                 <div
                                   key={item.id}
@@ -220,11 +223,15 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
               </thead>
               <tbody className="bg-white">
                 {users.map((user) => {
+                  const times = schedule.find(
+                    (item) => item.userId === user.id,
+                  )?.schedule;
                   return (
                     <Fragment key={user.id}>
                       <tr>
                         <td className="border-b border-slate-100 py-1 pl-8 w-full text-slate-700">
                           {user.name}
+                          {times && ` (${times})`}
                         </td>
                         <td className="border-b border-slate-100 py-1 text-slate-700 text-center inline-flex justify-center w-full">
                           {Communication.data.find((d) => d.userId === user.id)
