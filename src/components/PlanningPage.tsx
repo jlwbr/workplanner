@@ -149,7 +149,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             {Planning.morningAsignee.map((item) => (
                               <div
                                 key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
+                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
                                   {item.name?.split(' ')[0]}
@@ -161,7 +161,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             {Planning.afternoonAsignee.map((item) => (
                               <div
                                 key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
+                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
                                   {item.name?.split(' ')[0]}
@@ -173,7 +173,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             {Planning.eveningAsignee.map((item) => (
                               <div
                                 key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
+                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
                                   {item.name?.split(' ')[0]}
