@@ -194,7 +194,12 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
           </div>
           <div className="absolute inset-0 pointer-events-none border border-black/5 rounded-xl"></div>
         </div>
-        <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden mt-5 break-before-all">
+        <div
+          className="not-prose relative bg-slate-50 rounded-xl overflow-hidden mt-5"
+          style={{
+            pageBreakBefore: 'always',
+          }}
+        >
           <div className="relative rounded-xl overflow-auto">
             <table className="border-collapse table-auto w-full text-sm">
               <thead>
