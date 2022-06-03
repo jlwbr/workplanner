@@ -18,7 +18,7 @@ const phoneNumbers = [
   '240',
 ];
 
-const breakNumbers = ['1', '2', '3'];
+const breakNumbers = ['0', '1', '2', '3'];
 
 const Input: FC<{
   user: inferQueryOutput<'user.all'>[0];

@@ -18,7 +18,7 @@ const phoneNumbers = [
   '240',
 ];
 
-const numbers = ['1', '2', '3'];
+const numbers = ['0', '1', '2', '3'];
 
 const Input: FC<{
   user: any;
