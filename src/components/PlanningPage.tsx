@@ -145,7 +145,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               </div>
                             )}
                           </td>
-                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center">
+                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center whitespace-nowrap">
                             {Planning.morningAsignee.map((item) => (
                               <div
                                 key={item.id}
@@ -157,7 +157,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               </div>
                             ))}
                           </td>
-                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center">
+                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center whitespace-nowrap">
                             {Planning.afternoonAsignee.map((item) => (
                               <div
                                 key={item.id}
@@ -169,7 +169,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               </div>
                             ))}
                           </td>
-                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center">
+                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center whitespace-nowrap">
                             {Planning.eveningAsignee.map((item) => (
                               <div
                                 key={item.id}
