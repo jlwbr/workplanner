@@ -82,7 +82,9 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
         </button>
       </div>
       <div>
-        {(session && <UserMenu image={session.user?.image || ''} hasDate />) || (
+        {(session && (
+          <UserMenu image={session.user?.image || ''} hasDate />
+        )) || (
           <button
             onClick={() => signIn('slack')}
             className="inline-flex items-center h-10 px-5 text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg focus:shadow-outline hover:bg-indigo-800"

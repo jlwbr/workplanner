@@ -155,11 +155,12 @@ const Table: FC<{
                   user={user}
                   date={date}
                   defaultphoneNumber={
-                    commsQuery.data.find((d) => d.userId === user.id)?.phoneNumber ??
-                    ''
+                    commsQuery.data.find((d) => d.userId === user.id)
+                      ?.phoneNumber ?? ''
                   }
                   defaultHT={
-                    commsQuery.data.find((d) => d.userId === user.id)?.HT ?? false
+                    commsQuery.data.find((d) => d.userId === user.id)?.HT ??
+                    false
                   }
                   defaultNumber={
                     breakQuery.data
