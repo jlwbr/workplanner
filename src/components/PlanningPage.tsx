@@ -145,47 +145,41 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               </div>
                             )}
                           </td>
-                          <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
-                            <div className="flex flex-wrap justify-center gap-1">
-                              {Planning.morningAsignee.map((item) => (
-                                <div
-                                  key={item.id}
-                                  className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 border rounded-md"
-                                >
-                                  <span className="whitespace-nowrap">
-                                    {item.name}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
+                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center">
+                            {Planning.morningAsignee.map((item) => (
+                              <div
+                                key={item.id}
+                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
+                              >
+                                <span className="whitespace-nowrap">
+                                  {item.name}
+                                </span>
+                              </div>
+                            ))}
                           </td>
-                          <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
-                            <div className="flex flex-wrap justify-center gap-1">
-                              {Planning.afternoonAsignee.map((item) => (
-                                <div
-                                  key={item.id}
-                                  className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 border rounded-md"
-                                >
-                                  <span className="whitespace-nowrap">
-                                    {item.name}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
+                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center">
+                            {Planning.afternoonAsignee.map((item) => (
+                              <div
+                                key={item.id}
+                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
+                              >
+                                <span className="whitespace-nowrap">
+                                  {item.name}
+                                </span>
+                              </div>
+                            ))}
                           </td>
-                          <td className="border-b border-slate-100 p-1 text-slate-700 text-center">
-                            <div className="flex flex-wrap justify-center gap-1">
-                              {Planning.eveningAsignee.map((item) => (
-                                <div
-                                  key={item.id}
-                                  className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 border rounded-md"
-                                >
-                                  <span className="whitespace-nowrap">
-                                    {item.name}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
+                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center">
+                            {Planning.eveningAsignee.map((item) => (
+                              <div
+                                key={item.id}
+                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 border rounded-md"
+                              >
+                                <span className="whitespace-nowrap">
+                                  {item.name}
+                                </span>
+                              </div>
+                            ))}
                           </td>
                         </tr>
                       ))}
