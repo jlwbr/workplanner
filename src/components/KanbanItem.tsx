@@ -9,7 +9,6 @@ import { useState } from 'react';
 
 type KanbanItemType = {
   item: KanbanRule;
-  currentPrio: number;
   locked: boolean;
   isAdmin: boolean;
   Break?: inferQueryOutput<'break.getAll'>;
@@ -106,7 +105,6 @@ const Assignees = ({
 
 const KanbanItem = ({
   item,
-  currentPrio,
   Break,
   Communication,
   locked,
@@ -139,7 +137,6 @@ const KanbanItem = ({
     id,
     name,
     description,
-    priority,
     ownerId,
     done,
     doneUser,
@@ -195,34 +192,19 @@ const KanbanItem = ({
     ? minEvening - eveningAsignee.length
     : 1;
 
-  const isCorrectPrio = currentPrio == 0 || currentPrio == priority;
-
   const canMorningAsign =
-    isCorrectPrio &&
     !locked &&
     (isAdmin || !morningAsignee.some((item) => item.id === userId)) &&
     (maxMorning == 0 || morningAsignee.length < maxMorning) &&
     (maxMorning == 0 || morningAsignee.length < maxMorning);
   const canAfternoonAsign =
-    isCorrectPrio &&
     !locked &&
     (isAdmin || !afternoonAsignee.some((item) => item.id === userId)) &&
     (maxAfternoon == 0 || afternoonAsignee.length < maxAfternoon);
   const canEveningAsign =
-    isCorrectPrio &&
     !locked &&
     (isAdmin || !eveningAsignee.some((item) => item.id === userId)) &&
     (maxEvening == 0 || eveningAsignee.length < maxEvening);
-
-  if (!isCorrectPrio)
-    return (
-      <DisabledKanbanItem
-        item={item}
-        canEdit={(userId === ownerId ?? isEditer) || false}
-        currentPriority={currentPrio}
-        editTask={editTask}
-      />
-    );
 
   return (
     <div className="bg-white rounded-md shadow-md">
@@ -251,11 +233,6 @@ const KanbanItem = ({
             <h2 className="font-bold text-gray-900">{name}</h2>
           </strong>
           <div className="flex items-center gap-2">
-            {priority > 0 && (
-              <div className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-blue-200 text-blue-700 rounded-full whitespace-nowrap">
-                Prio {priority}
-              </div>
-            )}
             {(userId === ownerId || isEditer) && !locked && (
               <button
                 onClick={() => editTask(item)}
@@ -438,65 +415,5 @@ const KanbanItem = ({
     </div>
   );
 };
-
-type DisabledKanbanItemType = {
-  item: KanbanRule;
-  canEdit: boolean;
-  currentPriority: number;
-  editTask: (item: KanbanRule) => void;
-};
-
-const DisabledKanbanItem = ({
-  item,
-  canEdit,
-  currentPriority,
-  editTask,
-}: DisabledKanbanItemType) => (
-  <div className="bg-white rounded-md shadow-md">
-    <div className="p-5">
-      <div className="flex justify-between content-center tracking-tight pb-2">
-        <strong className="inline-flex items-center">
-          <h2 className="font-bold text-gray-900">{item.name}</h2>
-        </strong>
-        <div className="flex items-center gap-2">
-          {item.priority > 0 && (
-            <div className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-blue-200 text-blue-700 rounded-full">
-              Prio {item.priority}
-            </div>
-          )}
-          {canEdit && (
-            <button
-              onClick={() => editTask(item)}
-              className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-purple-200 text-purple-700 rounded-full"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-            </button>
-          )}
-        </div>
-      </div>
-      <p>{item.description}</p>
-      <div className="pt-2">
-        <div className="flex content-center justify-center tracking-tight my-2">
-          <div className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-red-200 text-red-700 rounded-full">
-            Vul eerst alle items met Prio {currentPriority} in
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 export default KanbanItem;

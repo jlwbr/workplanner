@@ -24,7 +24,6 @@ const defaultEditingRuleData: inferMutationInput<'planning.tasks.upsert'> = {
   id: '',
   name: '',
   ownerId: '',
-  priority: 0,
   description: '',
   minMorning: 0,
   minAfternoon: 0,
@@ -225,21 +224,6 @@ const KanbanList = ({
   newTask,
 }: KanbanListType) => {
   const { data: user } = useSession();
-  const prioGroups = groupByKey(rules, 'priority');
-
-  const currentPrioString = Object.keys(prioGroups).find((k) => {
-    return prioGroups[k].find(
-      (item: KanbanRule) =>
-        item.priority !== 0 &&
-        (item.morningAsignee.length < item.minMorning ||
-          item.afternoonAsignee.length < item.minAfternoon ||
-          item.eveningAsignee.length < item.minEvening),
-    );
-  });
-
-  const currentPrio = parseInt(currentPrioString || '0') || 0;
-
-  console.log(title, canAdd);
 
   return (
     <div className="bg-gray-200 rounded-lg shadow-lg min-w-[calc(100vw_-_2rem)] w-[calc(100vw_-_2rem)] sm:min-w-[22rem] sm:w-[22rem]">
@@ -248,7 +232,6 @@ const KanbanList = ({
         {rules.map((rule) => (
           <KanbanItem
             key={rule.id}
-            currentPrio={currentPrio}
             editTask={newTask}
             item={rule}
             Break={Break}

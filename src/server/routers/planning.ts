@@ -27,7 +27,6 @@ const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
       name: true,
       ownerId: true,
       planningId: true,
-      priority: true,
       description: true,
       minMorning: true,
       minAfternoon: true,
@@ -226,7 +225,6 @@ export const planningRouter = createRouter()
       name: z.string(),
       ownerId: z.string().nullable().optional(),
       description: z.string(),
-      priority: z.number(),
       minMorning: z.number().nonnegative(),
       minAfternoon: z.number().nonnegative(),
       minEvening: z.number().nonnegative(),
@@ -258,7 +256,6 @@ export const planningRouter = createRouter()
       id: z.string().optional(),
       name: z.string(),
       description: z.string(),
-      priority: z.number(),
       rule: z.string(),
       minMorning: z.number().nonnegative(),
       minAfternoon: z.number().nonnegative(),
@@ -461,7 +458,6 @@ export const planningRouter = createRouter()
             select: {
               id: true,
               name: true,
-              priority: true,
               description: true,
               minMorning: true,
               minAfternoon: true,
@@ -522,14 +518,6 @@ export const planningRouter = createRouter()
       // FIXME: we should be sorting in the prisma query
       const sortedPlanning = planning
         .sort((a, b) => a.channel.sort - b.channel.sort)
-        .map((item) => ({
-          ...item,
-          PlanningItem: item.PlanningItem.sort((a, b) => {
-            if (a.priority === 0) return 1; //Return 1 so that b goes first
-            if (b.priority === 0) return -1; //Return -1 so that a goes first
-            return a.priority - b.priority;
-          }),
-        }));
 
       return sortedPlanning;
     },

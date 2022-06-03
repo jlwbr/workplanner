@@ -60,7 +60,6 @@ model PlanningItem {
   planningId       String
   planningRuleId   String?
   name             String
-  priority         Int
   description      String
   minMorning       Int     @default(0)
   minAfternoon     Int     @default(0)
@@ -91,7 +90,6 @@ model PlanningRule {
   id           String  @id @default(cuid())
   name         String
   description  String
-  priority     Int
   rule         String
   channelId    String
   minMorning   Int     @default(0)

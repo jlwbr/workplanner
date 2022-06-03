@@ -16,7 +16,6 @@ function classNames(...classes: string[]) {
 const defaultEditingRuleData: PlanningRule = {
   id: '',
   name: '',
-  priority: 0,
   description: '',
   rule: '',
   channelId: '',
@@ -145,12 +144,6 @@ const IndexPage: NextPageWithLayout = () => {
       field: 'name',
       label: 'Naam',
       input: 'text',
-    },
-    {
-      field: 'priority',
-      label: 'Prioriteit',
-      input: 'number',
-      placeholder: 'Geen prioriteit',
     },
     {
       field: 'description',
