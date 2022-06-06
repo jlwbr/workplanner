@@ -98,10 +98,9 @@ export const scheduleRouter = createRouter()
 
           await prisma.schedule.upsert({
             where: {
-              userId_date_schedule: {
+              userId_date: {
                 userId: id,
                 date: day,
-                schedule,
               },
             },
             update: {
