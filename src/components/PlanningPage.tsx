@@ -127,9 +127,9 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                           {task.channel.name}
                         </td>
                       </tr>
-                      {items.map((Planning) => (
+                      {items.map((Planning, i) => (
                         <tr key={Planning.id}>
-                          <td className="border-b border-slate-100 py-1 pl-8 w-full text-slate-700">
+                          <td className="border-b border-slate-100 py-2 pl-8 w-full text-slate-700">
                             <div className="text-sm">{Planning.name}</div>
                             {Planning.description && (
                               <div className="text-xs">
@@ -162,7 +162,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               })}
                             </div>
                           </td>
-                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center whitespace-nowrap">
+                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
                             {Planning.morningAsignee.map((item) => (
                               <div
                                 key={item.id}
@@ -174,7 +174,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               </div>
                             ))}
                           </td>
-                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center whitespace-nowrap">
+                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
                             {Planning.afternoonAsignee.map((item) => (
                               <div
                                 key={item.id}
@@ -186,7 +186,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               </div>
                             ))}
                           </td>
-                          <td className="border-b border-slate-100 pt-1 text-slate-700 text-center whitespace-nowrap">
+                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
                             {Planning.eveningAsignee.map((item) => (
                               <div
                                 key={item.id}
