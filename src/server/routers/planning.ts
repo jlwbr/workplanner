@@ -602,6 +602,7 @@ export const planningRouter = createRouter()
         .map((planningItem) => ({
           ...planningItem,
           planningItem: planningItem.PlanningItem.sort((a, b) => {
+            if (!a.PlanningRule?.order && !b.PlanningRule?.order) return 0;
             if (!a.PlanningRule?.order) return 1;
             if (!b.PlanningRule?.order) return -1;
             return a.PlanningRule.order - b.PlanningRule.order;
