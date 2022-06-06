@@ -5,15 +5,6 @@ import Image from 'next/image';
 import Logo from '../../public/Karwei_logo.png';
 import { Prisma } from '@prisma/client';
 
-const groupByKey = (list: any[], key: string) =>
-  list.reduce(
-    (hash, obj) => ({
-      ...hash,
-      [obj[key]]: (hash[obj[key]] || []).concat(obj),
-    }),
-    {},
-  );
-
 type PrintComponentType = {
   date: Date;
 };

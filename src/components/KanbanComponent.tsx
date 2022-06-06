@@ -6,15 +6,6 @@ import { inferMutationInput, inferQueryOutput, trpc } from '~/utils/trpc';
 import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
 
-const groupByKey = (list: any[], key: string) =>
-  list.reduce(
-    (hash, obj) => ({
-      ...hash,
-      [obj[key]]: (hash[obj[key]] || []).concat(obj),
-    }),
-    {},
-  );
-
 export type KanbanRule = Exclude<
   inferQueryOutput<'planning.byDate'>,
   false
