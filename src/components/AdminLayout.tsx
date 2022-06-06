@@ -48,7 +48,7 @@ export const AdminLayout = ({ children, hasDate }: AdminLayoutProps) => {
         <div className="min-h-screen bg-slate-100">
           <AdminDateContext.Provider value={date}>
             {hasDate ? (
-              <DateHeader date={date} setDate={setDate} />
+              <DateHeader date={date} setDate={setDate} admin={true} />
             ) : (
               <Header />
             )}

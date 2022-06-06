@@ -10,6 +10,7 @@ export function classNames(...classes: string[]) {
 type DateHeaderType = {
   date: Date;
   setDate: Dispatch<SetStateAction<Date>>;
+  admin?: boolean;
 };
 
 function addDays(dateTime: Date, count_days = 0) {
@@ -19,11 +20,11 @@ function addDays(dateTime: Date, count_days = 0) {
   return new_date;
 }
 
-const DateHeader = ({ date, setDate }: DateHeaderType) => {
+const DateHeader = ({ date, setDate, admin }: DateHeaderType) => {
   const { data: session } = useSession();
 
   return (
-    <nav className="flex items-center justify-between flex-wrap p-4 shadow-md bg-white">
+    <nav className="flex items-center justify-between p-4 shadow-md bg-white">
       <div className="hidden md:block">
         <Link href="/">
           <a href="#" className="font-semibold text-xl tracking-tight">
@@ -31,7 +32,7 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
           </a>
         </Link>
       </div>
-      <div className="md:hidden"></div>
+      {!session?.user?.isEditor && <div className="md:hidden"></div>}
       <div className="flex items-center justify-between">
         <button
           onClick={() => {
@@ -81,7 +82,22 @@ const DateHeader = ({ date, setDate }: DateHeaderType) => {
           </svg>
         </button>
       </div>
-      <div>
+      <div className="flex gap-2">
+        {session &&
+          session.user?.isEditor &&
+          (admin ? (
+            <Link href="/">
+              <button className="bg-transparent hover:bg-gray-500 text-gray-700 hover:text-white py-1 px-2 border border-gray-500 hover:border-transparent rounded">
+                Planning
+              </button>
+            </Link>
+          ) : (
+            <Link href="/admin">
+              <button className="bg-transparent hover:bg-gray-500 text-gray-700 hover:text-white py-1 px-2 border border-gray-500 hover:border-transparent rounded">
+                Afronden
+              </button>
+            </Link>
+          ))}
         {(session && (
           <UserMenu image={session.user?.image || ''} hasDate />
         )) || (
