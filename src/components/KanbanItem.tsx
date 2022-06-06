@@ -319,7 +319,8 @@ const KanbanItem = ({
             if (AssigneeText && typeof AssigneeText === 'object') {
               return (
                 <div key={id}>
-                  {name?.split(' ')[0]}: {(AssigneeText as Prisma.JsonObject)[id]}
+                  {name?.split(' ')[0]}:{' '}
+                  {(AssigneeText as Prisma.JsonObject)[id]}
                 </div>
               );
             }
