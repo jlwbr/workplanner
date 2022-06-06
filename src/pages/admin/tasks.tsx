@@ -28,6 +28,7 @@ const defaultEditingRuleData: PlanningRule = {
   hasMorning: true,
   hasAfternoon: true,
   hasEvening: true,
+  order: 0,
 };
 
 const IndexPage: NextPageWithLayout = () => {
@@ -53,6 +54,7 @@ const IndexPage: NextPageWithLayout = () => {
   );
   const UpsertRule = trpc.useMutation(['planning.rules.upsert'], options);
   const deleteMutation = trpc.useMutation(['planning.rules.delete'], options);
+  const moveRuleMutation = trpc.useMutation(['planning.rules.move'], options);
 
   const [open, setOpen] = useState(false);
   const [editingRuleData, setEditingRuleData] = useState<
@@ -93,13 +95,20 @@ const IndexPage: NextPageWithLayout = () => {
       hasMorning: z.boolean().optional(),
       hasAfternoon: z.boolean().optional(),
       hasEvening: z.boolean().optional(),
+      order: z.number().nonnegative().optional(),
     });
-
-    console.log(editingRuleData);
 
     if (input.safeParse(editingRuleData).success === false) {
       alert('Niet alle velden zijn ingevuld');
       return;
+    }
+
+    if (!editingRuleData.order) {
+      const data =
+        RulesQuery.data?.find((r) => r.id === editingRuleData.channelId)
+          ?.PlanningRule || [];
+      editingRuleData.order =
+        ((data.length > 0 && data[data.length - 1].order) || 0) + 1;
     }
 
     const result = await checkMutation.mutateAsync(editingRuleData.rule);
@@ -263,7 +272,7 @@ const IndexPage: NextPageWithLayout = () => {
               )}
             >
               <ul>
-                {PlanningRule.map((rule) => (
+                {PlanningRule.map((rule, i) => (
                   <div key={rule.id}>
                     <li className="relative flex justify-between p-3 rounded-md">
                       <h3 className="text-sm font-medium leading-5">
@@ -271,6 +280,62 @@ const IndexPage: NextPageWithLayout = () => {
                       </h3>
 
                       <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => {
+                            moveRuleMutation.mutateAsync({
+                              id: rule.id,
+                              sort: rule.order - 1,
+                            });
+                            if (PlanningRule[i - 1])
+                              moveRuleMutation.mutateAsync({
+                                id: PlanningRule[i - 1].id,
+                                sort: rule.order,
+                              });
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 10l7-7m0 0l7 7m-7-7v18"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {
+                            moveRuleMutation.mutateAsync({
+                              id: rule.id,
+                              sort: rule.order + 1,
+                            });
+                            if (PlanningRule[i + 1])
+                              moveRuleMutation.mutateAsync({
+                                id: PlanningRule[i + 1].id,
+                                sort: rule.order,
+                              });
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                            />
+                          </svg>
+                        </button>
                         <button onClick={() => onAddSubTask(rule.id)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

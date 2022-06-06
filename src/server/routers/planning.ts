@@ -39,6 +39,11 @@ const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
       hasEvening: true,
       done: true,
       AssigneeText: true,
+      PlanningRule: {
+        select: {
+          order: true,
+        },
+      },
       subTask: {
         select: {
           id: true,
@@ -310,6 +315,7 @@ export const planningRouter = createRouter()
       hasAfternoon: z.boolean(),
       hasEvening: z.boolean(),
       channelId: z.string(),
+      order: z.number().nonnegative(),
     }),
     async resolve({ input, ctx }) {
       const { id, ...data } = input;
@@ -490,7 +496,7 @@ export const planningRouter = createRouter()
         });
       }
 
-      return await prisma.channel.findMany({
+      const planning = await prisma.channel.findMany({
         where: {
           removed: false,
         },
@@ -513,6 +519,7 @@ export const planningRouter = createRouter()
               hasMorning: true,
               hasAfternoon: true,
               hasEvening: true,
+              order: true,
               subTask: {
                 select: {
                   id: true,
@@ -524,6 +531,37 @@ export const planningRouter = createRouter()
         },
         orderBy: {
           sort: 'asc',
+        },
+      });
+
+      return planning.map((planningItem) => ({
+        ...planningItem,
+        PlanningRule: planningItem.PlanningRule.sort(
+          (a, b) => a.order - b.order,
+        ),
+      }));
+    },
+  })
+  .mutation('rules.move', {
+    input: z.object({
+      id: z.string(),
+      sort: z.number(),
+    }),
+    async resolve({ input, ctx }) {
+      const { id, sort } = input;
+      if (!ctx.session?.user?.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      return prisma.planningRule.update({
+        where: {
+          id,
+        },
+        data: {
+          order: sort,
         },
       });
     },
@@ -541,7 +579,7 @@ export const planningRouter = createRouter()
           message: 'You must be authorized',
         });
       }
-      const planning = await prisma.planning.findMany({
+      let planning = await prisma.planning.findMany({
         where: {
           date: date,
         },
@@ -550,7 +588,7 @@ export const planningRouter = createRouter()
 
       if (planning.length === 0) {
         await GeneratePlanning(date);
-        return await prisma.planning.findMany({
+        planning = await prisma.planning.findMany({
           where: {
             date: date,
           },
@@ -559,11 +597,15 @@ export const planningRouter = createRouter()
       }
 
       // FIXME: we should be sorting in the prisma query
-      const sortedPlanning = planning.sort(
-        (a, b) => a.channel.sort - b.channel.sort,
-      );
-
-      return sortedPlanning;
+      return planning
+        .sort((a, b) => a.channel.sort - b.channel.sort)
+        .map((planningItem) => ({
+          ...planningItem,
+          planningItem: planningItem.PlanningItem.sort(
+            (a, b) =>
+              (a.PlanningRule?.order || 0) - (b.PlanningRule?.order || 0),
+          ),
+        }));
     },
   })
   .query('isLocked', {

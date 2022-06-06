@@ -102,6 +102,7 @@ model PlanningRule {
   hasMorning   Boolean @default(true)
   hasAfternoon Boolean @default(true)
   hasEvening   Boolean @default(true)
+  order        Int     @default(0)
 
   channel      Channel        @relation(fields: [channelId], references: [id])
   PlanningItem PlanningItem[]
