@@ -1,6 +1,7 @@
 import { Tab } from '@headlessui/react';
 import { PlanningRule } from '@prisma/client';
 import { ReactElement, useState } from 'react';
+import toast from 'react-hot-toast';
 import { z } from 'zod';
 import { AdminLayout } from '~/components/AdminLayout';
 import PlanningEditor, {
@@ -118,7 +119,11 @@ const IndexPage: NextPageWithLayout = () => {
       return;
     }
 
-    await UpsertRule.mutateAsync(editingRuleData);
+    await toast.promise(UpsertRule.mutateAsync(editingRuleData), {
+      success: 'Regel opgeslagen',
+      error: 'Er is iets fout gegaan',
+      loading: 'Bezig met opslaan...',
+    });
     setOpen(false);
   };
 
