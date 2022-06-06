@@ -3,6 +3,7 @@ import ReactToPrint from 'react-to-print';
 import { trpc } from '~/utils/trpc';
 import Image from 'next/image';
 import Logo from '../../public/Karwei_logo.png';
+import { Prisma } from '@prisma/client';
 
 const groupByKey = (list: any[], key: string) =>
   list.reduce(
@@ -144,6 +145,31 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                                 {Planning.description}
                               </div>
                             )}
+                            <div className="whitespace-pre-wrap text-xs">
+                              {[
+                                ...Planning.morningAsignee,
+                                ...Planning.afternoonAsignee,
+                                ...Planning.eveningAsignee,
+                              ].map(({ id, name }) => {
+                                if (
+                                  Planning.AssigneeText &&
+                                  typeof Planning.AssigneeText === 'object'
+                                ) {
+                                  return (
+                                    <div key={id}>
+                                      {name?.split(' ')[0]}:{' '}
+                                      {
+                                        (
+                                          Planning.AssigneeText as Prisma.JsonObject
+                                        )[id]
+                                      }
+                                    </div>
+                                  );
+                                }
+
+                                return null;
+                              })}
+                            </div>
                           </td>
                           <td className="border-b border-slate-100 pt-1 text-slate-700 text-center whitespace-nowrap">
                             {Planning.morningAsignee.map((item) => (

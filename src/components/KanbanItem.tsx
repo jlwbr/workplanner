@@ -22,7 +22,6 @@ type KanbanItemType = {
 type assigneeType = {
   id: string;
   asignees: KanbanRule['morningAsignee'];
-  AssigneeText: Prisma.JsonObject;
   canAssign: boolean;
   userId: string;
   timeOfDay: 'morning' | 'afternoon' | 'evening';
@@ -36,7 +35,6 @@ type assigneeType = {
 const Assignees = ({
   id,
   asignees,
-  AssigneeText,
   canAssign,
   userId,
   timeOfDay,
@@ -72,14 +70,7 @@ const Assignees = ({
         )?.phoneNumber;
         const br = Break?.find(({ userId }) => userId === itemId)?.number;
         return (
-          <div
-            data-tip={
-              AssigneeText && typeof AssigneeText === 'object'
-                ? AssigneeText[itemId] || ''
-                : ''
-            }
-            key={itemId}
-          >
+          <div key={itemId}>
             <AsigneeBadge
               planningItemId={id}
               asigneeId={itemId}
@@ -184,7 +175,7 @@ const KanbanItem = ({
   }
 
   const updateAssigneeText = () => {
-    const text = prompt('Bescrijving');
+    const text = prompt('Beschrijving');
 
     if (text) {
       toast.promise(
@@ -200,6 +191,8 @@ const KanbanItem = ({
       );
     }
   };
+
+  const users = [...morningAsignee, ...afternoonAsignee, ...eveningAsignee];
 
   const willUseMaxMorning =
     maxMorning - morningAsignee.length > 0 ? true : false;
@@ -321,7 +314,19 @@ const KanbanItem = ({
           </div>
         </div>
         <div className="whitespace-pre-wrap">{description}</div>
+        <div className="whitespace-pre-wrap">
+          {users.map(({ id, name }) => {
+            if (AssigneeText && typeof AssigneeText === 'object') {
+              return (
+                <div key={id}>
+                  {name?.split(' ')[0]}: {(AssigneeText as Prisma.JsonObject)[id]}
+                </div>
+              );
+            }
 
+            return null;
+          })}
+        </div>
         {item.subTask.length > 0 && (
           <div className="pt-2">
             <div className="flex gap-1 items-baseline justify-between">
@@ -419,7 +424,6 @@ const KanbanItem = ({
             <Assignees
               id={id}
               asignees={morningAsignee}
-              AssigneeText={AssigneeText as Prisma.JsonObject}
               canAssign={canMorningAsign}
               userId={userId}
               Break={Break}
@@ -442,7 +446,6 @@ const KanbanItem = ({
             </div>
             <Assignees
               id={id}
-              AssigneeText={AssigneeText as Prisma.JsonObject}
               asignees={afternoonAsignee}
               canAssign={canAfternoonAsign}
               userId={userId}
@@ -465,7 +468,6 @@ const KanbanItem = ({
             </div>
             <Assignees
               id={id}
-              AssigneeText={AssigneeText as Prisma.JsonObject}
               asignees={eveningAsignee}
               canAssign={canEveningAsign}
               userId={userId}
