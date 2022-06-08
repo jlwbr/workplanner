@@ -175,21 +175,19 @@ const KanbanItem = ({
   }
 
   const updateAssigneeText = (oldText?: string) => {
-    const text = prompt('Beschrijving', oldText);
+    const text = prompt('Beschrijving', oldText) || '';
 
-    if (text) {
-      toast.promise(
-        AssigneeTextMutation.mutateAsync({
-          id,
-          text,
-        }),
-        {
-          loading: 'Beschrijving aan het aanpassen',
-          error: 'Er is iets fout gegaan',
-          success: 'Beschrijving is aangepast',
-        },
-      );
-    }
+    toast.promise(
+      AssigneeTextMutation.mutateAsync({
+        id,
+        text,
+      }),
+      {
+        loading: 'Beschrijving aan het aanpassen',
+        error: 'Er is iets fout gegaan',
+        success: 'Beschrijving is aangepast',
+      },
+    );
   };
 
   const users = [...morningAsignee, ...afternoonAsignee, ...eveningAsignee];
@@ -273,7 +271,9 @@ const KanbanItem = ({
               <button
                 onClick={() =>
                   updateAssigneeText(
-                    (AssigneeText as Prisma.JsonObject)[userId] as string,
+                    AssigneeText && typeof AssigneeText === 'object'
+                      ? ((AssigneeText as Prisma.JsonObject)[userId] as string)
+                      : undefined,
                   )
                 }
                 className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-red-200 text-red-700 rounded-full"
