@@ -43,7 +43,7 @@ const IndexPage: NextPageWithLayout = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      {data?.user?.isAdmin && (
+      {data?.user?.isEditor && (
         <div className="hidden md:block sticky top-0 bg-slate-100">
           <div className="flex flex-wrap gap-2 p-5">
             {options.map((option) => (
