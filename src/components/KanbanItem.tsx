@@ -190,7 +190,13 @@ const KanbanItem = ({
     );
   };
 
-  const users = [...morningAsignee, ...afternoonAsignee, ...eveningAsignee];
+  const users = [
+    ...morningAsignee,
+    ...afternoonAsignee,
+    ...eveningAsignee,
+  ].filter(
+    (value, index, self) => index === self.findIndex((t) => t.id === value.id),
+  );
 
   const willUseMaxMorning =
     maxMorning - morningAsignee.length > 0 ? true : false;
