@@ -89,12 +89,16 @@ export const scheduleRouter = createRouter()
         parseInt(week.slice(0, 4), 10),
       );
 
-      isoWeek.forEach((day, index) => {
+      isoWeek.forEach(async (day, index) => {
+        await prisma.schedule.deleteMany({
+          where: {
+            date: day,
+          },
+        })
+
         data.forEach(async ({ id, data }) => {
           const schedule = data[index];
           if (!schedule || typeof id == 'boolean') return;
-
-          console.log(schedule);
 
           await prisma.schedule.upsert({
             where: {

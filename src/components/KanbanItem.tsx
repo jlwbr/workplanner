@@ -174,8 +174,8 @@ const KanbanItem = ({
     return null;
   }
 
-  const updateAssigneeText = () => {
-    const text = prompt('Beschrijving');
+  const updateAssigneeText = (oldText?: string) => {
+    const text = prompt('Beschrijving', oldText);
 
     if (text) {
       toast.promise(
@@ -271,7 +271,11 @@ const KanbanItem = ({
           <div className="flex items-center gap-2">
             {canAddAssigneeText && (
               <button
-                onClick={updateAssigneeText}
+                onClick={() =>
+                  updateAssigneeText(
+                    (AssigneeText as Prisma.JsonObject)[userId] as string,
+                  )
+                }
                 className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-red-200 text-red-700 rounded-full"
               >
                 <svg
@@ -317,12 +321,12 @@ const KanbanItem = ({
         <div className="whitespace-pre-wrap">
           {users.map(({ id, name }) => {
             if (AssigneeText && typeof AssigneeText === 'object') {
-              return (
+              const text = (AssigneeText as Prisma.JsonObject)[id];
+              return text ? (
                 <div key={id}>
-                  {name?.split(' ')[0]}:{' '}
-                  {(AssigneeText as Prisma.JsonObject)[id]}
+                  {name?.split(' ')[0]}: {text}
                 </div>
-              );
+              ) : null;
             }
 
             return null;
