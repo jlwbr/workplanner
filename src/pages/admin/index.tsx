@@ -104,7 +104,7 @@ const IndexPage: NextPageWithLayout = () => {
         ) : (
           <div />
         )}
-        {currentStep < 5 ? (
+        {currentStep < stepArray.length ? (
           <button
             onClick={() => handleClick('next')}
             className="btn-outline-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline border border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white font-normal py-2 px-4 rounded"

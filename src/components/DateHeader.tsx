@@ -1,5 +1,6 @@
 import { signIn, useSession } from 'next-auth/react';
-import { Dispatch, SetStateAction } from 'react';
+import { useRouter } from 'next/router';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import Link from 'next/link';
 import { UserMenu } from './UserMenu';
 
@@ -21,7 +22,22 @@ function addDays(dateTime: Date, count_days = 0) {
 }
 
 const DateHeader = ({ date, setDate, admin }: DateHeaderType) => {
+  const router = useRouter();
   const { data: session } = useSession();
+  const { date: qDate } = router.query;
+
+  useEffect(() => {
+    if (qDate && typeof qDate === 'string') {
+      setDate(new Date(qDate));
+    }
+  }, []);
+
+  const updateDate = (newdate: Date) => {
+    router.replace({
+      query: { ...router.query, date: newdate.toISOString() },
+    });
+    setDate(newdate);
+  };
 
   return (
     <nav className="flex items-center justify-between p-4 shadow-md bg-white">
@@ -36,7 +52,7 @@ const DateHeader = ({ date, setDate, admin }: DateHeaderType) => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => {
-            setDate(addDays(date, -1));
+            updateDate(addDays(date, -1));
           }}
           aria-label="Previous day"
           className="inline-flex items-center justify-center w-10 h-10 mr-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
@@ -63,7 +79,7 @@ const DateHeader = ({ date, setDate, admin }: DateHeaderType) => {
         </h5>
         <button
           aria-label="Next day"
-          onClick={() => setDate(addDays(date, 1))}
+          onClick={() => updateDate(addDays(date, 1))}
           className="inline-flex items-center justify-center w-10 h-10 ml-1 text-gray-700 transition-colors duration-150 bg-white rounded-full focus:shadow-outline hover:bg-gray-200"
         >
           <svg
@@ -86,13 +102,13 @@ const DateHeader = ({ date, setDate, admin }: DateHeaderType) => {
         {session &&
           session.user?.isEditor &&
           (admin ? (
-            <Link href="/">
+            <Link href={`/?date=${date.toISOString()}`}>
               <button className="bg-transparent hover:bg-gray-500 text-gray-700 hover:text-white py-1 px-2 border border-gray-500 hover:border-transparent rounded">
                 Planning
               </button>
             </Link>
           ) : (
-            <Link href="/admin">
+            <Link href={`/admin/?date=${date.toISOString()}`}>
               <button className="bg-transparent hover:bg-gray-500 text-gray-700 hover:text-white py-1 px-2 border border-gray-500 hover:border-transparent rounded">
                 Afronden
               </button>
