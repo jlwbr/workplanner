@@ -32,14 +32,7 @@ export const communicationRouter = createRouter()
     input: z.object({
       date: z.date(),
     }),
-    async resolve({ input, ctx }) {
-      if (!ctx.session?.user?.isEditor) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'You must be an admin or editor to acces this resource',
-        });
-      }
-
+    async resolve({ input }) {
       const users = await prisma.user.findMany({
         select: { id: true, defaultHT: true, defaultPhoneNumber: true },
       });
