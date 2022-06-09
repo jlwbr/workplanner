@@ -8,6 +8,7 @@ import { useDrop } from 'react-dnd';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Prisma } from '@prisma/client';
+import Select, { MultiValue } from 'react-select';
 
 type KanbanItemType = {
   item: KanbanRule;
@@ -45,15 +46,60 @@ const Assignees = ({
   rest,
 }: assigneeType) => {
   const context = trpc.useContext();
+  const [assignees, setAssignees] = useState(
+    asignees.map((item) => ({
+      value: item.id,
+      label: item.name,
+    })),
+  );
   const asigneeMuation = trpc.useMutation(['planning.asignee.add'], {
     onSuccess: () => {
       context.invalidateQueries(['planning.byDate']);
     },
   });
+  const removeAsignee = trpc.useMutation(['planning.asignee.remove'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+
+  const userQuery = trpc.useQuery(['user.all'], {
+    enabled: isAdmin,
+  });
+  const options = userQuery.data?.map((user) => ({
+    value: user.id,
+    label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
+  }));
+
+  const handleChange = (
+    selectedOption: MultiValue<{ value: string; label: string | null }>,
+  ) => {
+    setAssignees(selectedOption.concat());
+    for (const option of selectedOption) {
+      if (!asignees.some((asignee) => asignee.id == option.value)) {
+        asignees.shift();
+        asigneeMuation.mutate({
+          planningItemId: id,
+          timeOfDay,
+          asigneeId: option.value,
+        });
+      }
+    }
+
+    for (const asignee of asignees) {
+      removeAsignee.mutate({
+        planningItemId: id,
+        timeOfDay,
+        asigneeId: asignee.id,
+      });
+    }
+  };
 
   const [, drop] = useDrop(() => ({
     accept: ItemTypes.BADGE,
     drop: (item: { id: string }) => {
+      const option = options?.find((i) => i.value == item.id);
+      if (option) setAssignees([...assignees, option]);
       asigneeMuation.mutate({
         planningItemId: id,
         timeOfDay,
@@ -62,7 +108,20 @@ const Assignees = ({
     },
   }));
 
-  return (
+  return isAdmin ? (
+    <div ref={drop}>
+      <Select
+        options={options}
+        value={assignees}
+        onChange={(c) => handleChange(c)}
+        menuPortalTarget={document.body}
+        styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+        placeholder="Typen om te zoeken..."
+        isMulti
+        isSearchable
+      />
+    </div>
+  ) : (
     <div ref={drop} className="flex flex-wrap gap-2">
       {asignees.map(({ id: itemId, name }) => {
         const phone = Communication?.find(
