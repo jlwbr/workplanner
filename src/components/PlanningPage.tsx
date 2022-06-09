@@ -146,16 +146,14 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                                   Planning.AssigneeText &&
                                   typeof Planning.AssigneeText === 'object'
                                 ) {
-                                  return (
+                                  const text = (
+                                    Planning.AssigneeText as Prisma.JsonObject
+                                  )[id];
+                                  return text ? (
                                     <div key={id}>
-                                      {name?.split(' ')[0]}:{' '}
-                                      {
-                                        (
-                                          Planning.AssigneeText as Prisma.JsonObject
-                                        )[id]
-                                      }
+                                      {name?.split(' ')[0]}: {text}
                                     </div>
-                                  );
+                                  ) : null;
                                 }
 
                                 return null;

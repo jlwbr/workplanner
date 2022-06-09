@@ -108,7 +108,7 @@ const Assignees = ({
     },
   }));
 
-  return isAdmin ? (
+  return isAdmin && !locked ? (
     <div ref={drop}>
       <Select
         options={options}
@@ -136,9 +136,9 @@ const Assignees = ({
               name={
                 !locked
                   ? name
-                  : `${name}  ${(phone || br) && '('}${(phone && phone) || ''}${
-                      (phone && br && '/') || ''
-                    }${(br && `p${br}`) || ''}${(phone || br) && ')'}`
+                  : `${name}  ${(phone || br) ? '(' : ''}${(typeof phone == "string" && phone) || ''}${
+                      (typeof phone == "string" && typeof br == "number" ? '/' : '') || ''
+                    }${(typeof br == "number" && `p${br}`) || ''}${(phone || br) ? ')' : ''}`
               }
               timeOfDay={timeOfDay}
               canRemove={!locked && (isAdmin || itemId == userId)}
