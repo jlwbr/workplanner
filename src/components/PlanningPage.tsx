@@ -127,7 +127,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                           {task.channel.name}
                         </td>
                       </tr>
-                      {items.map((Planning, i) => (
+                      {items.map((Planning) => (
                         <tr key={Planning.id}>
                           <td className="border-b border-slate-100 py-2 pl-8 w-full text-slate-700">
                             <div className="text-sm">{Planning.name}</div>
