@@ -106,7 +106,7 @@ const Assignees = ({
         asigneeId: item.id,
       });
     },
-  }));
+  }), [assignees]);
 
   return isAdmin && !locked ? (
     <div ref={drop}>
