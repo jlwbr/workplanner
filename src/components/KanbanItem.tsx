@@ -95,18 +95,21 @@ const Assignees = ({
     }
   };
 
-  const [, drop] = useDrop(() => ({
-    accept: ItemTypes.BADGE,
-    drop: (item: { id: string }) => {
-      const option = options?.find((i) => i.value == item.id);
-      if (option) setAssignees([...assignees, option]);
-      asigneeMuation.mutate({
-        planningItemId: id,
-        timeOfDay,
-        asigneeId: item.id,
-      });
-    },
-  }), [assignees]);
+  const [, drop] = useDrop(
+    () => ({
+      accept: ItemTypes.BADGE,
+      drop: (item: { id: string }) => {
+        const option = options?.find((i) => i.value == item.id);
+        if (option) setAssignees([...assignees, option]);
+        asigneeMuation.mutate({
+          planningItemId: id,
+          timeOfDay,
+          asigneeId: item.id,
+        });
+      },
+    }),
+    [assignees],
+  );
 
   return isAdmin && !locked ? (
     <div ref={drop}>
