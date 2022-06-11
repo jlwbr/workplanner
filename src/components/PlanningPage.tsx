@@ -66,7 +66,11 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
 
     return (
       <div ref={ref}>
-        <style>{'@page { margin: 2rem !important; }'}</style>
+        <style>
+          {
+            '@page { margin: 2rem !important; } @media print { .page-break { margin-top: 1rem; display: block; page-break-before: auto; } * { page-break-before: avoid; } }'
+          }
+        </style>
         <div className="flex gap-5 pb-5">
           <div className="flex-1">
             <h1 className="text-2xl font-bold">Dagverdeling</h1>
@@ -108,7 +112,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {planing.data.map((task) => {
+                {planing.data.map((task, i) => {
                   const items = task.PlanningItem.filter(
                     (item) =>
                       item.morningAsignee.length > 0 ||
@@ -119,7 +123,15 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                   if (items.length === 0) return null;
                   return (
                     <Fragment key={task.id}>
-                      <tr>
+                      {i > 0 && (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="border-b bg-white font-bold h-5 w-full"
+                          ></td>
+                        </tr>
+                      )}
+                      <tr className="page-break">
                         <td
                           colSpan={4}
                           className="border-b border-slate-100 bg-slate-200 font-bold p-1 pl-8 w-full text-slate-700"
@@ -206,7 +218,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
           </div>
           <div className="absolute inset-0 pointer-events-none border border-black/5 rounded-xl"></div>
         </div>
-        <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden mt-5">
+        <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden mt-5 page-break">
           <div className="relative rounded-xl overflow-auto">
             <table className="border-collapse table-auto w-full text-sm">
               <thead>
