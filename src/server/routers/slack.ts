@@ -5,45 +5,48 @@ import { WebClient } from '@slack/web-api';
 
 const client = new WebClient(process.env.SLACK_BOT_TOKEN);
 
-export const slackRouter = createRouter()
-  .query('update', {
-    async resolve() {
-        const prismaUsers = await prisma.user.findMany({
-            select: {
-              id: true,
-              name: true,
-              accounts: {
-                where: {
-                  provider: 'slack',
-                },
-                select: {
-                  providerAccountId: true,
-                },
-              },
-            },
-          });
+export const slackRouter = createRouter().query('update', {
+  async resolve() {
+    const prismaUsers = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        accounts: {
+          where: {
+            provider: 'slack',
+          },
+          select: {
+            providerAccountId: true,
+          },
+        },
+      },
+    });
 
-        const result = await client.users.list();
-        if (!result.ok || !result.members)
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'You must be authorized',
-            });
-        
-        result.members.forEach(async member => {
-            const user = prismaUsers.find(u => u.accounts.some(a => a.providerAccountId === member.id));
+    const result = await client.users.list({
+      limit: 9999,
+    });
+    if (!result.ok || !result.members)
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'You must be authorized',
+      });
 
-            if(user?.name === member.profile?.real_name) return;
-            if (!user) return;
+    result.members.forEach(async (member) => {
+      const user = prismaUsers.find((u) =>
+        u.accounts.some((a) => a.providerAccountId === member.id),
+      );
 
-            await prisma.user.update({
-                where: {
-                    id: user.id,
-                },
-                data: {
-                    name: member.profile?.real_name,
-                },
-            });
-        });
-    },
-  });
+      if (user?.name === member.profile?.real_name) return;
+      if (!user) return;
+
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          name: member.profile?.real_name,
+        },
+      });
+    });
+  },
+});
