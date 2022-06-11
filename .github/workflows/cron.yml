@@ -1,0 +1,12 @@
+name: cron
+on:
+  schedule:
+    - cron: '0 1 * * *'
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call slack endpoint
+        run: |
+          curl --request GET \
+          --url 'https://workplanner-nu.vercel.app/api/trpc/slack.update'
