@@ -21,7 +21,11 @@ const phoneNumbers = [
 const numbers = ['0', '1', '2', '3'];
 
 const Input: FC<{
-  user: any;
+  user: {
+    schedule: string | undefined;
+    id: string;
+    name: string | null;
+  };
   date: Date;
   defaultphoneNumber: string;
   defaultHT: boolean;
@@ -49,6 +53,9 @@ const Input: FC<{
     <tr key={user.id}>
       <td className="border-b border-slate-100 p-4 pl-8 w-full text-slate-700">
         {user.name}
+      </td>
+      <td className="border-b border-slate-100 py-1 w-full text-slate-700 text-center whitespace-nowrap">
+        {user.schedule}
       </td>
       <td className="border-b border-slate-100 p-4 text-slate-700 text-center">
         <input
@@ -138,6 +145,9 @@ const Table: FC<{
                   Naam
                 </th>
                 <th className="border-b font-medium p-4 pt-0 pb-3 text-slate-600 text-center">
+                  Werktijden
+                </th>
+                <th className="border-b font-medium p-4 pt-0 pb-3 text-slate-600 text-center">
                   Porto
                 </th>
                 <th className="border-b font-medium p-4 pr-8 pt-0 pb-3 text-slate-600 text-center">
@@ -179,6 +189,7 @@ const Table: FC<{
 };
 
 const CommsBreakComponent = ({ date }: CommunicationComponentType) => {
+  const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
   const planing = trpc.useQuery([
     'planning.byDate',
     {
@@ -187,6 +198,7 @@ const CommsBreakComponent = ({ date }: CommunicationComponentType) => {
   ]);
 
   if (!planing.isSuccess || !planing.data) return null;
+  const schedule = scheduleQuery.data || [];
 
   const users = planing.data
     .flatMap((p) =>
@@ -199,7 +211,21 @@ const CommsBreakComponent = ({ date }: CommunicationComponentType) => {
     .filter(
       (value, index, self) =>
         index === self.findIndex((t) => t.id === value.id),
-    );
+    )
+    .map((user) => ({
+      ...user,
+      schedule: schedule.find((s) => s.userId === user.id)?.schedule,
+    }))
+    .sort((a, b) => {
+      if (!a.schedule || !b.schedule)
+        return a.name && b.name ? a.name.localeCompare(b.name) : 0;
+
+      const sort = a.schedule.localeCompare(b.schedule);
+
+      if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
+
+      return sort;
+    });
 
   return (
     <div className="w-full p-4 px-10">

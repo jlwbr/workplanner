@@ -62,7 +62,21 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
       .filter(
         (value, index, self) =>
           index === self.findIndex((t) => t.id === value.id),
-      );
+      )
+      .map((user) => ({
+        ...user,
+        schedule: schedule.find((s) => s.userId === user.id)?.schedule,
+      }))
+      .sort((a, b) => {
+        if (!a.schedule || !b.schedule)
+          return a.name && b.name ? a.name.localeCompare(b.name) : 0;
+
+        const sort = a.schedule.localeCompare(b.schedule);
+
+        if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
+
+        return sort;
+      });
 
     return (
       <div ref={ref}>
@@ -223,6 +237,9 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                     Naam
                   </th>
                   <th className="border-b font-bold p-4 pt-4 pb-3 text-slate-600 text-center">
+                    Werktijden
+                  </th>
+                  <th className="border-b font-bold p-4 pt-4 pb-3 text-slate-600 text-center">
                     Porto
                   </th>
                   <th className="border-b font-bold p-4 pt-4 pb-3 text-slate-600 text-center">
@@ -235,15 +252,14 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
               </thead>
               <tbody className="bg-white">
                 {users.map((user) => {
-                  const times = schedule.find(
-                    (item) => item.userId === user.id,
-                  )?.schedule;
                   return (
                     <Fragment key={user.id}>
                       <tr>
                         <td className="border-b border-slate-100 py-1 pl-8 w-full text-slate-700">
                           {user.name}
-                          {times && ` (${times})`}
+                        </td>
+                        <td className="border-b border-slate-100 py-1 w-full text-slate-700 text-center whitespace-nowrap">
+                          {user.schedule}
                         </td>
                         <td className="border-b border-slate-100 py-1 text-slate-700 text-center inline-flex justify-center w-full">
                           {Communication.data.find((d) => d.userId === user.id)

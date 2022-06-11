@@ -60,6 +60,9 @@ export const scheduleRouter = createRouter()
       return prisma.schedule.findMany({
         where: input,
         select: defaultScheduleSelect,
+        orderBy: {
+          schedule: 'asc',
+        }
       });
     },
   })
