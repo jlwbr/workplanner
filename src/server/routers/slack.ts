@@ -39,7 +39,7 @@ export const slackRouter = createRouter()
                     id: user.id,
                 },
                 data: {
-                    name: member.name,
+                    name: member.profile?.real_name,
                 },
             });
         });
