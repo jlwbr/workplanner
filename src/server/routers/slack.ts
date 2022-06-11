@@ -11,6 +11,7 @@ export const slackRouter = createRouter()
         const prismaUsers = await prisma.user.findMany({
             select: {
               id: true,
+              name: true,
               accounts: {
                 where: {
                   provider: 'slack',
@@ -32,6 +33,7 @@ export const slackRouter = createRouter()
         result.members.forEach(async member => {
             const user = prismaUsers.find(u => u.accounts.some(a => a.providerAccountId === member.id));
 
+            if(user?.name === member.profile?.real_name) return;
             if (!user) return;
 
             await prisma.user.update({
