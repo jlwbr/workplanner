@@ -2,7 +2,7 @@ import { createRouter } from '~/server/createRouter';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaPromise } from '@prisma/client';
 
 /**
  * Default selector for Tasks.
@@ -62,7 +62,7 @@ export const scheduleRouter = createRouter()
         select: defaultScheduleSelect,
         orderBy: {
           schedule: 'asc',
-        }
+        },
       });
     },
   })
@@ -92,34 +92,39 @@ export const scheduleRouter = createRouter()
         parseInt(week.slice(0, 4), 10),
       );
 
-      isoWeek.forEach(async (day, index) => {
-        await prisma.schedule.deleteMany({
-          where: {
-            date: day,
-          },
-        })
+      await prisma.schedule.deleteMany({
+        where: {
+          date: { in: isoWeek },
+        },
+      });
 
+      const schedules: PrismaPromise<any>[] = [];
+      isoWeek.forEach(async (day, index) => {
         data.forEach(async ({ id, data }) => {
           const schedule = data[index];
           if (!schedule || typeof id == 'boolean') return;
 
-          await prisma.schedule.upsert({
-            where: {
-              userId_date: {
+          schedules.push(
+            prisma.schedule.upsert({
+              where: {
+                userId_date: {
+                  userId: id,
+                  date: day,
+                },
+              },
+              update: {
+                schedule: schedule,
+              },
+              create: {
                 userId: id,
                 date: day,
+                schedule: schedule,
               },
-            },
-            update: {
-              schedule: schedule,
-            },
-            create: {
-              userId: id,
-              date: day,
-              schedule: schedule,
-            },
-          });
+            }),
+          );
         });
       });
+
+      await prisma.$transaction(schedules);
     },
   });
