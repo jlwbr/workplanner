@@ -1,9 +1,8 @@
 import { useSession } from 'next-auth/react';
 import ReactTooltip from 'react-tooltip';
-import { inferMutationInput, trpc } from '~/utils/trpc';
+import { InferQueryOutput, InferMutationInput, trpc } from '~/utils/trpc';
 import AsigneeBadge, { ItemTypes } from './AsigneeBadge';
 import { KanbanRule } from './KanbanComponent';
-import { inferQueryOutput } from '~/utils/trpc';
 import { useDrop } from 'react-dnd';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -14,10 +13,10 @@ type KanbanItemType = {
   item: KanbanRule;
   locked: boolean;
   isAdmin: boolean;
-  Break?: inferQueryOutput<'break.getAll'>;
-  Communication?: inferQueryOutput<'communication.getAll'>;
-  schedule?: inferQueryOutput<'schedule.getAll'>;
-  editTask: (item: inferMutationInput<'planning.tasks.upsert'>) => void;
+  Break?: InferQueryOutput<'break.getAll'>;
+  Communication?: InferQueryOutput<'communication.getAll'>;
+  schedule?: InferQueryOutput<'schedule.getAll'>;
+  editTask: (item: InferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
 type assigneeType = {
@@ -27,8 +26,8 @@ type assigneeType = {
   userId: string;
   timeOfDay: 'morning' | 'afternoon' | 'evening';
   isAdmin: boolean;
-  Break?: inferQueryOutput<'break.getAll'>;
-  Communication?: inferQueryOutput<'communication.getAll'>;
+  Break?: InferQueryOutput<'break.getAll'>;
+  Communication?: InferQueryOutput<'communication.getAll'>;
   locked: boolean;
   rest: number;
 };
@@ -397,9 +396,7 @@ const KanbanItem = ({
             if (AssigneeText && typeof AssigneeText === 'object') {
               const text = (AssigneeText as Prisma.JsonObject)[id];
               return text ? (
-                <div key={id}>
-                  {name?.split(' ')[0]}: {text}
-                </div>
+                <div key={id}>{`${name?.split(' ')[0]}: ${text}`}</div>
               ) : null;
             }
 

@@ -30,7 +30,7 @@ const DateHeader = ({ date, setDate, admin }: DateHeaderType) => {
     if (qDate && typeof qDate === 'string') {
       setDate(new Date(qDate));
     }
-  }, []);
+  }, [qDate, setDate]);
 
   const updateDate = (newdate: Date) => {
     router.replace({

@@ -2,7 +2,7 @@ import { useSession } from 'next-auth/react';
 import { FC, ReactElement, useState } from 'react';
 import { AdminLayout } from '~/components/AdminLayout';
 import { NextPageWithLayout } from '~/pages/_app';
-import { inferQueryOutput, trpc } from '~/utils/trpc';
+import { InferQueryOutput, trpc } from '~/utils/trpc';
 
 const phoneNumbers = [
   '201',
@@ -21,7 +21,7 @@ const phoneNumbers = [
 const breakNumbers = ['0', '1', '2', '3'];
 
 const Input: FC<{
-  user: inferQueryOutput<'user.all'>[0];
+  user: InferQueryOutput<'user.all'>[0];
 }> = ({ user }) => {
   const context = trpc.useContext();
   const upsertMutation = trpc.useMutation(['user.update'], {
