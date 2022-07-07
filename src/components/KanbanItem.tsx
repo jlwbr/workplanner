@@ -70,7 +70,7 @@ const Assignees = ({
     label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
   }));
 
-  const handleChange = (
+  const handleChange = async (
     selectedOption: MultiValue<{ value: string; label: string | null }>,
   ) => {
     setAssignees(selectedOption.concat());
@@ -85,12 +85,22 @@ const Assignees = ({
       }
     }
 
+    const alertUser = (event: any) => {
+      event.preventDefault();
+      event.returnValue = '';
+      return '';
+    };
+
     for (const asignee of asignees) {
-      removeAsignee.mutate({
+      window.addEventListener('beforeunload', alertUser);
+
+      await removeAsignee.mutateAsync({
         planningItemId: id,
         timeOfDay,
         asigneeId: asignee.id,
       });
+
+      window.removeEventListener('beforeunload', alertUser);
     }
   };
 
