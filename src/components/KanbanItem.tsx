@@ -34,7 +34,7 @@ type assigneeType = {
 
 const Assignees = ({
   id,
-  asignees,
+  asignees: initalAsignees,
   canAssign,
   userId,
   timeOfDay,
@@ -46,7 +46,7 @@ const Assignees = ({
 }: assigneeType) => {
   const context = trpc.useContext();
   const [assignees, setAssignees] = useState(
-    asignees.map((item) => ({
+    initalAsignees.map((item) => ({
       value: item.id,
       label: item.name,
     })),
@@ -70,37 +70,31 @@ const Assignees = ({
     label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
   }));
 
-  const handleChange = async (
+  const handleChange = (
     selectedOption: MultiValue<{ value: string; label: string | null }>,
   ) => {
+    const prevAssignees = assignees;
+
     setAssignees(selectedOption.concat());
-    for (const option of selectedOption) {
-      if (!asignees.some((asignee) => asignee.id == option.value)) {
-        asignees.shift();
+    for (const { value } of selectedOption) {
+      const index = prevAssignees.findIndex(({ value: id }) => id === value);
+      if (index === -1) {
         asigneeMuation.mutate({
           planningItemId: id,
           timeOfDay,
-          asigneeId: option.value,
+          asigneeId: value,
         });
+      } else {
+        prevAssignees.splice(index, 1);
       }
     }
 
-    const alertUser = (event: any) => {
-      event.preventDefault();
-      event.returnValue = '';
-      return '';
-    };
-
-    for (const asignee of asignees) {
-      window.addEventListener('beforeunload', alertUser);
-
-      await removeAsignee.mutateAsync({
+    for (const { value } of prevAssignees) {
+      removeAsignee.mutate({
         planningItemId: id,
         timeOfDay,
-        asigneeId: asignee.id,
+        asigneeId: value,
       });
-
-      window.removeEventListener('beforeunload', alertUser);
     }
   };
 
@@ -135,7 +129,7 @@ const Assignees = ({
     </div>
   ) : (
     <div ref={drop} className="flex flex-wrap gap-2">
-      {asignees.map(({ id: itemId, name }) => {
+      {initalAsignees.map(({ id: itemId, name }) => {
         const phone = Communication?.find(
           ({ userId }) => userId === itemId,
         )?.phoneNumber;
