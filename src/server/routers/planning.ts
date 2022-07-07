@@ -599,9 +599,9 @@ export const planningRouter = createRouter()
       // FIXME: we should be sorting in the prisma query
       return planning
         .sort((a, b) => a.channel.sort - b.channel.sort)
-        .map((planningItem) => ({
-          ...planningItem,
-          planningItem: planningItem.PlanningItem.sort((a, b) => {
+        .map((PlanningItem) => ({
+          ...PlanningItem,
+          PlanningItem: PlanningItem.PlanningItem.sort((a, b) => {
             if (!a.PlanningRule?.order && !b.PlanningRule?.order) return 0;
             if (!a.PlanningRule?.order) return 1;
             if (!b.PlanningRule?.order) return -1;
