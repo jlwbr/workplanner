@@ -2,16 +2,16 @@ import { PlanningItem } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { z } from 'zod';
-import { inferMutationInput, inferQueryOutput, trpc } from '~/utils/trpc';
+import { InferMutationInput, InferQueryOutput, trpc } from '~/utils/trpc';
 import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
 
 export type KanbanRule = Exclude<
-  inferQueryOutput<'planning.byDate'>,
+  InferQueryOutput<'planning.byDate'>,
   false
 >[0]['PlanningItem'][0];
 
-const defaultEditingRuleData: inferMutationInput<'planning.tasks.upsert'> = {
+const defaultEditingRuleData: InferMutationInput<'planning.tasks.upsert'> = {
   id: '',
   name: '',
   ownerId: '',
@@ -81,10 +81,10 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
   });
   const [open, setOpen] = useState(false);
   const [editingRuleData, setEditingRuleData] = useState<
-    inferMutationInput<'planning.tasks.upsert'>
+    InferMutationInput<'planning.tasks.upsert'>
   >(defaultEditingRuleData);
 
-  const openTask = (data?: inferMutationInput<'planning.tasks.upsert'>) => {
+  const openTask = (data?: InferMutationInput<'planning.tasks.upsert'>) => {
     if (data) {
       setEditingRuleData(data);
     } else {
@@ -196,10 +196,10 @@ type KanbanListType = {
   locked: boolean;
   isAdmin: boolean;
   canAdd: boolean;
-  Break?: inferQueryOutput<'break.getAll'>;
-  Communication?: inferQueryOutput<'communication.getAll'>;
-  schedule?: inferQueryOutput<'schedule.getAll'>;
-  newTask: (data?: inferMutationInput<'planning.tasks.upsert'>) => void;
+  Break?: InferQueryOutput<'break.getAll'>;
+  Communication?: InferQueryOutput<'communication.getAll'>;
+  schedule?: InferQueryOutput<'schedule.getAll'>;
+  newTask: (data?: InferMutationInput<'planning.tasks.upsert'>) => void;
 };
 
 const KanbanList = ({

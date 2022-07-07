@@ -8,7 +8,7 @@ import PlanningEditor, {
   PlanningInputsType,
 } from '~/components/PlanningEditor';
 import { NextPageWithLayout } from '~/pages/_app';
-import { inferMutationInput, trpc } from '~/utils/trpc';
+import { InferMutationInput, trpc } from '~/utils/trpc';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -59,7 +59,7 @@ const IndexPage: NextPageWithLayout = () => {
 
   const [open, setOpen] = useState(false);
   const [editingRuleData, setEditingRuleData] = useState<
-    inferMutationInput<'planning.rules.upsert'>
+    InferMutationInput<'planning.rules.upsert'>
   >(defaultEditingRuleData);
 
   const openRule = (data?: PlanningRule) => {

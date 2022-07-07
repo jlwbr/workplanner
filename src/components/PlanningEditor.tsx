@@ -2,7 +2,7 @@
 import { Fragment, HTMLInputTypeAttribute } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { PlanningItem, PlanningRule } from '@prisma/client';
-import { inferMutationInput } from '~/utils/trpc';
+import { InferMutationInput } from '~/utils/trpc';
 
 // TODO: find a more typescript friendly way to do this
 export type PlanningInputsType = {
@@ -17,12 +17,12 @@ type PlanningEditorType = {
   open: boolean;
   onClose: (cancel?: boolean) => any;
   value:
-    | inferMutationInput<'planning.tasks.upsert'>
-    | inferMutationInput<'planning.rules.upsert'>;
+    | InferMutationInput<'planning.tasks.upsert'>
+    | InferMutationInput<'planning.rules.upsert'>;
   onChange: (
     value:
-      | inferMutationInput<'planning.tasks.upsert'>
-      | inferMutationInput<'planning.rules.upsert'>,
+      | InferMutationInput<'planning.tasks.upsert'>
+      | InferMutationInput<'planning.rules.upsert'>,
   ) => void;
   inputs: PlanningInputsType;
   onDelete: (id: string) => void;
