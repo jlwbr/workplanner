@@ -1,6 +1,9 @@
 # Workplanner
 
-Workplanner is a daily planner for you and your colleagues with it you can assign people to tasks, keep track of everyones phone numbers and break schedules and create todo lists for a task.
+Workplanner is a daily planner for you and your colleagues. With it you can: 
+- assign people to tasks
+- keep track of everyones phone numbers and break schedules
+- create todo lists for a task (subtasks)
 
 (Someday there will be more info here :grin:).
 
