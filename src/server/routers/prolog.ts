@@ -65,6 +65,12 @@ export const prologRouter = createRouter().mutation('Check', {
     try {
       await session.promiseQuery('test.');
       await session.promiseConsult(program);
+
+      for await (const answer of session.promiseAnswers()) {
+        const formatted = session.format_answer(answer);
+        if (!formatted.includes('true') || formatted.includes('false'))
+          return { success: false };
+      }
       return {
         success: true,
       };
