@@ -7,6 +7,7 @@ import { prisma } from '../prisma';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import pl from 'tau-prolog';
+import groupBy from '~/utils/groupBy';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('tau-prolog/modules/promises.js')(pl);
@@ -53,15 +54,6 @@ function fromList<T>(xs: any) {
     return arr as unknown as T[];
   return null;
 }
-
-const groupByKey = (list: any[], key: string) =>
-  list.reduce(
-    (hash, obj) => ({
-      ...hash,
-      [obj[key]]: (hash[obj[key]] || []).concat(obj),
-    }),
-    {},
-  );
 
 export const prologRouter = createRouter().mutation('Check', {
   input: z.string(),
@@ -120,27 +112,7 @@ export const GeneratePlanning = async (date: Date) => {
     PlanningRules.map((rule) => `task(${rule.id}) :- ${rule.rule}`).join('\n'),
   );
 
-  type PlanningRulesByChannelId = {
-    [key: string]: {
-      id: string;
-      name: string;
-      description: string;
-      hasMorning: boolean;
-      hasAfternoon: boolean;
-      hasEvening: boolean;
-      maxMorning: number;
-      maxAfternoon: number;
-      maxEvening: number;
-      priority: number;
-      channelId: string;
-      subTask: { id: string; name: string }[];
-    }[];
-  };
-
-  const channels: PlanningRulesByChannelId = groupByKey(
-    PlanningRules,
-    'channelId',
-  );
+  const channels = groupBy(PlanningRules, ({ channelId }) => channelId);
 
   await session.promiseConsult(program);
   await session.promiseQuery('test_all(X).');

@@ -3,15 +3,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';
-
-const groupByKey = (list: any[], key: string) =>
-  list.reduce(
-    (hash, obj) => ({
-      ...hash,
-      [obj[key]]: (hash[obj[key]] || []).concat(obj),
-    }),
-    {},
-  );
+import groupBy from '~/utils/groupBy';
 
 /**
  * Default selector for Tasks.
@@ -41,7 +33,10 @@ export const communicationRouter = createRouter()
         select: defaultCommunicationSelect,
       });
 
-      const communications = groupByKey(customCommunication, 'userId');
+      const communications = groupBy(
+        customCommunication,
+        ({ userId }) => userId,
+      );
 
       return users.map((user) => {
         if (communications[user.id]) return communications[user.id][0];

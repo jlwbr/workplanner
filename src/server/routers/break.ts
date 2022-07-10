@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';
+import groupBy from '~/utils/groupBy';
 
 /**
  * Default selector for Tasks.
@@ -15,15 +16,6 @@ const defaultBreakSelect = Prisma.validator<Prisma.BreakSelect>()({
   date: true,
   number: true,
 });
-
-const groupByKey = (list: any[], key: string) =>
-  list.reduce(
-    (hash, obj) => ({
-      ...hash,
-      [obj[key]]: (hash[obj[key]] || []).concat(obj),
-    }),
-    {},
-  );
 
 export const breakRouter = createRouter()
   .query('getAll', {
@@ -39,7 +31,7 @@ export const breakRouter = createRouter()
         select: defaultBreakSelect,
       });
 
-      const breaks = groupByKey(customBreak, 'userId');
+      const breaks = groupBy(customBreak, ({ userId }) => userId);
 
       return users.map((user) => {
         if (breaks[user.id]) return breaks[user.id][0];
