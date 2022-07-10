@@ -2,6 +2,12 @@ import { useSession } from 'next-auth/react';
 import { ReactElement, useContext, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import toast from 'react-hot-toast';
+import {
+  HiChevronDoubleLeft,
+  HiOutlineChevronDoubleRight,
+  HiPlus,
+} from 'react-icons/hi';
 import AsigneeBadge from '~/components/AsigneeBadge';
 import { DateContext, DateLayout } from '~/components/DateLayout';
 import KanbanComponent from '~/components/KanbanComponent';
@@ -13,7 +19,25 @@ const IndexPage: NextPageWithLayout = () => {
   const { data } = useSession();
   const userQuery = trpc.useQuery(['user.all']);
   const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
+  const addUserMutation = trpc.useMutation(['user.add']);
   const [open, setOpen] = useState(false);
+
+  const addUser = () => {
+    const name = prompt('Naam');
+
+    if (!name) return;
+
+    toast.promise(
+      addUserMutation.mutateAsync({
+        name,
+      }),
+      {
+        loading: 'Beschrijving aan het aanpassen',
+        error: 'Er is iets fout gegaan',
+        success: 'Beschrijving is aangepast',
+      },
+    );
+  };
 
   const users = userQuery.data || [];
   const schedule = scheduleQuery.data || [];
@@ -72,38 +96,18 @@ const IndexPage: NextPageWithLayout = () => {
                 className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap"
               >
                 {open ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-                    />
-                  </svg>
+                  <HiChevronDoubleLeft className="h-4 w-4" />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 5l7 7-7 7M5 5l7 7-7 7"
-                    />
-                  </svg>
+                  <HiOutlineChevronDoubleRight className="h-4 w-4" />
                 )}
               </button>
             )}
+            <button
+              onClick={() => addUser()}
+              className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap"
+            >
+              <HiPlus className="h-4 w-4" />
+            </button>
           </div>
         </div>
       )}

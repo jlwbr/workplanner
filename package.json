@@ -51,6 +51,7 @@
     "react-dom": "^18.2.0",
     "react-drag-drop-files": "^2.3.5",
     "react-hot-toast": "^2.2.0",
+    "react-icons": "^4.4.0",
     "react-is": "^18.2.0",
     "react-query": "^3.39.1",
     "react-select": "^5.3.1",

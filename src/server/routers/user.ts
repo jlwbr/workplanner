@@ -38,6 +38,25 @@ export const userRouter = createRouter()
       });
     },
   })
+  .mutation('add', {
+    input: z.object({
+      name: z.string(),
+    }),
+    async resolve({ ctx, input }) {
+      if (!ctx.session?.user?.isEditor) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be an admin or editor to acces this resource',
+        });
+      }
+
+      return prisma.user.create({
+        data: {
+          ...input,
+        },
+      });
+    },
+  })
   .mutation('update', {
     input: z.object({
       id: z.string(),

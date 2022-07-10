@@ -42,6 +42,7 @@ specifiers:
   react-dom: ^18.2.0
   react-drag-drop-files: ^2.3.5
   react-hot-toast: ^2.2.0
+  react-icons: ^4.4.0
   react-is: ^18.2.0
   react-query: ^3.39.1
   react-select: ^5.3.1
@@ -78,6 +79,7 @@ dependencies:
   react-dom: 18.2.0_react@18.2.0
   react-drag-drop-files: 2.3.5_7i5myeigehqah43i5u7wbekgba
   react-hot-toast: 2.2.0_npw22p3c4ehm7n7vxn2gqac44u
+  react-icons: 4.4.0_react@18.2.0
   react-is: 18.2.0
   react-query: 3.39.1_biqbaboplfbrettd7655fr4n2y
   react-select: 5.3.1_7ir5hbqdbfw4we5ecpxz77f25m
@@ -5496,6 +5498,14 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     transitivePeerDependencies:
       - csstype
+    dev: false
+
+  /react-icons/4.4.0_react@18.2.0:
+    resolution: {integrity: sha512-fSbvHeVYo/B5/L4VhB7sBA1i2tS8MkT0Hb9t2H1AVPkwGfVHLJCqyr2Py9dKMxsyM63Eng1GkdZfbWj+Fmv8Rg==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react-is/16.13.1:
