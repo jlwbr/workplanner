@@ -113,6 +113,8 @@ export const GeneratePlanning = async (date: Date) => {
     },
   });
 
+  if (PlanningRules.length == 0) return;
+
   const program = generateProgram(
     date,
     PlanningRules.map((rule) => `task(${rule.id}) :- ${rule.rule}`).join('\n'),
