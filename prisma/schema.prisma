@@ -160,15 +160,28 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Permission {
+  id   String @id @default(cuid())
+  name String
+
+  roles Role[]
+}
+
+model Role {
+  id   String @id @default(cuid())
+  name String
+
+  permissions Permission[]
+  users User[]
+}
+
 model User {
   id                   String          @id @default(cuid())
   name                 String?
   email                String?         @unique
   emailVerified        DateTime?
   image                String?
-  admin                Boolean         @default(false)
-  editor               Boolean         @default(false)
-  shared               Boolean         @default(false)
+  roles                Role[]
   defaultPhoneNumber   String?
   defaultHT            Boolean?
   defaultBreak         Int?

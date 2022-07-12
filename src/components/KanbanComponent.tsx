@@ -2,6 +2,7 @@ import { PlanningItem } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { z } from 'zod';
+import swallowQuery from '~/utils/swallowQuery';
 import { InferMutationInput, InferQueryOutput, trpc } from '~/utils/trpc';
 import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
@@ -45,8 +46,8 @@ type KanbanComponentType = {
 
 const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
   const context = trpc.useContext();
-  const planing = trpc.useQuery([
-    'planning.byDate',
+  const rowQuery = trpc.useQuery([
+    'planning.rows',
     {
       date: date,
     },
@@ -63,20 +64,20 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
     },
   );
   const Break = trpc.useQuery(['break.getAll', { date }], {
-    enabled: planing.data?.some((item) => item.locked),
+    enabled: rowQuery.data?.some((item) => item.locked),
   });
   const Communication = trpc.useQuery(['communication.getAll', { date }], {
-    enabled: planing.data?.some((item) => item.locked),
+    enabled: rowQuery.data?.some((item) => item.locked),
   });
 
   const UpsertRule = trpc.useMutation(['planning.tasks.upsert'], {
     onSuccess: () => {
-      context.invalidateQueries(['planning.byDate']);
+      // context.invalidateQueries(['planning.byDate']);
     },
   });
   const deleteMutation = trpc.useMutation(['planning.tasks.delete'], {
     onSuccess: () => {
-      context.invalidateQueries(['planning.byDate']);
+      // context.invalidateQueries(['planning.byDate']);
     },
   });
   const [open, setOpen] = useState(false);
@@ -131,31 +132,8 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
     }
   };
 
-  if (!planing.isSuccess)
-    return (
-      <div className="flex flex-col items-center justify-center h-[60vh]">
-        <svg
-          className="animate-spin -ml-1 mr-3 h-20 w-20 text-white"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-      </div>
-    );
+  const [rows, success, element] = swallowQuery(rowQuery);
+  if (!success) return element;
 
   return (
     <div className="overflow-x-scroll">
@@ -168,14 +146,13 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
           inputs={PlanningInputs}
           onDelete={onDelete}
         />
-        {planing.data.map((plan) => (
+        {rows.map(({ id, channel, locked }) => (
           <KanbanList
-            key={plan.id}
-            id={plan.id}
-            locked={plan.locked}
-            canAdd={plan.channel.canAdd}
-            title={plan.channel.name}
-            rules={plan.PlanningItem}
+            key={id}
+            planning={id}
+            locked={locked}
+            canAdd={channel.canAdd}
+            title={channel.name}
             schedule={schedule.data}
             Break={Break.data}
             Communication={Communication.data}
@@ -190,9 +167,8 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
 };
 
 type KanbanListType = {
-  id: string;
+  planning: string;
   title: string;
-  rules: KanbanRule[];
   locked: boolean;
   isAdmin: boolean;
   canAdd: boolean;
@@ -203,9 +179,8 @@ type KanbanListType = {
 };
 
 const KanbanList = ({
-  id,
+  planning,
   title,
-  rules,
   locked,
   isAdmin,
   canAdd,
@@ -215,16 +190,20 @@ const KanbanList = ({
   newTask,
 }: KanbanListType) => {
   const { data: user } = useSession();
+  const rulesQuery = trpc.useQuery(['planning.rules', { planning }]);
+
+  const [rules, success, element] = swallowQuery(rulesQuery);
+  if (!success) return element;
 
   return (
     <div className="bg-gray-200 rounded-lg shadow-lg min-w-[calc(100vw_-_2rem)] w-[calc(100vw_-_2rem)] sm:min-w-[22rem] sm:w-[22rem]">
       <h1 className="text-lg font-medium text-gray-900 pl-5 pt-3">{title}</h1>
       <div className="flex flex-col gap-4 p-2 h-[80vh] overflow-y-auto">
-        {rules.map((rule) => (
+        {rules.map(({ id }) => (
           <KanbanItem
-            key={rule.id}
+            key={id}
             editTask={newTask}
-            item={rule}
+            item={id}
             Break={Break}
             Communication={Communication}
             schedule={schedule}
