@@ -1,83 +1,47 @@
 import { forwardRef, Fragment, useRef } from 'react';
 import ReactToPrint from 'react-to-print';
-import { trpc } from '~/utils/trpc';
+import { InferQueryOutput, trpc } from '~/utils/trpc';
 import Image from 'next/image';
 import Logo from '../../public/Karwei_logo.png';
 import { Prisma } from '@prisma/client';
 
 type PrintComponentType = {
   date: Date;
+  users: any[];
+  Communication: InferQueryOutput<'communication.getAll'>;
+  Break: InferQueryOutput<'break.getAll'>;
+  planing: InferQueryOutput<'planning.byDate'>;
 };
 
 const Loading = () => (
-  <div className="flex flex-col items-center justify-center h-20 w-20">
-    <svg
-      className="animate-spin h-20 w-20 text-slate-400"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      ></circle>
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      ></path>
-    </svg>
+  <div className="bg-white border rounded mt-5 p-8">
+    <div className="flex flex-col items-center justify-center h-20 w-20">
+      <svg
+        className="animate-spin h-20 w-20 text-slate-400"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+    </div>
   </div>
 );
 
 const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
-  ({ date }, ref) => {
-    const planing = trpc.useQuery([
-      'planning.byDate',
-      {
-        date: date,
-      },
-    ]);
-    const Break = trpc.useQuery(['break.getAll', { date }]);
-    const Communication = trpc.useQuery(['communication.getAll', { date }]);
-    const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
-    if (!planing.isSuccess || !planing.data) return <Loading />;
-    if (!Break.isSuccess || !Break.data) return <Loading />;
-    if (!Communication.isSuccess || !Communication.data) return <Loading />;
-
-    const schedule = scheduleQuery.data || [];
-
-    const users = planing.data
-      .flatMap((p) =>
-        p.PlanningItem.flatMap((i) => [
-          ...i.morningAsignee,
-          ...i.afternoonAsignee,
-          ...i.eveningAsignee,
-        ]),
-      )
-      .filter(
-        (value, index, self) =>
-          index === self.findIndex((t) => t.id === value.id),
-      )
-      .map((user) => ({
-        ...user,
-        schedule: schedule.find((s) => s.userId === user.id)?.schedule,
-      }))
-      .sort((a, b) => {
-        if (!a.schedule || !b.schedule)
-          return a.name && b.name ? a.name.localeCompare(b.name) : 0;
-
-        const sort = a.schedule.localeCompare(b.schedule);
-
-        if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
-
-        return sort;
-      });
-
+  ({ date, users, planing, Communication, Break }, ref) => {
     return (
       <div ref={ref}>
         <style>{'@page { margin: 2rem !important; }'}</style>
@@ -122,7 +86,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {planing.data.map((task, i) => {
+                {planing.map((task, i) => {
                   const items = task.PlanningItem.filter(
                     (item) =>
                       item.morningAsignee.length > 0 ||
@@ -186,7 +150,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             {Planning.morningAsignee.map((item) => (
                               <div
                                 key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
+                                className="text-xs leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
                                   {item.name?.split(' ')[0]}
@@ -198,7 +162,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             {Planning.afternoonAsignee.map((item) => (
                               <div
                                 key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
+                                className="text-xs leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
                                   {item.name?.split(' ')[0]}
@@ -210,7 +174,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                             {Planning.eveningAsignee.map((item) => (
                               <div
                                 key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
+                                className="text-xs leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
                               >
                                 <span className="whitespace-nowrap">
                                   {item.name?.split(' ')[0]}
@@ -262,7 +226,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                           {user.schedule}
                         </td>
                         <td className="border-b border-slate-100 py-1 text-slate-700 text-center inline-flex justify-center w-full">
-                          {Communication.data.find((d) => d.userId === user.id)
+                          {Communication.find((d) => d.userId === user.id)
                             ?.HT ? (
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -296,13 +260,13 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                           )}
                         </td>
                         <td className="border-b border-slate-100 py-1 text-slate-700 text-center">
-                          {Communication.data.find((d) => d.userId === user.id)
+                          {Communication.find((d) => d.userId === user.id)
                             ?.phoneNumber ?? ''}
                         </td>
                         <td className="border-b border-slate-100 py-1 text-slate-700 text-center">
-                          {Break.data
-                            .find((d) => d.userId === user.id)
-                            ?.number?.toString() ?? ''}
+                          {Break.find(
+                            (d) => d.userId === user.id,
+                          )?.number?.toString() ?? ''}
                         </td>
                       </tr>
                     </Fragment>
@@ -325,6 +289,47 @@ type PlanningPageType = {
 
 const Planningpage = ({ date }: PlanningPageType) => {
   const componentRef = useRef(null);
+  const planing = trpc.useQuery([
+    'planning.byDate',
+    {
+      date: date,
+    },
+  ]);
+  const Break = trpc.useQuery(['break.getAll', { date }]);
+  const Communication = trpc.useQuery(['communication.getAll', { date }]);
+  const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
+  if (!planing.isSuccess || !planing.data) return <Loading />;
+  if (!Break.isSuccess || !Break.data) return <Loading />;
+  if (!Communication.isSuccess || !Communication.data) return <Loading />;
+
+  const schedule = scheduleQuery.data || [];
+
+  const users = planing.data
+    .flatMap((p) =>
+      p.PlanningItem.flatMap((i) => [
+        ...i.morningAsignee,
+        ...i.afternoonAsignee,
+        ...i.eveningAsignee,
+      ]),
+    )
+    .filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.id === value.id),
+    )
+    .map((user) => ({
+      ...user,
+      schedule: schedule.find((s) => s.userId === user.id)?.schedule,
+    }))
+    .sort((a, b) => {
+      if (!a.schedule || !b.schedule)
+        return a.name && b.name ? a.name.localeCompare(b.name) : 0;
+
+      const sort = a.schedule.localeCompare(b.schedule);
+
+      if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
+
+      return sort;
+    });
 
   return (
     <div className="flex flex-col items-center">
@@ -337,7 +342,14 @@ const Planningpage = ({ date }: PlanningPageType) => {
         content={() => componentRef.current}
       />
       <div className="bg-white border rounded mt-5 p-8">
-        <PrintComponent ref={componentRef} date={date} />
+        <PrintComponent
+          ref={componentRef}
+          date={date}
+          users={users}
+          Communication={Communication.data}
+          Break={Break.data}
+          planing={planing.data}
+        />
       </div>
     </div>
   );

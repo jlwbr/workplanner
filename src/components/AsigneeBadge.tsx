@@ -31,8 +31,18 @@ const AsigneeBadge = ({
   return (
     <div ref={drag}>
       {canRemove
-        ? removableAsigneeBadge({ planningItemId, name, asigneeId, timeOfDay })
-        : staticAsigneeBadge({ planningItemId, name, asigneeId, timeOfDay })}
+        ? removableAsigneeBadge({
+            planningItemId,
+            name,
+            asigneeId,
+            timeOfDay,
+          })
+        : staticAsigneeBadge({
+            planningItemId,
+            name,
+            asigneeId,
+            timeOfDay,
+          })}
     </div>
   );
 };
@@ -45,7 +55,9 @@ type AsigneeBadgeSubType = {
 };
 
 const staticAsigneeBadge = ({ name }: AsigneeBadgeSubType) => (
-  <div className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-lime-200 text-lime-700 rounded-full whitespace-nowrap">
+  <div
+    className={`text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-lime-200 text-lime-700 rounded-full whitespace-nowrap`}
+  >
     {name}
   </div>
 );
@@ -74,7 +86,7 @@ const removableAsigneeBadge = ({
           asigneeId,
         });
       }}
-      className="text-xs inline-flex items-center justify-center gap-1 font-bold leading-sm px-3 py-1 bg-lime-200 text-lime-700 hover:bg-red-200 hover:text-red-700 rounded-full whitespace-nowrap"
+      className={`text-xs inline-flex items-center justify-center gap-1 font-bold leading-sm px-3 py-1 bg-lime-200 text-lime-700 hover:bg-red-200 hover:text-red-700 rounded-full whitespace-nowrap`}
     >
       {name}
     </button>
