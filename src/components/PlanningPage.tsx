@@ -148,8 +148,8 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               })}
                             </div>
                           </td>
-                          <td className="border-b border-l border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            <div className="grid grid-cols-[auto_auto] gap-1 mx-1">
+                          <td className="border-b border-l border-slate-100 py-2 text-slate-700 text-center whitespace-nowrap">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
                               {Planning.morningAsignee.map((item) => (
                                 <div
                                   key={item.id}
@@ -162,8 +162,8 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               ))}
                             </div>
                           </td>
-                          <td className="border-b border-l border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            <div className="grid grid-cols-[auto_auto] gap-1 mx-1">
+                          <td className="border-b border-l border-slate-100 py-2 text-slate-700 text-center whitespace-nowrap">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
                               {Planning.afternoonAsignee.map((item) => (
                                 <div
                                   key={item.id}
@@ -176,8 +176,8 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               ))}
                             </div>
                           </td>
-                          <td className="border-b border-l border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            <div className="grid grid-cols-[auto_auto] gap-1 mx-1">
+                          <td className="border-b border-l border-slate-100 py-2 text-slate-700 text-center whitespace-nowrap">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
                               {Planning.eveningAsignee.map((item) => (
                                 <div
                                   key={item.id}
