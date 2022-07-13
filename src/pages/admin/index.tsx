@@ -51,14 +51,14 @@ const IndexPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <div className="container horizontal">
+      <div className="hidden md:block container horizontal">
         <Stepper
           steps={stepArray}
           currentStepNumber={currentStep}
           onClick={handleStepClick}
         />
       </div>
-      <div className="container my-8 pt-4">
+      <div className="container my-8 md:pt-4">
         {currentStep == 1 && (
           <div className="text-center px-10">
             <h2 className="text-2xl m-5">

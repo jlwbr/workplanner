@@ -41,10 +41,12 @@ const PlanningInputs: PlanningInputsType = [
 type KanbanComponentType = {
   date: Date;
   isAdmin: boolean;
+  isEditor: boolean;
 };
 
-const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
+const KanbanComponent = ({ date, isAdmin, isEditor }: KanbanComponentType) => {
   const context = trpc.useContext();
+  const { data: user } = useSession();
   const planing = trpc.useQuery([
     'planning.byDate',
     {
@@ -59,7 +61,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
       },
     ],
     {
-      enabled: isAdmin,
+      enabled: isEditor,
     },
   );
   const Break = trpc.useQuery(['break.getAll', { date }], {
@@ -166,6 +168,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
           value={editingRuleData}
           onChange={(e: unknown) => setEditingRuleData(e as PlanningItem)}
           inputs={PlanningInputs}
+          hideDelete={!isAdmin && user?.user?.id !== editingRuleData.ownerId}
           onDelete={onDelete}
         />
         {planing.data.map((plan) => (
@@ -179,7 +182,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
             schedule={schedule.data}
             Break={Break.data}
             Communication={Communication.data}
-            isAdmin={isAdmin}
+            isAdmin={isEditor}
             newTask={openTask}
           />
         ))}

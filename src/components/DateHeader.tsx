@@ -98,18 +98,18 @@ const DateHeader = ({ date, setDate, admin }: DateHeaderType) => {
           </svg>
         </button>
       </div>
-      <div className="flex gap-2">
+      <div className="flex md:gap-4">
         {session &&
           session.user?.isEditor &&
           (admin ? (
             <Link href={`/?date=${date.toISOString()}`}>
-              <button className="bg-transparent hover:bg-gray-500 text-gray-700 hover:text-white py-1 px-2 border border-gray-500 hover:border-transparent rounded">
+              <button className="hidden md:block bg-transparent hover:bg-gray-500 text-gray-700 hover:text-white py-1 px-2 border border-gray-500 hover:border-transparent rounded">
                 Planning
               </button>
             </Link>
           ) : (
             <Link href={`/admin/?date=${date.toISOString()}`}>
-              <button className="bg-transparent hover:bg-gray-500 text-gray-700 hover:text-white py-1 px-2 border border-gray-500 hover:border-transparent rounded">
+              <button className="hidden md:block bg-transparent hover:bg-gray-500 text-gray-700 hover:text-white py-1 px-2 border border-gray-500 hover:border-transparent rounded">
                 Afronden
               </button>
             </Link>
