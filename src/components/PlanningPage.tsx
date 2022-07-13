@@ -14,28 +14,30 @@ type PrintComponentType = {
 };
 
 const Loading = () => (
-  <div className="bg-white border rounded mt-5 p-8">
-    <div className="flex flex-col items-center justify-center h-20 w-20">
-      <svg
-        className="animate-spin h-20 w-20 text-slate-400"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
-      </svg>
+  <div className="flex flex-col items-center">
+    <div className="bg-white border rounded mt-5 p-8">
+      <div className="flex flex-col items-center justify-center h-20 w-20">
+        <svg
+          className="animate-spin h-20 w-20 text-slate-400"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+      </div>
     </div>
   </div>
 );
@@ -115,7 +117,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                       </tr>
                       {items.map((Planning) => (
                         <tr key={Planning.id}>
-                          <td className="border-b border-slate-100 py-2 pl-8 w-full text-slate-700">
+                          <td className="border-b border-l border-slate-100 py-2 pl-8 w-full text-slate-700">
                             <div className="text-sm">{Planning.name}</div>
                             {Planning.description && (
                               <div className="text-xs">
@@ -146,41 +148,47 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               })}
                             </div>
                           </td>
-                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            {Planning.morningAsignee.map((item) => (
-                              <div
-                                key={item.id}
-                                className="text-xs leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
-                              >
-                                <span className="whitespace-nowrap">
-                                  {item.name?.split(' ')[0]}
-                                </span>
-                              </div>
-                            ))}
+                          <td className="border-b border-l border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-1">
+                              {Planning.morningAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="text-xs leading-sm px-2 py-1 border rounded-md"
+                                >
+                                  <span className="whitespace-nowrap">
+                                    {item.name?.split(' ')[0]}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
                           </td>
-                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            {Planning.afternoonAsignee.map((item) => (
-                              <div
-                                key={item.id}
-                                className="text-xs leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
-                              >
-                                <span className="whitespace-nowrap">
-                                  {item.name?.split(' ')[0]}
-                                </span>
-                              </div>
-                            ))}
+                          <td className="border-b border-l border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-1">
+                              {Planning.afternoonAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="text-xs leading-sm px-2 py-1 border rounded-md"
+                                >
+                                  <span className="whitespace-nowrap">
+                                    {item.name?.split(' ')[0]}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
                           </td>
-                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            {Planning.eveningAsignee.map((item) => (
-                              <div
-                                key={item.id}
-                                className="text-xs leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
-                              >
-                                <span className="whitespace-nowrap">
-                                  {item.name?.split(' ')[0]}
-                                </span>
-                              </div>
-                            ))}
+                          <td className="border-b border-l border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-1">
+                              {Planning.eveningAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="text-xs leading-sm px-2 py-1 border rounded-md"
+                                >
+                                  <span className="whitespace-nowrap">
+                                    {item.name?.split(' ')[0]}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -341,7 +349,7 @@ const Planningpage = ({ date }: PlanningPageType) => {
         )}
         content={() => componentRef.current}
       />
-      <div className="bg-white border rounded mt-5 p-8">
+      <div className="hidden md:block bg-white border rounded mt-5 p-8">
         <PrintComponent
           ref={componentRef}
           date={date}
