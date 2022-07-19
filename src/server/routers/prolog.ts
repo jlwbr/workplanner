@@ -8,6 +8,7 @@ import { prisma } from '../prisma';
 // @ts-ignore
 import pl from 'tau-prolog';
 import groupBy from '~/utils/groupBy';
+import { PrismaPromise } from '@prisma/client';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('tau-prolog/modules/promises.js')(pl);
@@ -68,7 +69,7 @@ export const prologRouter = createRouter().mutation('Check', {
 
       for await (const answer of session.promiseAnswers()) {
         const formatted = session.format_answer(answer);
-        if (!formatted.includes('true') || formatted.includes('false'))
+        if (!formatted.includes('true') && !formatted.includes('false'))
           return { success: false };
       }
       return {
@@ -164,28 +165,33 @@ export const GeneratePlanning = async (date: Date) => {
             },
           });
 
-          await planning.PlanningItem.forEach(async (item) => {
+          const transaction: PrismaPromise<any>[] = [];
+          planning.PlanningItem.forEach((item) => {
             const subTasks =
               filteredRules.find((rule) => rule.id === item.planningRuleId)
                 ?.subTask || [];
 
             if (subTasks.length <= 0) return;
 
-            await prisma.planningItem.update({
-              where: {
-                id: item.id,
-              },
-              data: {
-                subTask: {
-                  createMany: {
-                    data: subTasks.map((subTask) => ({
-                      name: subTask.name,
-                    })),
+            transaction.push(
+              prisma.planningItem.update({
+                where: {
+                  id: item.id,
+                },
+                data: {
+                  subTask: {
+                    createMany: {
+                      data: subTasks.map((subTask) => ({
+                        name: subTask.name,
+                      })),
+                    },
                   },
                 },
-              },
-            });
+              }),
+            );
           });
+
+          await prisma.$transaction(transaction);
         }
       }
     }
