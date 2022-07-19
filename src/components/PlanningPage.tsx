@@ -59,7 +59,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
               })}
             </h2>
           </div>
-          <div className="flex flex-col text-[0.6rem] italic">
+          <div className="hidden md:flex flex-col text-[0.6rem] italic">
             <span>p1: Koffie 10:15 - Lunch: 12:30 - Thee: 15:00 </span>
             <span>p2: Koffie 10:30 - Lunch: 13:00 - Thee: 15:15 </span>
             <span>p3: Koffie 10:45 - Lunch: 13:30 - Thee: 15:30 </span>
@@ -363,4 +363,5 @@ const Planningpage = ({ date }: PlanningPageType) => {
   );
 };
 
+export { PrintComponent };
 export default Planningpage;

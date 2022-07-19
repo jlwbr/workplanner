@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { InferMutationInput, InferQueryOutput, trpc } from '~/utils/trpc';
 import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
+import { PrintComponent } from './PlanningPage';
 
 export type KanbanRule = Exclude<
   InferQueryOutput<'planning.byDate'>,
@@ -159,6 +160,34 @@ const KanbanComponent = ({ date, isAdmin, isEditor }: KanbanComponentType) => {
       </div>
     );
 
+  const isLocked = planing.data.every(({ locked }) => locked == true);
+  const users = planing.data
+    .flatMap((p) =>
+      p.PlanningItem.flatMap((i) => [
+        ...i.morningAsignee,
+        ...i.afternoonAsignee,
+        ...i.eveningAsignee,
+      ]),
+    )
+    .filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.id === value.id),
+    )
+    .map((user) => ({
+      ...user,
+      schedule: schedule.data?.find((s) => s.userId === user.id)?.schedule,
+    }))
+    .sort((a, b) => {
+      if (!a.schedule || !b.schedule)
+        return a.name && b.name ? a.name.localeCompare(b.name) : 0;
+
+      const sort = a.schedule.localeCompare(b.schedule);
+
+      if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
+
+      return sort;
+    });
+
   return (
     <div className="overflow-x-scroll">
       <div className="flex h-full px-4 gap-6 pb-2">
@@ -171,21 +200,33 @@ const KanbanComponent = ({ date, isAdmin, isEditor }: KanbanComponentType) => {
           hideDelete={!isAdmin && user?.user?.id !== editingRuleData.ownerId}
           onDelete={onDelete}
         />
-        {planing.data.map((plan) => (
-          <KanbanList
-            key={plan.id}
-            id={plan.id}
-            locked={plan.locked}
-            canAdd={plan.channel.canAdd}
-            title={plan.channel.name}
-            rules={plan.PlanningItem}
-            schedule={schedule.data}
-            Break={Break.data}
-            Communication={Communication.data}
-            isAdmin={isEditor}
-            newTask={openTask}
-          />
-        ))}
+        {isLocked ? (
+          <div className="md:flex w-full justify-center">
+            <PrintComponent
+              date={date}
+              users={users}
+              Communication={Communication.data || []}
+              Break={Break.data || []}
+              planing={planing.data}
+            />
+          </div>
+        ) : (
+          planing.data.map((plan) => (
+            <KanbanList
+              key={plan.id}
+              id={plan.id}
+              locked={plan.locked}
+              canAdd={plan.channel.canAdd}
+              title={plan.channel.name}
+              rules={plan.PlanningItem}
+              schedule={schedule.data}
+              Break={Break.data}
+              Communication={Communication.data}
+              isAdmin={isEditor}
+              newTask={openTask}
+            />
+          ))
+        )}
         <div className="w-0 h-full">&nbsp;</div>
       </div>
     </div>
