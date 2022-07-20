@@ -20,6 +20,12 @@ const IndexPage: NextPageWithLayout = () => {
   const userQuery = trpc.useQuery(['user.all']);
   const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
   const addUserMutation = trpc.useMutation(['user.add']);
+  const planing = trpc.useQuery([
+    'planning.byDate',
+    {
+      date,
+    },
+  ]);
   const [open, setOpen] = useState(false);
 
   const addUser = () => {
@@ -32,9 +38,9 @@ const IndexPage: NextPageWithLayout = () => {
         name,
       }),
       {
-        loading: 'Beschrijving aan het aanpassen',
+        loading: 'Gebruiker aan het toevoegen',
         error: 'Er is iets fout gegaan',
-        success: 'Beschrijving is aangepast',
+        success: 'Gebruiker is toegevoegd',
       },
     );
   };
@@ -65,6 +71,34 @@ const IndexPage: NextPageWithLayout = () => {
         label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
       }));
 
+  const morning: string[] = [];
+  const afternoon: string[] = [];
+  const evening: string[] = [];
+
+  planing.data?.forEach((item) => {
+    item.PlanningItem.forEach((item) => {
+      item.morningAsignee.forEach(({ id }) => {
+        morning.push(id);
+      });
+
+      item.afternoonAsignee.forEach(({ id }) => {
+        afternoon.push(id);
+      });
+
+      item.eveningAsignee.forEach(({ id }) => {
+        evening.push(id);
+      });
+    });
+  });
+
+  const userAmount = (userId: string) => {
+    return (
+      morning.filter((id) => id === userId).length +
+      afternoon.filter((id) => id === userId).length +
+      evening.filter((id) => id === userId).length
+    );
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
       {data?.user?.isEditor && (
@@ -77,6 +111,7 @@ const IndexPage: NextPageWithLayout = () => {
                 name={option.label}
                 asigneeId={option.value}
                 draggable={true}
+                used={userAmount(option.value)}
               />
             ))}
             {excess &&
@@ -88,6 +123,7 @@ const IndexPage: NextPageWithLayout = () => {
                   name={option.label}
                   asigneeId={option.value}
                   draggable={true}
+                  used={userAmount(option.value)}
                 />
               ))}
             {excess && (

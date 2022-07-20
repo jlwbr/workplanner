@@ -1,9 +1,10 @@
-import { forwardRef, Fragment, useRef } from 'react';
+import { forwardRef, Fragment, useRef, useState } from 'react';
 import ReactToPrint from 'react-to-print';
 import { InferQueryOutput, trpc } from '~/utils/trpc';
 import Image from 'next/image';
 import Logo from '../../public/Karwei_logo.png';
 import { Prisma } from '@prisma/client';
+import ReactTooltip from 'react-tooltip';
 
 type PrintComponentType = {
   date: Date;
@@ -11,6 +12,7 @@ type PrintComponentType = {
   Communication: InferQueryOutput<'communication.getAll'>;
   Break: InferQueryOutput<'break.getAll'>;
   planing: InferQueryOutput<'planning.byDate'>;
+  print?: boolean;
 };
 
 const Loading = () => (
@@ -43,9 +45,32 @@ const Loading = () => (
 );
 
 const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
-  ({ date, users, planing, Communication, Break }, ref) => {
+  ({ date, users, planing, Communication, Break, print }, ref) => {
+    const context = trpc.useContext();
+    const doneMutation = trpc.useMutation(['planning.tasks.done'], {
+      onSuccess: () => {
+        context.invalidateQueries(['planning.byDate']);
+      },
+    });
+    const subTaskdoneMutation = trpc.useMutation(['planning.subTask.done'], {
+      onSuccess: () => {
+        context.invalidateQueries(['planning.byDate']);
+      },
+    });
+    const subTaskFinishAllMutation = trpc.useMutation(
+      ['planning.subTasks.finishAll'],
+      {
+        onSuccess: () => {
+          context.invalidateQueries(['planning.byDate']);
+        },
+      },
+    );
+
+    const [open, setOpen] = useState<string[]>([]);
+
     return (
       <div ref={ref}>
+        {!print && <ReactTooltip />}
         <style>{'@page { margin: 2rem !important; }'}</style>
         <div className="flex gap-5 pb-5">
           <div className="flex-1">
@@ -59,7 +84,11 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
               })}
             </h2>
           </div>
-          <div className="hidden md:flex flex-col text-[0.6rem] italic">
+          <div
+            className={`${
+              print ? 'flex' : 'hidden md:flex'
+            } flex-col text-[0.6rem] italic`}
+          >
             <span>p1: Koffie 10:15 - Lunch: 12:30 - Thee: 15:00 </span>
             <span>p2: Koffie 10:30 - Lunch: 13:00 - Thee: 15:15 </span>
             <span>p3: Koffie 10:45 - Lunch: 13:30 - Thee: 15:30 </span>
@@ -103,22 +132,49 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                         <tr>
                           <td
                             colSpan={4}
-                            className="border-b bg-white font-bold h-5 w-full"
+                            className="bg-white font-bold h-5 w-full"
                           ></td>
                         </tr>
                       )}
                       <tr>
                         <td
                           colSpan={4}
-                          className="border-b border-slate-100 bg-slate-200 font-bold p-1 pl-8 w-full text-slate-700"
+                          className="border-slate-100 bg-slate-200 font-bold p-1 pl-8 w-full text-slate-700"
                         >
                           {task.channel.name}
                         </td>
                       </tr>
                       {items.map((Planning) => (
                         <tr key={Planning.id}>
-                          <td className="border-b border-l border-slate-100 py-2 pl-8 w-full text-slate-700">
-                            <div className="text-sm">{Planning.name}</div>
+                          <td className="border-l border-slate-100 py-2 pl-8 w-full text-slate-700">
+                            <strong className="inline-flex items-center gap-2">
+                              {!print && (
+                                <div
+                                  data-tip={
+                                    Planning.doneUser
+                                      ? `${Planning.doneUser.name} heeft deze taak afgerond`
+                                      : 'Deze taak is nog niet afgerond'
+                                  }
+                                  className="text-xs inline-flex items-center font-bold leading-sm uppercase"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={Planning.done}
+                                    disabled={
+                                      doneMutation.status !== 'idle' &&
+                                      doneMutation.status !== 'success'
+                                    }
+                                    onChange={() =>
+                                      doneMutation.mutateAsync({
+                                        id: Planning.id,
+                                        done: !!!Planning.done,
+                                      })
+                                    }
+                                  />
+                                </div>
+                              )}
+                              <div className="text-sm">{Planning.name}</div>
+                            </strong>
                             {Planning.description && (
                               <div className="text-xs">
                                 {Planning.description}
@@ -147,45 +203,125 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                                 return null;
                               })}
                             </div>
+                            {!print && (
+                              <div className="flex flex-col justify-center pt-2">
+                                {open.find((id) => id === Planning.id) &&
+                                  Planning.subTask.map((subTask) => (
+                                    <li
+                                      key={subTask.id}
+                                      data-tip={
+                                        subTask.doneUser
+                                          ? `${subTask.doneUser.name} heeft deze taak afgerond`
+                                          : 'Deze taak is nog niet afgerond'
+                                      }
+                                      className="inline-flex items-center gap-2"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={subTask.done}
+                                        disabled={
+                                          (subTaskdoneMutation.status !==
+                                            'idle' &&
+                                            subTaskdoneMutation.status !==
+                                              'success') ||
+                                          (subTaskFinishAllMutation.status !==
+                                            'idle' &&
+                                            subTaskFinishAllMutation.status !==
+                                              'success')
+                                        }
+                                        onChange={() =>
+                                          subTaskdoneMutation.mutateAsync({
+                                            id: subTask.id,
+                                            done: !!!subTask.done,
+                                          })
+                                        }
+                                      />
+                                      {subTask.name}
+                                    </li>
+                                  ))}
+                                {Planning.subTask.length > 0 && (
+                                  <div className="flex items-center">
+                                    <button
+                                      className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap"
+                                      onClick={() =>
+                                        open.find((id) => id === Planning.id)
+                                          ? setOpen(
+                                              open.filter(
+                                                (id) => id !== Planning.id,
+                                              ),
+                                            )
+                                          : setOpen([...open, Planning.id])
+                                      }
+                                    >
+                                      {open.find((id) => id === Planning.id) ? (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="h-4 w-4"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                          strokeWidth={2}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M5 11l7-7 7 7M5 19l7-7 7 7"
+                                          />
+                                        </svg>
+                                      ) : (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="h-4 w-4"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                          strokeWidth={2}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
+                                          />
+                                        </svg>
+                                      )}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </td>
-                          <td className="border-b border-l border-slate-100 py-2 text-slate-700 text-center whitespace-nowrap">
+                          <td className="border-l border-slate-100 py-2 text-slate-700">
                             <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
                               {Planning.morningAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="text-xs leading-sm px-2 py-1 border rounded-md"
+                                  className="text-xs text-center font-bold px-3 py-1 rounded-full bg-lime-200 text-lime-700 whitespace-nowrap"
                                 >
-                                  <span className="whitespace-nowrap">
-                                    {item.name?.split(' ')[0]}
-                                  </span>
+                                  {item.name?.split(' ')[0] || ''}
                                 </div>
                               ))}
                             </div>
                           </td>
-                          <td className="border-b border-l border-slate-100 py-2 text-slate-700 text-center whitespace-nowrap">
+                          <td className="border-l border-slate-100 py-2 text-slate-700">
                             <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
                               {Planning.afternoonAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="text-xs leading-sm px-2 py-1 border rounded-md"
+                                  className="text-xs text-center font-bold px-3 py-1 rounded-full bg-lime-200 text-lime-700 whitespace-nowrap"
                                 >
-                                  <span className="whitespace-nowrap">
-                                    {item.name?.split(' ')[0]}
-                                  </span>
+                                  {item.name?.split(' ')[0] || ''}
                                 </div>
                               ))}
                             </div>
                           </td>
-                          <td className="border-b border-l border-slate-100 py-2 text-slate-700 text-center whitespace-nowrap">
+                          <td className="border-l border-slate-100 py-2 text-slate-700">
                             <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
                               {Planning.eveningAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="text-xs leading-sm px-2 py-1 border rounded-md"
+                                  className=" w-full text-xs text-center font-bold px-3 py-1 bg-lime-200 text-lime-700 rounded-full whitespace-nowrap"
                                 >
-                                  <span className="whitespace-nowrap">
-                                    {item.name?.split(' ')[0]}
-                                  </span>
+                                  {item.name?.split(' ')[0] || ''}
                                 </div>
                               ))}
                             </div>
@@ -357,6 +493,7 @@ const Planningpage = ({ date }: PlanningPageType) => {
           Communication={Communication.data}
           Break={Break.data}
           planing={planing.data}
+          print={true}
         />
       </div>
     </div>

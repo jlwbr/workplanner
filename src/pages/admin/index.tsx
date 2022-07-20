@@ -82,8 +82,8 @@ const IndexPage: NextPageWithLayout = () => {
               }
               className={`mt-7 btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline ${
                 isLocked
-                  ? 'bg-green-700 hover:bg-green-900'
-                  : 'bg-red-700 hover:bg-red-900'
+                  ? 'bg-lime-300 text-lime-700'
+                  : 'bg-blue-300 text-blue-700'
               } text-white font-normal py-2 px-4 mr-1 rounded`}
             >
               {isLocked ? 'Ontgrendel' : 'Vergrendel'} planning

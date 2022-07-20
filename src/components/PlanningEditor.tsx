@@ -1,4 +1,3 @@
-/* This example requires Tailwind CSS v2.0+ */
 import { Fragment, HTMLInputTypeAttribute } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { PlanningItem, PlanningRule } from '@prisma/client';
@@ -44,7 +43,7 @@ const PlanningEditor = ({
         as="div"
         className="fixed z-10 inset-0 overflow-y-auto"
         // FIXME: we don't want the dialog to be closable using anything other than the close button
-        // for now, an empty arror function is fine, but ther might be a better solution
+        // for now, an empty arror function is fine, but there might be a better solution
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         onClose={() => {}}
       >
