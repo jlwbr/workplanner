@@ -2,11 +2,17 @@
 import * as trpc from '@trpc/server';
 import * as trpcNext from '@trpc/server/adapters/next';
 import { Session } from 'next-auth';
-import { getSession } from 'next-auth/react';
+import Gate from '~/utils/gate';
+import { default as getServerSession } from 'next-auth/next';
+import { prisma } from './prisma';
+import { authOptions } from '~/pages/api/auth/[...nextauth]';
+import { PrismaClient } from '@prisma/client';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface CreateContextOptions {
   session: Session | null;
+  gate: Awaited<ReturnType<typeof Gate>> | null;
+  prisma: PrismaClient;
 }
 
 /**
@@ -28,10 +34,13 @@ export async function createContext(
 ): Promise<Context> {
   // for API-response caching see https://trpc.io/docs/caching
 
-  const session = await getSession({ req: opts.req });
+  const session = await getServerSession(opts.req, opts.res, authOptions);
+  const gate = session?.user?.id ? await Gate(session.user.id, prisma) : null;
 
   const ctx = await createContextInner({
     session,
+    gate,
+    prisma,
   });
   return ctx;
 }
