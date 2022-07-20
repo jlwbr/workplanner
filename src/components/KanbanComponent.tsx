@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { InferMutationInput, InferQueryOutput, trpc } from '~/utils/trpc';
 import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
-import { PrintComponent } from './PlanningPage';
+import { DonePage } from './PlanningPage';
 
 export type KanbanRule = Exclude<
   InferQueryOutput<'planning.byDate'>,
@@ -161,32 +161,6 @@ const KanbanComponent = ({ date, isEditor }: KanbanComponentType) => {
     );
 
   const isLocked = planing.data.every(({ locked }) => locked == true);
-  const users = planing.data
-    .flatMap((p) =>
-      p.PlanningItem.flatMap((i) => [
-        ...i.morningAsignee,
-        ...i.afternoonAsignee,
-        ...i.eveningAsignee,
-      ]),
-    )
-    .filter(
-      (value, index, self) =>
-        index === self.findIndex((t) => t.id === value.id),
-    )
-    .map((user) => ({
-      ...user,
-      schedule: schedule.data?.find((s) => s.userId === user.id)?.schedule,
-    }))
-    .sort((a, b) => {
-      if (!a.schedule || !b.schedule)
-        return a.name && b.name ? a.name.localeCompare(b.name) : 0;
-
-      const sort = a.schedule.localeCompare(b.schedule);
-
-      if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
-
-      return sort;
-    });
 
   return (
     <div className="overflow-x-scroll">
@@ -202,13 +176,7 @@ const KanbanComponent = ({ date, isEditor }: KanbanComponentType) => {
         />
         {isLocked ? (
           <div className="md:flex w-full justify-center">
-            <PrintComponent
-              date={date}
-              users={users}
-              Communication={Communication.data || []}
-              Break={Break.data || []}
-              planing={planing.data}
-            />
+            <DonePage date={date} />
           </div>
         ) : (
           planing.data.map((plan) => (

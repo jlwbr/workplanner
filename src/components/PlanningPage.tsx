@@ -14,6 +14,11 @@ type PrintComponentType = {
   Break: InferQueryOutput<'break.getAll'>;
   planing: InferQueryOutput<'planning.byDate'>;
   print?: boolean;
+  doneMutation: any;
+  subTaskdoneMutation: any;
+  subTaskFinishAllMutation: any;
+  open: string[];
+  setOpen: (open: string[]) => void;
 };
 
 const Loading = () => (
@@ -46,29 +51,22 @@ const Loading = () => (
 );
 
 const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
-  ({ date, users, planing, Communication, Break, print }, ref) => {
-    const context = trpc.useContext();
-    const doneMutation = trpc.useMutation(['planning.tasks.done'], {
-      onSuccess: () => {
-        context.invalidateQueries(['planning.byDate']);
-      },
-    });
-    const subTaskdoneMutation = trpc.useMutation(['planning.subTask.done'], {
-      onSuccess: () => {
-        context.invalidateQueries(['planning.byDate']);
-      },
-    });
-    const subTaskFinishAllMutation = trpc.useMutation(
-      ['planning.subTasks.finishAll'],
-      {
-        onSuccess: () => {
-          context.invalidateQueries(['planning.byDate']);
-        },
-      },
-    );
-
-    const [open, setOpen] = useState<string[]>([]);
-
+  (
+    {
+      date,
+      users,
+      planing,
+      Communication,
+      Break,
+      print,
+      doneMutation,
+      subTaskdoneMutation,
+      subTaskFinishAllMutation,
+      open,
+      setOpen,
+    },
+    ref,
+  ) => {
     return (
       <div ref={ref}>
         {!print && <ReactTooltip />}
@@ -406,6 +404,7 @@ type PlanningPageType = {
 
 const Planningpage = ({ date }: PlanningPageType) => {
   const componentRef = useRef(null);
+  const context = trpc.useContext();
   const planing = trpc.useQuery([
     'planning.byDate',
     {
@@ -415,6 +414,26 @@ const Planningpage = ({ date }: PlanningPageType) => {
   const Break = trpc.useQuery(['break.getAll', { date }]);
   const Communication = trpc.useQuery(['communication.getAll', { date }]);
   const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
+  const doneMutation = trpc.useMutation(['planning.tasks.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const subTaskdoneMutation = trpc.useMutation(['planning.subTask.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const subTaskFinishAllMutation = trpc.useMutation(
+    ['planning.subTasks.finishAll'],
+    {
+      onSuccess: () => {
+        context.invalidateQueries(['planning.byDate']);
+      },
+    },
+  );
+  const [open, setOpen] = useState<string[]>([]);
+
   if (!planing.isSuccess || !planing.data) return <Loading />;
   if (!Break.isSuccess || !Break.data) return <Loading />;
   if (!Communication.isSuccess || !Communication.data) return <Loading />;
@@ -467,11 +486,98 @@ const Planningpage = ({ date }: PlanningPageType) => {
           Break={Break.data}
           planing={planing.data}
           print={true}
+          doneMutation={doneMutation}
+          subTaskdoneMutation={subTaskdoneMutation}
+          subTaskFinishAllMutation={subTaskFinishAllMutation}
+          open={open}
+          setOpen={setOpen}
         />
       </div>
     </div>
   );
 };
 
-export { PrintComponent };
+const DonePage = ({ date }: PlanningPageType) => {
+  const componentRef = useRef(null);
+  const context = trpc.useContext();
+  const planing = trpc.useQuery([
+    'planning.byDate',
+    {
+      date: date,
+    },
+  ]);
+  const Break = trpc.useQuery(['break.getAll', { date }]);
+  const Communication = trpc.useQuery(['communication.getAll', { date }]);
+  const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
+  const doneMutation = trpc.useMutation(['planning.tasks.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const subTaskdoneMutation = trpc.useMutation(['planning.subTask.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const subTaskFinishAllMutation = trpc.useMutation(
+    ['planning.subTasks.finishAll'],
+    {
+      onSuccess: () => {
+        context.invalidateQueries(['planning.byDate']);
+      },
+    },
+  );
+  const [open, setOpen] = useState<string[]>([]);
+  if (!planing.isSuccess || !planing.data) return <Loading />;
+  if (!Break.isSuccess || !Break.data) return <Loading />;
+  if (!Communication.isSuccess || !Communication.data) return <Loading />;
+
+  const schedule = scheduleQuery.data || [];
+
+  const users = planing.data
+    .flatMap((p) =>
+      p.PlanningItem.flatMap((i) => [
+        ...i.morningAsignee,
+        ...i.afternoonAsignee,
+        ...i.eveningAsignee,
+      ]),
+    )
+    .filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.id === value.id),
+    )
+    .map((user) => ({
+      ...user,
+      schedule: schedule.find((s) => s.userId === user.id)?.schedule,
+    }))
+    .sort((a, b) => {
+      if (!a.schedule || !b.schedule)
+        return a.name && b.name ? a.name.localeCompare(b.name) : 0;
+
+      const sort = a.schedule.localeCompare(b.schedule);
+
+      if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
+
+      return sort;
+    });
+
+  return (
+    <PrintComponent
+      ref={componentRef}
+      date={date}
+      users={users}
+      Communication={Communication.data}
+      Break={Break.data}
+      planing={planing.data}
+      print={false}
+      subTaskFinishAllMutation={subTaskFinishAllMutation}
+      subTaskdoneMutation={subTaskdoneMutation}
+      doneMutation={doneMutation}
+      open={open}
+      setOpen={setOpen}
+    />
+  );
+};
+
+export { DonePage };
 export default Planningpage;
