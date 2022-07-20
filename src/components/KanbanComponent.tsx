@@ -45,7 +45,7 @@ type KanbanComponentType = {
   isEditor: boolean;
 };
 
-const KanbanComponent = ({ date, isAdmin, isEditor }: KanbanComponentType) => {
+const KanbanComponent = ({ date, isEditor }: KanbanComponentType) => {
   const context = trpc.useContext();
   const { data: user } = useSession();
   const planing = trpc.useQuery([
@@ -197,7 +197,7 @@ const KanbanComponent = ({ date, isAdmin, isEditor }: KanbanComponentType) => {
           value={editingRuleData}
           onChange={(e: unknown) => setEditingRuleData(e as PlanningItem)}
           inputs={PlanningInputs}
-          hideDelete={!isAdmin && user?.user?.id !== editingRuleData.ownerId}
+          hideDelete={!isEditor && user?.user?.id !== editingRuleData.ownerId}
           onDelete={onDelete}
         />
         {isLocked ? (
