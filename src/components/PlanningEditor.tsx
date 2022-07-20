@@ -1,4 +1,3 @@
-/* This example requires Tailwind CSS v2.0+ */
 import { Fragment, HTMLInputTypeAttribute } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { PlanningItem, PlanningRule } from '@prisma/client';
@@ -25,6 +24,7 @@ type PlanningEditorType = {
       | InferMutationInput<'planning.rules.upsert'>,
   ) => void;
   inputs: PlanningInputsType;
+  hideDelete?: boolean;
   onDelete: (id: string) => void;
 };
 
@@ -34,6 +34,7 @@ const PlanningEditor = ({
   value,
   onChange,
   inputs,
+  hideDelete,
   onDelete,
 }: PlanningEditorType) => {
   return (
@@ -42,7 +43,7 @@ const PlanningEditor = ({
         as="div"
         className="fixed z-10 inset-0 overflow-y-auto"
         // FIXME: we don't want the dialog to be closable using anything other than the close button
-        // for now, an empty arror function is fine, but ther might be a better solution
+        // for now, an empty arror function is fine, but there might be a better solution
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         onClose={() => {}}
       >
@@ -197,7 +198,7 @@ const PlanningEditor = ({
                 >
                   Opslaan
                 </button>
-                {value.id && (
+                {value.id && !hideDelete && (
                   <button
                     type="button"
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"

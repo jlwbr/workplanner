@@ -6,6 +6,7 @@ type AsigneeBadgeType = {
   asigneeId?: string;
   name: string | null;
   timeOfDay?: 'morning' | 'afternoon' | 'evening';
+  used?: number;
   canRemove: boolean;
   draggable?: boolean;
 };
@@ -21,6 +22,7 @@ const AsigneeBadge = ({
   asigneeId,
   canRemove,
   draggable,
+  used,
 }: AsigneeBadgeType) => {
   const [, drag] = useDrag(() => ({
     type: ItemTypes.BADGE,
@@ -31,8 +33,20 @@ const AsigneeBadge = ({
   return (
     <div ref={drag}>
       {canRemove
-        ? removableAsigneeBadge({ planningItemId, name, asigneeId, timeOfDay })
-        : staticAsigneeBadge({ planningItemId, name, asigneeId, timeOfDay })}
+        ? removableAsigneeBadge({
+            planningItemId,
+            name,
+            asigneeId,
+            timeOfDay,
+            used,
+          })
+        : staticAsigneeBadge({
+            planningItemId,
+            name,
+            asigneeId,
+            timeOfDay,
+            used,
+          })}
     </div>
   );
 };
@@ -42,19 +56,38 @@ type AsigneeBadgeSubType = {
   name: string | null;
   asigneeId?: string;
   timeOfDay?: 'morning' | 'afternoon' | 'evening';
+  used?: number;
 };
 
-const staticAsigneeBadge = ({ name }: AsigneeBadgeSubType) => (
-  <div className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-lime-200 text-lime-700 rounded-full whitespace-nowrap">
-    {name}
-  </div>
-);
+const staticAsigneeBadge = ({ name, used }: AsigneeBadgeSubType) => {
+  const color = () => {
+    switch (used) {
+      case 1:
+        return 'bg-orange-200 text-orange-700';
+      case 2:
+        return 'bg-blue-200 text-blue-700';
+      case 3:
+        return 'bg-lime-200 text-lime-700';
+      default:
+        return 'bg-gray-200 text-gray-700';
+    }
+  };
+
+  return (
+    <div
+      className={`text-xs inline-flex items-center font-bold leading-sm px-3 py-1 ${color()} rounded-full whitespace-nowrap`}
+    >
+      {name}
+    </div>
+  );
+};
 
 const removableAsigneeBadge = ({
   planningItemId,
   name,
   timeOfDay,
   asigneeId,
+  used,
 }: AsigneeBadgeSubType) => {
   const context = trpc.useContext();
   const removableAsignee = trpc.useMutation(['planning.asignee.remove'], {
@@ -65,6 +98,19 @@ const removableAsigneeBadge = ({
 
   if (!planningItemId || !timeOfDay) return null;
 
+  const color = () => {
+    switch (used) {
+      case 1:
+        return 'bg-orange-200 text-orange-700';
+      case 2:
+        return 'bg-blue-200 text-blue-700';
+      case 3:
+        return 'bg-lime-200 text-lime-700';
+      default:
+        return 'bg-gray-200 text-gray-700';
+    }
+  };
+
   return (
     <button
       onClick={() => {
@@ -74,11 +120,12 @@ const removableAsigneeBadge = ({
           asigneeId,
         });
       }}
-      className="text-xs inline-flex items-center justify-center gap-1 font-bold leading-sm px-3 py-1 bg-lime-200 text-lime-700 hover:bg-red-200 hover:text-red-700 rounded-full whitespace-nowrap"
+      className={`text-xs inline-flex items-center font-bold leading-sm px-3 py-1 ${color()} rounded-full whitespace-nowrap`}
     >
       {name}
     </button>
   );
 };
 
+export { staticAsigneeBadge as StaticAsigneeBadge };
 export default AsigneeBadge;

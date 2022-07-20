@@ -8,6 +8,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Prisma } from '@prisma/client';
 import Select, { MultiValue } from 'react-select';
+import { HiXCircle } from 'react-icons/hi';
 
 type KanbanItemType = {
   item: KanbanRule;
@@ -353,7 +354,7 @@ const KanbanItem = ({
                       : undefined,
                   )
                 }
-                className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-red-200 text-red-700 rounded-full"
+                className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -374,7 +375,7 @@ const KanbanItem = ({
             {(userId === ownerId || isEditer) && !locked && (
               <button
                 onClick={() => editTask(item)}
-                className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-purple-200 text-purple-700 rounded-full"
+                className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-lime-200 text-lime-700 rounded-full"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -396,11 +397,24 @@ const KanbanItem = ({
         </div>
         <div className="whitespace-pre-wrap">{description}</div>
         <div className="whitespace-pre-wrap">
-          {users.map(({ id, name }) => {
+          {users.map(({ id: uID, name }) => {
             if (AssigneeText && typeof AssigneeText === 'object') {
-              const text = (AssigneeText as Prisma.JsonObject)[id];
+              const text = (AssigneeText as Prisma.JsonObject)[uID];
               return text ? (
-                <div key={id}>{`${name?.split(' ')[0]}: ${text}`}</div>
+                <div className="flex items-center gap-1" key={uID}>
+                  {(isEditer || userId === uID) && (
+                    <HiXCircle
+                      className="w-4 h-4 text-slate-800 cursor-pointer"
+                      onClick={() =>
+                        AssigneeTextMutation.mutateAsync({
+                          id,
+                          text: '',
+                        })
+                      }
+                    />
+                  )}
+                  {`${name?.split(' ')[0]}: ${text}`}
+                </div>
               ) : null;
             }
 
@@ -497,7 +511,11 @@ const KanbanItem = ({
             <div className="flex gap-2 content-center tracking-tight my-2">
               <h2 className="font-bold text-gray-900">Ochtend</h2>
               {/* FIXME: we could make this more clear by using a progessbar, for example: https://tailwinduikit.com/components/webapp/UI_element/progress_bar */}
-              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
+              <span
+                className={`inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full ${
+                  morningAsignee.length == 0 ? 'bg-red-200 border-red-400' : ''
+                }`}
+              >
                 {morningAsignee.length} / {maxMorning > 0 ? maxMorning : '∞'}
               </span>
             </div>
@@ -519,7 +537,13 @@ const KanbanItem = ({
           <div className="pt-2">
             <div className="flex gap-2 content-center tracking-tight my-2">
               <h2 className="font-bold text-gray-900">Middag</h2>
-              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
+              <span
+                className={`inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full ${
+                  afternoonAsignee.length == 0
+                    ? 'bg-red-200 border-red-400'
+                    : ''
+                }`}
+              >
                 {afternoonAsignee.length} /{' '}
                 {maxAfternoon > 0 ? maxAfternoon : '∞'}
               </span>
@@ -542,7 +566,11 @@ const KanbanItem = ({
           <div className="pt-2">
             <div className="flex gap-2 content-center tracking-tight my-2">
               <h2 className="font-bold text-gray-900">Avond</h2>
-              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
+              <span
+                className={`inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full ${
+                  eveningAsignee.length == 0 ? 'bg-red-200 border-red-400' : ''
+                }`}
+              >
                 {eveningAsignee.length} / {maxEvening > 0 ? maxEvening : '∞'}
               </span>
             </div>

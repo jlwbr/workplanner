@@ -6,6 +6,7 @@ import swallowQuery from '~/utils/swallowQuery';
 import { InferMutationInput, InferQueryOutput, trpc } from '~/utils/trpc';
 import KanbanItem from './KanbanItem';
 import PlanningEditor, { PlanningInputsType } from './PlanningEditor';
+import { DonePage } from './PlanningPage';
 
 export type KanbanRule = Exclude<
   InferQueryOutput<'planning.byDate'>,
@@ -42,9 +43,10 @@ const PlanningInputs: PlanningInputsType = [
 type KanbanComponentType = {
   date: Date;
   isAdmin: boolean;
+  isEditor: boolean;
 };
 
-const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
+const KanbanComponent = ({ date, isEditor }: KanbanComponentType) => {
   const context = trpc.useContext();
   const rowQuery = trpc.useQuery([
     'planning.rows',
@@ -60,7 +62,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
       },
     ],
     {
-      enabled: isAdmin,
+      enabled: isEditor,
     },
   );
   const Break = trpc.useQuery(['break.getAll', { date }], {
@@ -135,6 +137,8 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
   const [rows, success, element] = swallowQuery(rowQuery);
   if (!success) return element;
 
+  const isLocked = planing.data.every(({ locked }) => locked == true);
+
   return (
     <div className="overflow-x-scroll">
       <div className="flex h-full px-4 gap-6 pb-2">
@@ -144,6 +148,7 @@ const KanbanComponent = ({ date, isAdmin }: KanbanComponentType) => {
           value={editingRuleData}
           onChange={(e: unknown) => setEditingRuleData(e as PlanningItem)}
           inputs={PlanningInputs}
+          hideDelete={!isEditor && user?.user?.id !== editingRuleData.ownerId}
           onDelete={onDelete}
         />
         {rows.map(({ id, channel, locked }) => (

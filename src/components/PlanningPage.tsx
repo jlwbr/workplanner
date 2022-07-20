@@ -1,85 +1,75 @@
-import { forwardRef, Fragment, useRef } from 'react';
+import { forwardRef, Fragment, useRef, useState } from 'react';
 import ReactToPrint from 'react-to-print';
-import { trpc } from '~/utils/trpc';
+import { InferQueryOutput, trpc } from '~/utils/trpc';
 import Image from 'next/image';
 import Logo from '../../public/Karwei_logo.png';
 import { Prisma } from '@prisma/client';
+import ReactTooltip from 'react-tooltip';
+import { GoCheck } from 'react-icons/go';
 
 type PrintComponentType = {
   date: Date;
+  users: any[];
+  Communication: InferQueryOutput<'communication.getAll'>;
+  Break: InferQueryOutput<'break.getAll'>;
+  planing: InferQueryOutput<'planning.byDate'>;
+  print?: boolean;
+  doneMutation: any;
+  subTaskdoneMutation: any;
+  subTaskFinishAllMutation: any;
+  open: string[];
+  setOpen: (open: string[]) => void;
 };
 
 const Loading = () => (
-  <div className="flex flex-col items-center justify-center h-20 w-20">
-    <svg
-      className="animate-spin h-20 w-20 text-slate-400"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      ></circle>
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      ></path>
-    </svg>
+  <div className="flex flex-col items-center">
+    <div className="bg-white border rounded mt-5 p-8">
+      <div className="flex flex-col items-center justify-center h-20 w-20">
+        <svg
+          className="animate-spin h-20 w-20 text-slate-400"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+      </div>
+    </div>
   </div>
 );
 
 const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
-  ({ date }, ref) => {
-    const planing = trpc.useQuery([
-      'planning.byDate',
-      {
-        date: date,
-      },
-    ]);
-    const Break = trpc.useQuery(['break.getAll', { date }]);
-    const Communication = trpc.useQuery(['communication.getAll', { date }]);
-    const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
-    if (!planing.isSuccess || !planing.data) return <Loading />;
-    if (!Break.isSuccess || !Break.data) return <Loading />;
-    if (!Communication.isSuccess || !Communication.data) return <Loading />;
-
-    const schedule = scheduleQuery.data || [];
-
-    const users = planing.data
-      .flatMap((p) =>
-        p.PlanningItem.flatMap((i) => [
-          ...i.morningAsignee,
-          ...i.afternoonAsignee,
-          ...i.eveningAsignee,
-        ]),
-      )
-      .filter(
-        (value, index, self) =>
-          index === self.findIndex((t) => t.id === value.id),
-      )
-      .map((user) => ({
-        ...user,
-        schedule: schedule.find((s) => s.userId === user.id)?.schedule,
-      }))
-      .sort((a, b) => {
-        if (!a.schedule || !b.schedule)
-          return a.name && b.name ? a.name.localeCompare(b.name) : 0;
-
-        const sort = a.schedule.localeCompare(b.schedule);
-
-        if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
-
-        return sort;
-      });
-
+  (
+    {
+      date,
+      users,
+      planing,
+      Communication,
+      Break,
+      print,
+      doneMutation,
+      subTaskdoneMutation,
+      subTaskFinishAllMutation,
+      open,
+      setOpen,
+    },
+    ref,
+  ) => {
     return (
       <div ref={ref}>
+        {!print && <ReactTooltip />}
         <style>{'@page { margin: 2rem !important; }'}</style>
         <div className="flex gap-5 pb-5">
           <div className="flex-1">
@@ -93,7 +83,11 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
               })}
             </h2>
           </div>
-          <div className="flex flex-col text-[0.6rem] italic">
+          <div
+            className={`${
+              print ? 'flex' : 'hidden md:flex'
+            } flex-col text-[0.6rem] italic`}
+          >
             <span>p1: Koffie 10:15 - Lunch: 12:30 - Thee: 15:00 </span>
             <span>p2: Koffie 10:30 - Lunch: 13:00 - Thee: 15:15 </span>
             <span>p3: Koffie 10:45 - Lunch: 13:30 - Thee: 15:30 </span>
@@ -122,7 +116,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {planing.data.map((task, i) => {
+                {planing.map((task, i) => {
                   const items = task.PlanningItem.filter(
                     (item) =>
                       item.morningAsignee.length > 0 ||
@@ -137,22 +131,49 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                         <tr>
                           <td
                             colSpan={4}
-                            className="border-b bg-white font-bold h-5 w-full"
+                            className="bg-white font-bold h-5 w-full"
                           ></td>
                         </tr>
                       )}
                       <tr>
                         <td
                           colSpan={4}
-                          className="border-b border-slate-100 bg-slate-200 font-bold p-1 pl-8 w-full text-slate-700"
+                          className="border-slate-100 bg-slate-200 font-bold p-1 pl-8 w-full text-slate-700"
                         >
                           {task.channel.name}
                         </td>
                       </tr>
                       {items.map((Planning) => (
                         <tr key={Planning.id}>
-                          <td className="border-b border-slate-100 py-2 pl-8 w-full text-slate-700">
-                            <div className="text-sm">{Planning.name}</div>
+                          <td className="border-l border-slate-100 py-2 pl-8 w-full text-slate-700">
+                            <strong className="inline-flex items-center gap-2">
+                              {!print && (
+                                <div
+                                  data-tip={
+                                    Planning.doneUser
+                                      ? `${Planning.doneUser.name} heeft deze taak afgerond`
+                                      : 'Deze taak is nog niet afgerond'
+                                  }
+                                  className="text-xs inline-flex items-center font-bold leading-sm uppercase"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={Planning.done}
+                                    disabled={
+                                      doneMutation.status !== 'idle' &&
+                                      doneMutation.status !== 'success'
+                                    }
+                                    onChange={() =>
+                                      doneMutation.mutateAsync({
+                                        id: Planning.id,
+                                        done: !!!Planning.done,
+                                      })
+                                    }
+                                  />
+                                </div>
+                              )}
+                              <div className="text-sm">{Planning.name}</div>
+                            </strong>
                             {Planning.description && (
                               <div className="text-xs">
                                 {Planning.description}
@@ -181,42 +202,128 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                                 return null;
                               })}
                             </div>
-                          </td>
-                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            {Planning.morningAsignee.map((item) => (
-                              <div
-                                key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
-                              >
-                                <span className="whitespace-nowrap">
-                                  {item.name?.split(' ')[0]}
-                                </span>
+                            {!print && (
+                              <div className="flex flex-col justify-center pt-2">
+                                {open.find((id) => id === Planning.id) &&
+                                  Planning.subTask.map((subTask) => (
+                                    <li
+                                      key={subTask.id}
+                                      data-tip={
+                                        subTask.doneUser
+                                          ? `${subTask.doneUser.name} heeft deze taak afgerond`
+                                          : 'Deze taak is nog niet afgerond'
+                                      }
+                                      className="inline-flex items-center gap-2"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={subTask.done}
+                                        disabled={
+                                          (subTaskdoneMutation.status !==
+                                            'idle' &&
+                                            subTaskdoneMutation.status !==
+                                              'success') ||
+                                          (subTaskFinishAllMutation.status !==
+                                            'idle' &&
+                                            subTaskFinishAllMutation.status !==
+                                              'success')
+                                        }
+                                        onChange={() =>
+                                          subTaskdoneMutation.mutateAsync({
+                                            id: subTask.id,
+                                            done: !!!subTask.done,
+                                          })
+                                        }
+                                      />
+                                      {subTask.name}
+                                    </li>
+                                  ))}
+                                {Planning.subTask.length > 0 && (
+                                  <div className="flex items-center">
+                                    <button
+                                      className="text-xs inline-flex items-center font-bold leading-sm px-3 py-1 bg-gray-200 text-gray-700 rounded-full whitespace-nowrap"
+                                      onClick={() =>
+                                        open.find((id) => id === Planning.id)
+                                          ? setOpen(
+                                              open.filter(
+                                                (id) => id !== Planning.id,
+                                              ),
+                                            )
+                                          : setOpen([...open, Planning.id])
+                                      }
+                                    >
+                                      {open.find((id) => id === Planning.id) ? (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="h-4 w-4"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                          strokeWidth={2}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M5 11l7-7 7 7M5 19l7-7 7 7"
+                                          />
+                                        </svg>
+                                      ) : (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="h-4 w-4"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                          strokeWidth={2}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
+                                          />
+                                        </svg>
+                                      )}
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                            ))}
+                            )}
                           </td>
-                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            {Planning.afternoonAsignee.map((item) => (
-                              <div
-                                key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
-                              >
-                                <span className="whitespace-nowrap">
-                                  {item.name?.split(' ')[0]}
-                                </span>
-                              </div>
-                            ))}
+                          <td className="border-l border-slate-100 py-2 text-slate-700">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
+                              {Planning.morningAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="text-xs text-center font-semibold px-3 py-1 rounded-full bg-lime-50 text-slate-700 whitespace-nowrap"
+                                >
+                                  {item.name?.split(' ')[0] || ''}
+                                </div>
+                              ))}
+                            </div>
                           </td>
-                          <td className="border-b border-slate-100 pt-2 text-slate-700 text-center whitespace-nowrap">
-                            {Planning.eveningAsignee.map((item) => (
-                              <div
-                                key={item.id}
-                                className="text-xs inline-flex flex-col items-center leading-sm px-2 py-1 mb-1 ml-1 border rounded-md"
-                              >
-                                <span className="whitespace-nowrap">
-                                  {item.name?.split(' ')[0]}
-                                </span>
-                              </div>
-                            ))}
+                          <td className="border-l border-slate-100 py-2 text-slate-700">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
+                              {Planning.afternoonAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="text-xs text-center font-semibold px-3 py-1 rounded-full bg-lime-50 text-slate-700 whitespace-nowrap"
+                                >
+                                  {item.name?.split(' ')[0] || ''}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="border-l border-slate-100 py-2 text-slate-700">
+                            <div className="grid grid-cols-[auto_auto] gap-1 mx-2">
+                              {Planning.eveningAsignee.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className=" w-full text-xs text-center font-semibold px-3 py-1 bg-lime-50 text-slate-700 rounded-full whitespace-nowrap"
+                                >
+                                  {item.name?.split(' ')[0] || ''}
+                                </div>
+                              ))}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -261,48 +368,20 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                         <td className="border-b border-slate-100 py-1 w-full text-slate-700 text-center whitespace-nowrap">
                           {user.schedule}
                         </td>
-                        <td className="border-b border-slate-100 py-1 text-slate-700 text-center inline-flex justify-center w-full">
-                          {Communication.data.find((d) => d.userId === user.id)
-                            ?.HT ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                          )}
+                        <td className="border-b border-slate-100 py-1 text-slate-700 whitespace-nowrap">
+                          <div className="w-full flex justify-center">
+                            {Communication.find((d) => d.userId === user.id)
+                              ?.HT && <GoCheck className="w-4 h-4" />}
+                          </div>
                         </td>
                         <td className="border-b border-slate-100 py-1 text-slate-700 text-center">
-                          {Communication.data.find((d) => d.userId === user.id)
+                          {Communication.find((d) => d.userId === user.id)
                             ?.phoneNumber ?? ''}
                         </td>
                         <td className="border-b border-slate-100 py-1 text-slate-700 text-center">
-                          {Break.data
-                            .find((d) => d.userId === user.id)
-                            ?.number?.toString() ?? ''}
+                          {Break.find(
+                            (d) => d.userId === user.id,
+                          )?.number?.toString() ?? ''}
                         </td>
                       </tr>
                     </Fragment>
@@ -325,6 +404,68 @@ type PlanningPageType = {
 
 const Planningpage = ({ date }: PlanningPageType) => {
   const componentRef = useRef(null);
+  const context = trpc.useContext();
+  const planing = trpc.useQuery([
+    'planning.byDate',
+    {
+      date: date,
+    },
+  ]);
+  const Break = trpc.useQuery(['break.getAll', { date }]);
+  const Communication = trpc.useQuery(['communication.getAll', { date }]);
+  const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
+  const doneMutation = trpc.useMutation(['planning.tasks.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const subTaskdoneMutation = trpc.useMutation(['planning.subTask.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const subTaskFinishAllMutation = trpc.useMutation(
+    ['planning.subTasks.finishAll'],
+    {
+      onSuccess: () => {
+        context.invalidateQueries(['planning.byDate']);
+      },
+    },
+  );
+  const [open, setOpen] = useState<string[]>([]);
+
+  if (!planing.isSuccess || !planing.data) return <Loading />;
+  if (!Break.isSuccess || !Break.data) return <Loading />;
+  if (!Communication.isSuccess || !Communication.data) return <Loading />;
+
+  const schedule = scheduleQuery.data || [];
+
+  const users = planing.data
+    .flatMap((p) =>
+      p.PlanningItem.flatMap((i) => [
+        ...i.morningAsignee,
+        ...i.afternoonAsignee,
+        ...i.eveningAsignee,
+      ]),
+    )
+    .filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.id === value.id),
+    )
+    .map((user) => ({
+      ...user,
+      schedule: schedule.find((s) => s.userId === user.id)?.schedule,
+    }))
+    .sort((a, b) => {
+      if (!a.schedule || !b.schedule)
+        return a.name && b.name ? a.name.localeCompare(b.name) : 0;
+
+      const sort = a.schedule.localeCompare(b.schedule);
+
+      if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
+
+      return sort;
+    });
 
   return (
     <div className="flex flex-col items-center">
@@ -336,11 +477,107 @@ const Planningpage = ({ date }: PlanningPageType) => {
         )}
         content={() => componentRef.current}
       />
-      <div className="bg-white border rounded mt-5 p-8">
-        <PrintComponent ref={componentRef} date={date} />
+      <div className="hidden md:block bg-white border rounded mt-5 p-8">
+        <PrintComponent
+          ref={componentRef}
+          date={date}
+          users={users}
+          Communication={Communication.data}
+          Break={Break.data}
+          planing={planing.data}
+          print={true}
+          doneMutation={doneMutation}
+          subTaskdoneMutation={subTaskdoneMutation}
+          subTaskFinishAllMutation={subTaskFinishAllMutation}
+          open={open}
+          setOpen={setOpen}
+        />
       </div>
     </div>
   );
 };
 
+const DonePage = ({ date }: PlanningPageType) => {
+  const componentRef = useRef(null);
+  const context = trpc.useContext();
+  const planing = trpc.useQuery([
+    'planning.byDate',
+    {
+      date: date,
+    },
+  ]);
+  const Break = trpc.useQuery(['break.getAll', { date }]);
+  const Communication = trpc.useQuery(['communication.getAll', { date }]);
+  const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
+  const doneMutation = trpc.useMutation(['planning.tasks.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const subTaskdoneMutation = trpc.useMutation(['planning.subTask.done'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const subTaskFinishAllMutation = trpc.useMutation(
+    ['planning.subTasks.finishAll'],
+    {
+      onSuccess: () => {
+        context.invalidateQueries(['planning.byDate']);
+      },
+    },
+  );
+  const [open, setOpen] = useState<string[]>([]);
+  if (!planing.isSuccess || !planing.data) return <Loading />;
+  if (!Break.isSuccess || !Break.data) return <Loading />;
+  if (!Communication.isSuccess || !Communication.data) return <Loading />;
+
+  const schedule = scheduleQuery.data || [];
+
+  const users = planing.data
+    .flatMap((p) =>
+      p.PlanningItem.flatMap((i) => [
+        ...i.morningAsignee,
+        ...i.afternoonAsignee,
+        ...i.eveningAsignee,
+      ]),
+    )
+    .filter(
+      (value, index, self) =>
+        index === self.findIndex((t) => t.id === value.id),
+    )
+    .map((user) => ({
+      ...user,
+      schedule: schedule.find((s) => s.userId === user.id)?.schedule,
+    }))
+    .sort((a, b) => {
+      if (!a.schedule || !b.schedule)
+        return a.name && b.name ? a.name.localeCompare(b.name) : 0;
+
+      const sort = a.schedule.localeCompare(b.schedule);
+
+      if (sort === 0 && a.name && b.name) return a.name.localeCompare(b.name);
+
+      return sort;
+    });
+
+  return (
+    <PrintComponent
+      ref={componentRef}
+      date={date}
+      users={users}
+      Communication={Communication.data}
+      Break={Break.data}
+      planing={planing.data}
+      print={false}
+      subTaskFinishAllMutation={subTaskFinishAllMutation}
+      subTaskdoneMutation={subTaskdoneMutation}
+      doneMutation={doneMutation}
+      open={open}
+      setOpen={setOpen}
+    />
+  );
+};
+
+export { DonePage };
 export default Planningpage;

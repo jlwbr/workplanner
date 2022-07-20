@@ -20,6 +20,12 @@ const IndexPage: NextPageWithLayout = () => {
   const userQuery = trpc.useQuery(['user.all']);
   const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
   const addUserMutation = trpc.useMutation(['user.add']);
+  const planing = trpc.useQuery([
+    'planning.byDate',
+    {
+      date,
+    },
+  ]);
   const [open, setOpen] = useState(false);
 
   const addUser = () => {
@@ -32,9 +38,9 @@ const IndexPage: NextPageWithLayout = () => {
         name,
       }),
       {
-        loading: 'Beschrijving aan het aanpassen',
+        loading: 'Gebruiker aan het toevoegen',
         error: 'Er is iets fout gegaan',
-        success: 'Beschrijving is aangepast',
+        success: 'Gebruiker is toegevoegd',
       },
     );
   };
@@ -65,6 +71,36 @@ const IndexPage: NextPageWithLayout = () => {
         label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
       }));
 
+  const morning = new Set<string>();
+  const afternoon = new Set<string>();
+  const evening = new Set<string>();
+
+  planing.data?.forEach((item) => {
+    item.PlanningItem.forEach((item) => {
+      item.morningAsignee.forEach(({ id }) => {
+        morning.add(id);
+      });
+
+      item.afternoonAsignee.forEach(({ id }) => {
+        afternoon.add(id);
+      });
+
+      item.eveningAsignee.forEach(({ id }) => {
+        evening.add(id);
+      });
+    });
+  });
+
+  const userAmount = (userId: string) => {
+    let amount = 0;
+
+    if (morning.has(userId)) amount++;
+    if (afternoon.has(userId)) amount++;
+    if (evening.has(userId)) amount++;
+
+    return amount;
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
       {data?.user?.isEditor && (
@@ -77,6 +113,7 @@ const IndexPage: NextPageWithLayout = () => {
                 name={option.label}
                 asigneeId={option.value}
                 draggable={true}
+                used={userAmount(option.value)}
               />
             ))}
             {excess &&
@@ -88,6 +125,7 @@ const IndexPage: NextPageWithLayout = () => {
                   name={option.label}
                   asigneeId={option.value}
                   draggable={true}
+                  used={userAmount(option.value)}
                 />
               ))}
             {excess && (
@@ -114,7 +152,8 @@ const IndexPage: NextPageWithLayout = () => {
       <div className={'pt-5'}>
         <KanbanComponent
           date={date}
-          isAdmin={data?.user?.isEditor || data?.user?.isShared || false}
+          isAdmin={data?.user?.isAdmin || false}
+          isEditor={data?.user?.isEditor || data?.user?.isShared || false}
         />
       </div>
     </DndProvider>
