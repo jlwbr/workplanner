@@ -8,6 +8,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Prisma } from '@prisma/client';
 import Select, { MultiValue } from 'react-select';
+import { HiXCircle } from 'react-icons/hi';
 
 type KanbanItemType = {
   item: KanbanRule;
@@ -396,11 +397,24 @@ const KanbanItem = ({
         </div>
         <div className="whitespace-pre-wrap">{description}</div>
         <div className="whitespace-pre-wrap">
-          {users.map(({ id, name }) => {
+          {users.map(({ id: uID, name }) => {
             if (AssigneeText && typeof AssigneeText === 'object') {
-              const text = (AssigneeText as Prisma.JsonObject)[id];
+              const text = (AssigneeText as Prisma.JsonObject)[uID];
               return text ? (
-                <div key={id}>{`${name?.split(' ')[0]}: ${text}`}</div>
+                <div className="flex items-center gap-1" key={uID}>
+                  {(isEditer || userId === uID) && (
+                    <HiXCircle
+                      className="w-4 h-4 text-slate-800 cursor-pointer"
+                      onClick={() =>
+                        AssigneeTextMutation.mutateAsync({
+                          id,
+                          text: '',
+                        })
+                      }
+                    />
+                  )}
+                  {`${name?.split(' ')[0]}: ${text}`}
+                </div>
               ) : null;
             }
 

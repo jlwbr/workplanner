@@ -71,32 +71,34 @@ const IndexPage: NextPageWithLayout = () => {
         label: user.name || `Anoniem (${user.id.slice(0, 4)})`,
       }));
 
-  const morning: string[] = [];
-  const afternoon: string[] = [];
-  const evening: string[] = [];
+  const morning = new Set<string>();
+  const afternoon = new Set<string>();
+  const evening = new Set<string>();
 
   planing.data?.forEach((item) => {
     item.PlanningItem.forEach((item) => {
       item.morningAsignee.forEach(({ id }) => {
-        morning.push(id);
+        morning.add(id);
       });
 
       item.afternoonAsignee.forEach(({ id }) => {
-        afternoon.push(id);
+        afternoon.add(id);
       });
 
       item.eveningAsignee.forEach(({ id }) => {
-        evening.push(id);
+        evening.add(id);
       });
     });
   });
 
   const userAmount = (userId: string) => {
-    return (
-      morning.filter((id) => id === userId).length +
-      afternoon.filter((id) => id === userId).length +
-      evening.filter((id) => id === userId).length
-    );
+    let amount = 0;
+
+    if (morning.has(userId)) amount++;
+    if (afternoon.has(userId)) amount++;
+    if (evening.has(userId)) amount++;
+
+    return amount;
   };
 
   return (

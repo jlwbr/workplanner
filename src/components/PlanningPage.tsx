@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Logo from '../../public/Karwei_logo.png';
 import { Prisma } from '@prisma/client';
 import ReactTooltip from 'react-tooltip';
+import { GoCheck } from 'react-icons/go';
 
 type PrintComponentType = {
   date: Date;
@@ -295,7 +296,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               {Planning.morningAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="text-xs text-center font-bold px-3 py-1 rounded-full bg-lime-200 text-lime-700 whitespace-nowrap"
+                                  className="text-xs text-center font-semibold px-3 py-1 rounded-full bg-lime-50 text-slate-700 whitespace-nowrap"
                                 >
                                   {item.name?.split(' ')[0] || ''}
                                 </div>
@@ -307,7 +308,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               {Planning.afternoonAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className="text-xs text-center font-bold px-3 py-1 rounded-full bg-lime-200 text-lime-700 whitespace-nowrap"
+                                  className="text-xs text-center font-semibold px-3 py-1 rounded-full bg-lime-50 text-slate-700 whitespace-nowrap"
                                 >
                                   {item.name?.split(' ')[0] || ''}
                                 </div>
@@ -319,7 +320,7 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                               {Planning.eveningAsignee.map((item) => (
                                 <div
                                   key={item.id}
-                                  className=" w-full text-xs text-center font-bold px-3 py-1 bg-lime-200 text-lime-700 rounded-full whitespace-nowrap"
+                                  className=" w-full text-xs text-center font-semibold px-3 py-1 bg-lime-50 text-slate-700 rounded-full whitespace-nowrap"
                                 >
                                   {item.name?.split(' ')[0] || ''}
                                 </div>
@@ -369,39 +370,11 @@ const PrintComponent = forwardRef<HTMLDivElement, PrintComponentType>(
                         <td className="border-b border-slate-100 py-1 w-full text-slate-700 text-center whitespace-nowrap">
                           {user.schedule}
                         </td>
-                        <td className="border-b border-slate-100 py-1 text-slate-700 text-center inline-flex justify-center w-full">
-                          {Communication.find((d) => d.userId === user.id)
-                            ?.HT ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                          )}
+                        <td className="border-b border-slate-100 py-1 text-slate-700 whitespace-nowrap">
+                          <div className="w-full flex justify-center">
+                            {Communication.find((d) => d.userId === user.id)
+                              ?.HT && <GoCheck className="w-4 h-4" />}
+                          </div>
                         </td>
                         <td className="border-b border-slate-100 py-1 text-slate-700 text-center">
                           {Communication.find((d) => d.userId === user.id)
