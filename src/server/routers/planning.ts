@@ -36,6 +36,7 @@ const defaultTaskSelect = Prisma.validator<Prisma.PlanningSelect>()({
       maxEvening: true,
       hasMorning: true,
       hasAfternoon: true,
+      important: true,
       hasEvening: true,
       done: true,
       AssigneeText: true,
@@ -314,6 +315,7 @@ export const planningRouter = createRouter()
       hasMorning: z.boolean(),
       hasAfternoon: z.boolean(),
       hasEvening: z.boolean(),
+      important: z.boolean().optional(),
       channelId: z.string(),
       order: z.number().nonnegative(),
     }),
@@ -519,6 +521,7 @@ export const planningRouter = createRouter()
               hasMorning: true,
               hasAfternoon: true,
               hasEvening: true,
+              important: true,
               order: true,
               subTask: {
                 select: {

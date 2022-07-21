@@ -61,9 +61,7 @@ const IndexPage: NextPageWithLayout = () => {
       <div className="container my-8 md:pt-4">
         {currentStep == 1 && (
           <div className="text-center px-10">
-            <h2 className="text-2xl m-5">
-              {isLocked ? 'Ontgrendel' : 'Vergrendel'} planning
-            </h2>
+            <h2 className="text-2xl m-5">Vergrendelen</h2>
             <p>
               Je staat op het punt de planning van {date.toLocaleDateString()}{' '}
               te {isLocked ? 'ontgrendelen' : 'vergrendelen'}.
@@ -82,11 +80,11 @@ const IndexPage: NextPageWithLayout = () => {
               }
               className={`mt-7 btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline ${
                 isLocked
-                  ? 'bg-lime-300 text-lime-700'
-                  : 'bg-blue-300 text-blue-700'
+                  ? 'bg-orange-300 text-orange-700'
+                  : 'bg-lime-300 text-lime-700'
               } text-white font-normal py-2 px-4 mr-1 rounded`}
             >
-              {isLocked ? 'Ontgrendel' : 'Vergrendel'} planning
+              {isLocked ? 'Terug naar' : 'Vergrendel'} planning
             </button>
           </div>
         )}

@@ -67,6 +67,7 @@ model PlanningItem {
   maxMorning       Int     @default(0)
   maxAfternoon     Int     @default(0)
   maxEvening       Int     @default(0)
+  important        Boolean @default(false)
   morningAsignee   User[]  @relation(name: "PlanningItem_morningAsignee")
   afternoonAsignee User[]  @relation(name: "PlanningItem_afternoonAsignee")
   eveningAsignee   User[]  @relation(name: "PlanningItem_eveningAsignee")
@@ -102,6 +103,7 @@ model PlanningRule {
   hasMorning   Boolean @default(true)
   hasAfternoon Boolean @default(true)
   hasEvening   Boolean @default(true)
+  important    Boolean @default(false)
   order        Int     @default(0)
 
   channel      Channel        @relation(fields: [channelId], references: [id])
