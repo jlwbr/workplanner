@@ -224,7 +224,7 @@ const IndexPage: NextPageWithLayout = () => {
     },
     {
       field: 'important',
-      label: 'Belangrijk',
+      label: 'Verplicht',
       input: 'checkbox',
     },
     {

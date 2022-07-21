@@ -305,7 +305,7 @@ const KanbanItem = ({
         ownerId
           ? 'border-4 border-blue-600'
           : important
-          ? 'border-4 border-red-600'
+          ? 'border-4 border-orange-600'
           : ''
       }`}
     >
