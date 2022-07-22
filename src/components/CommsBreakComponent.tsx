@@ -20,6 +20,21 @@ const phoneNumbers = [
 
 const numbers = ['0', '1', '2', '3'];
 
+const color = (number: string) => {
+  switch (number) {
+    case '0':
+      return 'bg-gray-200 text-gray-700';
+    case '1':
+      return 'bg-blue-200 text-blue-700';
+    case '2':
+      return 'bg-lime-200 text-lime-700';
+    case '3':
+      return 'bg-orange-200 text-orange-700';
+    default:
+      return '';
+  }
+};
+
 const Input: FC<{
   user: {
     schedule: string | undefined;
@@ -117,7 +132,7 @@ const Input: FC<{
             });
             setNumber(e.target.value);
           }}
-          className="block bg-white border rounded-sm m-0"
+          className={`block bg-white border rounded-sm m-0 ${color(number)}`}
         >
           <option value="" />
           {numbers.map((n) => (
