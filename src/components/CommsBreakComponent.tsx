@@ -30,16 +30,14 @@ const Input: FC<{
   defaultphoneNumber: string;
   defaultHT: boolean;
   defaultNumber: string;
-  currentNumbers: string[];
-  updateNumber: (number: string) => void;
+  duplicates: { [key: string]: number };
 }> = ({
   user,
   date,
   defaultphoneNumber,
   defaultNumber,
   defaultHT,
-  currentNumbers,
-  updateNumber,
+  duplicates,
 }) => {
   const context = trpc.useContext();
   const upsertCommsMutation = trpc.useMutation(['communication.upsert'], {
@@ -56,8 +54,6 @@ const Input: FC<{
   const [phone, setPhone] = useState<string>(defaultphoneNumber);
   const [number, setNumber] = useState(defaultNumber);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => updateNumber(number), [number]);
   useEffect(() => setNumber(defaultNumber), [defaultNumber]);
   useEffect(() => setSelected(defaultHT), [defaultHT]);
   useEffect(() => setPhone(defaultphoneNumber), [defaultphoneNumber]);
@@ -99,9 +95,7 @@ const Input: FC<{
             setPhone(e.target.value);
           }}
           className={`block bg-white border rounded-sm m-0 ${
-            currentNumbers.find((number) => number === phone)
-              ? 'border-red-800 bg-red-200'
-              : ''
+            duplicates[phone] > 1 ? 'border-red-800 bg-red-200' : ''
           }`}
         >
           <option value="" />
@@ -122,7 +116,6 @@ const Input: FC<{
               number: parseInt(e.target.value),
             });
             setNumber(e.target.value);
-            updateNumber(e.target.value);
           }}
           className="block bg-white border rounded-sm m-0"
         >
@@ -144,14 +137,22 @@ const Table: FC<{
 }> = ({ users, date }) => {
   const commsQuery = trpc.useQuery(['communication.getAll', { date }]);
   const breakQuery = trpc.useQuery(['break.getAll', { date }]);
-  const [usedNumbers, setUsedNumbers] = useState<string[]>([]);
 
   if (!commsQuery.isSuccess) return null;
   if (!breakQuery.isSuccess) return null;
 
-  const updateNumber = (phone: string) => {
-    setUsedNumbers([...new Set([...usedNumbers, phone])]);
-  };
+  const duplicates = commsQuery.data.reduce(function (
+    acc: { [key: string]: number },
+    curr,
+  ) {
+    return (
+      acc[curr.phoneNumber || 'none']
+        ? ++acc[curr.phoneNumber || 'none']
+        : (acc[curr.phoneNumber || 'none'] = 1),
+      acc
+    );
+  },
+  {});
 
   return (
     <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
@@ -200,8 +201,7 @@ const Table: FC<{
                       .find((d) => d.userId === user.id)
                       ?.number?.toString() ?? ''
                   }
-                  updateNumber={updateNumber}
-                  currentNumbers={usedNumbers}
+                  duplicates={duplicates}
                 />
               ))}
             </tbody>
