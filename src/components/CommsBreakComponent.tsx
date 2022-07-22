@@ -23,13 +23,13 @@ const numbers = ['0', '1', '2', '3'];
 const color = (number: string) => {
   switch (number) {
     case '0':
-      return 'bg-gray-200 text-gray-700';
+      return 'bg-gray-200 text-gray-700 border-gray-700';
     case '1':
-      return 'bg-blue-200 text-blue-700';
+      return 'bg-blue-200 text-blue-700 border-blue-700';
     case '2':
-      return 'bg-lime-200 text-lime-700';
+      return 'bg-lime-200 text-lime-700 border-lime-700';
     case '3':
-      return 'bg-orange-200 text-orange-700';
+      return 'bg-orange-200 text-orange-700 border-orange-700';
     default:
       return '';
   }
@@ -110,7 +110,7 @@ const Input: FC<{
             setPhone(e.target.value);
           }}
           className={`block bg-white border rounded-sm m-0 ${
-            duplicates[phone] > 1 ? 'border-red-800 bg-red-200' : ''
+            duplicates[phone] > 1 ? 'border-red-800' : ''
           }`}
         >
           <option value="" />
