@@ -300,6 +300,67 @@ export const planningRouter = createRouter()
       });
     },
   })
+  .mutation('tasks.move', {
+    input: z.object({
+      id: z.string().cuid(),
+      date: z.date(),
+    }),
+    async resolve({ input, ctx }) {
+      const { id, date } = input;
+      if (!ctx.session?.user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'You must be logged in to acces this resource',
+        });
+      }
+
+      const item = await prisma.planningItem.delete({
+        where: { id },
+        include: {
+          Planning: {
+            select: {
+              channelId: true,
+            },
+          },
+        },
+      });
+
+      let planning = await prisma.planning.findFirst({
+        where: { date, channelId: item.Planning.channelId },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!planning) {
+        GeneratePlanning(date);
+        planning = await prisma.planning.findFirst({
+          where: { date, channelId: item.Planning.channelId },
+          select: {
+            id: true,
+          },
+        });
+      }
+
+      if (!planning?.id) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Could not find planning',
+        });
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { Planning, ...itemData } = item;
+
+      return await prisma.planningItem.create({
+        data: {
+          ...itemData,
+          AssigneeText: item.AssigneeText ?? {},
+          planningId: planning.id,
+        },
+      });
+    },
+  })
   .mutation('rules.upsert', {
     input: z.object({
       id: z.string().optional(),

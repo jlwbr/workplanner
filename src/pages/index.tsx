@@ -16,10 +16,15 @@ import { NextPageWithLayout } from './_app';
 
 const IndexPage: NextPageWithLayout = () => {
   const date = useContext(DateContext);
+  const context = trpc.useContext();
   const { data } = useSession();
   const userQuery = trpc.useQuery(['user.all']);
   const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
-  const addUserMutation = trpc.useMutation(['user.add']);
+  const addUserMutation = trpc.useMutation(['user.add'], {
+    onSuccess: () => {
+      context.invalidateQueries('user.all');
+    },
+  });
   const planing = trpc.useQuery([
     'planning.byDate',
     {
@@ -32,12 +37,15 @@ const IndexPage: NextPageWithLayout = () => {
 
   const addUser = () => {
     const name = prompt('Naam');
+    const times = prompt('Werktijden');
 
     if (!name) return;
 
     toast.promise(
       addUserMutation.mutateAsync({
         name,
+        times: times || undefined,
+        date,
       }),
       {
         loading: 'Gebruiker aan het toevoegen',

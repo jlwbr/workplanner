@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { ReactElement, useContext, useState } from 'react';
+import { HiLockClosed, HiLockOpen, HiOutlineExclamation } from 'react-icons/hi';
 import { AdminDateContext, AdminLayout } from '~/components/AdminLayout';
 import CommsBreakComponent from '~/components/CommsBreakComponent';
 import Planningpage from '~/components/PlanningPage';
@@ -18,6 +19,7 @@ const IndexPage: NextPageWithLayout = () => {
     },
   });
   const isLockedQuery = trpc.useQuery(['planning.isLocked', { date }]);
+  const planing = trpc.useQuery(['planning.byDate', { date }]);
   const [currentStep, setCurrentStep] = useState(
     step ? parseInt(step as string) : 1,
   );
@@ -47,6 +49,19 @@ const IndexPage: NextPageWithLayout = () => {
     }
   };
 
+  const errors =
+    planing.data?.flatMap((p) =>
+      p.PlanningItem.filter((i) => {
+        const isFilled =
+          (i.morningAsignee.length > 0 ||
+            i.afternoonAsignee.length > 0 ||
+            i.eveningAsignee.length > 0) &&
+          i.description.length > 0;
+
+        return (i.important && !isFilled) || (i.ownerId && !isFilled);
+      }).map((i) => i.name),
+    ) || [];
+
   const isLocked = isLockedQuery.data || false;
 
   return (
@@ -61,7 +76,19 @@ const IndexPage: NextPageWithLayout = () => {
       <div className="container my-8 md:pt-4">
         {currentStep == 1 && (
           <div className="text-center px-10">
-            <h2 className="text-2xl m-5">Vergrendelen</h2>
+            <div className="flex items-center gap-2 justify-center m-5">
+              {isLocked ? (
+                <>
+                  <HiLockClosed className="h-6 w-6" />
+                  <h2 className="text-2xl">Vergrendeld</h2>
+                </>
+              ) : (
+                <>
+                  <HiLockOpen className="h-6 w-6" />
+                  <h2 className="text-2xl">Open</h2>
+                </>
+              )}
+            </div>
             <p>
               Je staat op het punt de planning van {date.toLocaleDateString()}{' '}
               te {isLocked ? 'ontgrendelen' : 'vergrendelen'}.
@@ -71,6 +98,26 @@ const IndexPage: NextPageWithLayout = () => {
             ) : (
               <p>Dit betekend dat niemand de planning meer kan wijzigen.</p>
             )}
+            {errors && (
+              <div className="flex items-center justify-center mt-5">
+                <div
+                  className="bg-red-100 border-red-500 rounded-md text-red-900 px-4 py-3 border-2 text-left"
+                  role="alert"
+                >
+                  <div className="flex gap-2">
+                    <div className="py-1">
+                      <HiOutlineExclamation className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-center">
+                        De volgende omlijnde velden zijn niet ingevuld!
+                      </p>
+                      <p className="text-sm text-center">{errors.join(', ')}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             <button
               onClick={() =>
                 mutateLock.mutateAsync({ date, locked: !isLocked })
@@ -78,13 +125,9 @@ const IndexPage: NextPageWithLayout = () => {
               disabled={
                 mutateLock.status !== 'idle' && mutateLock.status !== 'success'
               }
-              className={`mt-7 btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline ${
-                isLocked
-                  ? 'bg-orange-300 text-orange-700'
-                  : 'bg-lime-300 text-lime-700'
-              } text-white font-normal py-2 px-4 mr-1 rounded`}
+              className="mt-7 btn-primary transition duration-300 ease-in-out focus:outline-none focus:shadow-outline bg-blue-200 text-blue-700 font-normal py-2 px-4 mr-1 rounded"
             >
-              {isLocked ? 'Terug naar' : 'Vergrendel'} planning
+              {isLocked ? 'Open' : 'Vergrendel'} planning
             </button>
           </div>
         )}

@@ -4,11 +4,12 @@ import { InferQueryOutput, InferMutationInput, trpc } from '~/utils/trpc';
 import AsigneeBadge, { ItemTypes } from './AsigneeBadge';
 import { KanbanRule } from './KanbanComponent';
 import { useDrop } from 'react-dnd';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Prisma } from '@prisma/client';
 import Select, { MultiValue } from 'react-select';
-import { HiXCircle } from 'react-icons/hi';
+import { HiCalendar, HiXCircle } from 'react-icons/hi';
+import { DateContext } from './DateLayout';
 
 type KanbanItemType = {
   item: KanbanRule;
@@ -196,6 +197,12 @@ const KanbanItem = ({
       },
     },
   );
+  const moveMutation = trpc.useMutation(['planning.tasks.move'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const date = useContext(DateContext);
   const [open, setOpen] = useState(false);
 
   const {
@@ -251,6 +258,12 @@ const KanbanItem = ({
     (value, index, self) => index === self.findIndex((t) => t.id === value.id),
   );
 
+  const isFilled =
+    (morningAsignee.length > 0 ||
+      afternoonAsignee.length > 0 ||
+      eveningAsignee.length > 0) &&
+    description.length > 0;
+
   const willUseMaxMorning =
     maxMorning - morningAsignee.length > 0 ? true : false;
   const willUseMaxAfternoon =
@@ -302,9 +315,9 @@ const KanbanItem = ({
   return (
     <div
       className={`bg-white rounded-md shadow-md ${
-        ownerId
+        ownerId && !isFilled
           ? 'border-4 border-blue-600'
-          : important
+          : important && !isFilled
           ? 'border-4 border-orange-600'
           : ''
       }`}
@@ -343,6 +356,19 @@ const KanbanItem = ({
                 </svg>
               </button>
             )}
+            {isEditer && ownerId && !locked && (
+              <button
+                onClick={() =>
+                  moveMutation.mutate({
+                    id,
+                    date: new Date(new Date(date).setDate(date.getDate() + 1)),
+                  })
+                }
+                className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-lime-200 text-lime-700 rounded-full"
+              >
+                <HiCalendar className="h-4 w-4" />
+              </button>
+            )}
             {(userId === ownerId || isEditer) && !locked && (
               <button
                 onClick={() => editTask(item)}
@@ -378,7 +404,7 @@ const KanbanItem = ({
                       className="w-4 h-4 text-slate-800 cursor-pointer"
                       onClick={() =>
                         AssigneeTextMutation.mutateAsync({
-                          id,
+                          id: uID,
                           text: '',
                         })
                       }

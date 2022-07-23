@@ -41,6 +41,8 @@ export const userRouter = createRouter()
   .mutation('add', {
     input: z.object({
       name: z.string(),
+      date: z.date().optional(),
+      times: z.string().optional(),
     }),
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.isEditor) {
@@ -50,11 +52,27 @@ export const userRouter = createRouter()
         });
       }
 
-      return prisma.user.create({
+      const user = await prisma.user.create({
         data: {
-          ...input,
+          name: input.name,
         },
       });
+
+      if (input.times && input.date) {
+        await prisma.schedule.create({
+          data: {
+            user: {
+              connect: {
+                id: user.id,
+              },
+            },
+            schedule: input.times,
+            date: input.date,
+          },
+        });
+      }
+
+      return user;
     },
   })
   .mutation('update', {

@@ -48,5 +48,13 @@ export const slackRouter = createRouter().query('update', {
         },
       });
     });
+
+    await prisma.user.deleteMany({
+      where: {
+        accounts: {
+          none: {},
+        },
+      },
+    });
   },
 });

@@ -25,11 +25,11 @@ const color = (number: string) => {
     case '0':
       return 'bg-gray-200 text-gray-700 border-gray-700';
     case '1':
-      return 'bg-blue-200 text-blue-700 border-blue-700';
+      return 'bg-blue-50 text-blue-700 border-blue-700';
     case '2':
-      return 'bg-lime-200 text-lime-700 border-lime-700';
+      return 'bg-blue-200 text-blue-700 border-blue-700';
     case '3':
-      return 'bg-orange-200 text-orange-700 border-orange-700';
+      return 'bg-blue-400 text-blue-800 border-blue-800';
     default:
       return '';
   }
