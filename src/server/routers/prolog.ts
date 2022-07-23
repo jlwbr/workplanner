@@ -7,8 +7,7 @@ import { prisma } from '../prisma';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import pl from 'tau-prolog';
-import groupBy from '~/utils/groupBy';
-import { PrismaPromise } from '@prisma/client';
+import { PlanningRule, PrismaPromise } from '@prisma/client';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('tau-prolog/modules/promises.js')(pl);
@@ -87,33 +86,22 @@ export const prologRouter = createRouter().mutation('Check', {
 export const GeneratePlanning = async (date: Date) => {
   const session = pl.create();
 
-  const PlanningRules = await prisma.planningRule.findMany({
+  const channels = await prisma.channel.findMany({
     where: {
-      channel: {
-        removed: false,
-      },
+      removed: false,
     },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      rule: true,
-      maxMorning: true,
-      maxAfternoon: true,
-      maxEvening: true,
-      hasMorning: true,
-      hasAfternoon: true,
-      hasEvening: true,
-      channelId: true,
-      important: true,
-      subTask: {
-        select: {
-          id: true,
-          name: true,
+    include: {
+      PlanningRule: {
+        include: {
+          subTask: true,
         },
       },
     },
   });
+
+  const PlanningRules = channels.reduce((acc: PlanningRule[], channel) => {
+    return acc.concat(channel.PlanningRule);
+  }, []);
 
   if (PlanningRules.length == 0) return;
 
@@ -122,7 +110,7 @@ export const GeneratePlanning = async (date: Date) => {
     PlanningRules.map((rule) => `task(${rule.id}) :- ${rule.rule}`).join('\n'),
   );
 
-  const channels = groupBy(PlanningRules, ({ channelId }) => channelId);
+  // const channels = groupBy(PlanningRules, ({ channelId }) => channelId);
 
   await session.promiseConsult(program);
   await session.promiseQuery('test_all(X).');
@@ -130,71 +118,70 @@ export const GeneratePlanning = async (date: Date) => {
   for await (const answer of session.promiseAnswers()) {
     const ids = fromList<string>(answer.lookup('X'));
 
-    if (ids && ids?.length > 0) {
-      for (const channel in channels) {
-        const rules = channels[channel] || [];
-        const filteredRules = rules.filter((rule) => ids.includes(rule.id));
+    for (const channel of channels) {
+      const filteredRules = channel.PlanningRule.filter((rule) =>
+        ids?.includes(rule.id),
+      );
 
-        if (filteredRules.length > 0) {
-          const planning = await prisma.planning.create({
-            data: {
-              channelId: channel,
-              date,
-              PlanningItem: {
-                createMany: {
-                  data: filteredRules.map((item) => ({
-                    name: item.name,
-                    planningRuleId: item.id,
-                    hasMorning: item.hasMorning,
-                    hasAfternoon: item.hasAfternoon,
-                    hasEvening: item.hasEvening,
-                    maxMorning: item.maxMorning,
-                    maxAfternoon: item.maxAfternoon,
-                    maxEvening: item.maxEvening,
-                    description: item.description,
-                    important: item.important,
-                  })),
-                },
+      if (filteredRules.length > 0) {
+        const planning = await prisma.planning.create({
+          data: {
+            channelId: channel.id,
+            date,
+            PlanningItem: {
+              createMany: {
+                data: filteredRules.map((item) => ({
+                  name: item.name,
+                  planningRuleId: item.id,
+                  hasMorning: item.hasMorning,
+                  hasAfternoon: item.hasAfternoon,
+                  hasEvening: item.hasEvening,
+                  maxMorning: item.maxMorning,
+                  maxAfternoon: item.maxAfternoon,
+                  maxEvening: item.maxEvening,
+                  description: item.description,
+                  important: item.important,
+                })),
               },
             },
-            select: {
-              PlanningItem: {
-                select: {
-                  id: true,
-                  planningRuleId: true,
-                },
+          },
+          select: {
+            PlanningItem: {
+              select: {
+                id: true,
+                planningRuleId: true,
               },
             },
-          });
+          },
+        });
 
-          const transaction: PrismaPromise<any>[] = [];
-          planning.PlanningItem.forEach((item) => {
-            const subTasks =
-              filteredRules.find((rule) => rule.id === item.planningRuleId)
-                ?.subTask || [];
+        const transaction: PrismaPromise<any>[] = [];
+        planning.PlanningItem.forEach((item) => {
+          const subTasks =
+            filteredRules.find((rule) => rule.id === item.planningRuleId)
+              ?.subTask || [];
 
-            if (subTasks.length <= 0) return;
+          if (subTasks.length <= 0) return;
 
-            transaction.push(
-              prisma.planningItem.update({
-                where: {
-                  id: item.id,
-                },
-                data: {
-                  subTask: {
-                    createMany: {
-                      data: subTasks.map((subTask) => ({
-                        name: subTask.name,
-                      })),
-                    },
+          transaction.push(
+            prisma.planningItem.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                subTask: {
+                  createMany: {
+                    data: subTasks.map((subTask) => ({
+                      name: subTask.name,
+                    })),
                   },
                 },
-              }),
-            );
-          });
+              },
+            }),
+          );
+        });
 
-          await prisma.$transaction(transaction);
-        }
+        await prisma.$transaction(transaction);
       }
     }
   }
