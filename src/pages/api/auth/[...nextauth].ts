@@ -1,11 +1,11 @@
 import { Account, PrismaClient } from '@prisma/client';
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import SlackProvider from 'next-auth/providers/slack';
 
 const prisma = new PrismaClient();
 
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
   adapter: {
     ...PrismaAdapter(prisma),
@@ -17,21 +17,21 @@ export default NextAuth({
   },
   /* eslint-enable */
   callbacks: {
-    session: async ({ session, token }) => {
-      if (session?.user && token.sub) {
-        session.user.id = token.sub;
-        const prismaUser = await prisma.user.findUnique({
-          where: {
-            id: token.sub,
-          },
-        });
+    jwt: async ({ token, user }) => {
+      if (user?.id) token.id = user.id;
+      if (user?.roles) token.roles = user.roles;
 
-        if (prismaUser) {
-          session.user.isAdmin = prismaUser.admin;
-          session.user.isEditor = prismaUser.editor || prismaUser.admin;
-          session.user.isShared = prismaUser.shared;
-        }
+      return token;
+    },
+
+    session: async ({ session, token }) => {
+      if (session?.user) {
+        if (token?.id && typeof token.id === 'string')
+          session.user.id = token.id;
+        if (token?.roles && Array.isArray(token.roles))
+          session.user.roles = token.roles;
       }
+
       return session;
     },
   },
@@ -47,4 +47,6 @@ export default NextAuth({
     }),
     // ...add more providers here
   ],
-});
+};
+
+export default NextAuth(authOptions);
