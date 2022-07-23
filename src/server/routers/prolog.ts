@@ -105,6 +105,7 @@ export const GeneratePlanning = async (date: Date) => {
       hasAfternoon: true,
       hasEvening: true,
       channelId: true,
+      important: true,
       subTask: {
         select: {
           id: true,
@@ -151,6 +152,7 @@ export const GeneratePlanning = async (date: Date) => {
                     maxAfternoon: item.maxAfternoon,
                     maxEvening: item.maxEvening,
                     description: item.description,
+                    important: item.important,
                   })),
                 },
               },

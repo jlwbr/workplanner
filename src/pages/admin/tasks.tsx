@@ -26,6 +26,7 @@ const defaultEditingRuleData: PlanningRule = {
   maxMorning: 0,
   maxAfternoon: 0,
   maxEvening: 0,
+  important: false,
   hasMorning: true,
   hasAfternoon: true,
   hasEvening: true,
@@ -97,6 +98,7 @@ const IndexPage: NextPageWithLayout = () => {
       hasAfternoon: z.boolean().optional(),
       hasEvening: z.boolean().optional(),
       order: z.number().nonnegative().optional(),
+      important: z.boolean().optional(),
     });
 
     if (input.safeParse(editingRuleData).success === false) {
@@ -219,6 +221,11 @@ const IndexPage: NextPageWithLayout = () => {
       label: 'Max. aantal avond',
       input: 'number',
       placeholder: 'Geen limiet',
+    },
+    {
+      field: 'important',
+      label: 'Verplicht',
+      input: 'checkbox',
     },
     {
       field: 'channelId',

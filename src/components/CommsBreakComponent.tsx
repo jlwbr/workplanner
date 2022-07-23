@@ -20,6 +20,21 @@ const phoneNumbers = [
 
 const numbers = ['0', '1', '2', '3'];
 
+const color = (number: string) => {
+  switch (number) {
+    case '0':
+      return 'bg-gray-200 text-gray-700 border-gray-700';
+    case '1':
+      return 'bg-blue-50 text-blue-700 border-blue-700';
+    case '2':
+      return 'bg-blue-200 text-blue-700 border-blue-700';
+    case '3':
+      return 'bg-blue-400 text-blue-800 border-blue-800';
+    default:
+      return '';
+  }
+};
+
 const Input: FC<{
   user: {
     schedule: string | undefined;
@@ -30,16 +45,14 @@ const Input: FC<{
   defaultphoneNumber: string;
   defaultHT: boolean;
   defaultNumber: string;
-  currentNumbers: string[];
-  updateNumber: (number: string) => void;
+  duplicates: { [key: string]: number };
 }> = ({
   user,
   date,
   defaultphoneNumber,
   defaultNumber,
   defaultHT,
-  currentNumbers,
-  updateNumber,
+  duplicates,
 }) => {
   const context = trpc.useContext();
   const upsertCommsMutation = trpc.useMutation(['communication.upsert'], {
@@ -56,8 +69,6 @@ const Input: FC<{
   const [phone, setPhone] = useState<string>(defaultphoneNumber);
   const [number, setNumber] = useState(defaultNumber);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => updateNumber(number), [number]);
   useEffect(() => setNumber(defaultNumber), [defaultNumber]);
   useEffect(() => setSelected(defaultHT), [defaultHT]);
   useEffect(() => setPhone(defaultphoneNumber), [defaultphoneNumber]);
@@ -99,9 +110,7 @@ const Input: FC<{
             setPhone(e.target.value);
           }}
           className={`block bg-white border rounded-sm m-0 ${
-            currentNumbers.find((number) => number === phone)
-              ? 'border-red-800 bg-red-200'
-              : ''
+            duplicates[phone] > 1 ? 'border-red-800' : ''
           }`}
         >
           <option value="" />
@@ -122,9 +131,8 @@ const Input: FC<{
               number: parseInt(e.target.value),
             });
             setNumber(e.target.value);
-            updateNumber(e.target.value);
           }}
-          className="block bg-white border rounded-sm m-0"
+          className={`block bg-white border rounded-sm m-0 ${color(number)}`}
         >
           <option value="" />
           {numbers.map((n) => (
@@ -144,14 +152,22 @@ const Table: FC<{
 }> = ({ users, date }) => {
   const commsQuery = trpc.useQuery(['communication.getAll', { date }]);
   const breakQuery = trpc.useQuery(['break.getAll', { date }]);
-  const [usedNumbers, setUsedNumbers] = useState<string[]>([]);
 
   if (!commsQuery.isSuccess) return null;
   if (!breakQuery.isSuccess) return null;
 
-  const updateNumber = (phone: string) => {
-    setUsedNumbers([...new Set([...usedNumbers, phone])]);
-  };
+  const duplicates = commsQuery.data.reduce(function (
+    acc: { [key: string]: number },
+    curr,
+  ) {
+    return (
+      acc[curr.phoneNumber || 'none']
+        ? ++acc[curr.phoneNumber || 'none']
+        : (acc[curr.phoneNumber || 'none'] = 1),
+      acc
+    );
+  },
+  {});
 
   return (
     <div className="not-prose relative bg-slate-50 rounded-xl overflow-hidden">
@@ -200,8 +216,7 @@ const Table: FC<{
                       .find((d) => d.userId === user.id)
                       ?.number?.toString() ?? ''
                   }
-                  updateNumber={updateNumber}
-                  currentNumbers={usedNumbers}
+                  duplicates={duplicates}
                 />
               ))}
             </tbody>

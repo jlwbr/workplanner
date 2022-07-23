@@ -16,10 +16,15 @@ import { NextPageWithLayout } from './_app';
 
 const IndexPage: NextPageWithLayout = () => {
   const date = useContext(DateContext);
+  const context = trpc.useContext();
   const { data } = useSession();
   const userQuery = trpc.useQuery(['user.all']);
   const scheduleQuery = trpc.useQuery(['schedule.getAll', { date: date }]);
-  const addUserMutation = trpc.useMutation(['user.add']);
+  const addUserMutation = trpc.useMutation(['user.add'], {
+    onSuccess: () => {
+      context.invalidateQueries('user.all');
+    },
+  });
   const planing = trpc.useQuery([
     'planning.byDate',
     {
@@ -28,14 +33,19 @@ const IndexPage: NextPageWithLayout = () => {
   ]);
   const [open, setOpen] = useState(false);
 
+  const isLocked = planing.data?.every(({ locked }) => locked == true) ?? false;
+
   const addUser = () => {
     const name = prompt('Naam');
+    const times = prompt('Werktijden');
 
     if (!name) return;
 
     toast.promise(
       addUserMutation.mutateAsync({
         name,
+        times: times || undefined,
+        date,
       }),
       {
         loading: 'Gebruiker aan het toevoegen',
@@ -103,7 +113,7 @@ const IndexPage: NextPageWithLayout = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      {data?.user?.isEditor && (
+      {data?.user?.isEditor && !isLocked && (
         <div className="hidden md:block sticky top-0 bg-slate-100">
           <div className="flex flex-wrap gap-2 p-5">
             {options.map((option) => (

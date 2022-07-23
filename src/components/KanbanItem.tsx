@@ -4,11 +4,12 @@ import { InferQueryOutput, InferMutationInput, trpc } from '~/utils/trpc';
 import AsigneeBadge, { ItemTypes } from './AsigneeBadge';
 import { KanbanRule } from './KanbanComponent';
 import { useDrop } from 'react-dnd';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Prisma } from '@prisma/client';
 import Select, { MultiValue } from 'react-select';
-import { HiXCircle } from 'react-icons/hi';
+import { HiCalendar, HiXCircle } from 'react-icons/hi';
+import { DateContext } from './DateLayout';
 
 type KanbanItemType = {
   item: KanbanRule;
@@ -188,24 +189,6 @@ const KanbanItem = ({
 }: KanbanItemType) => {
   const context = trpc.useContext();
   const { data, status } = useSession();
-  const doneMutation = trpc.useMutation(['planning.tasks.done'], {
-    onSuccess: () => {
-      context.invalidateQueries(['planning.byDate']);
-    },
-  });
-  const subTaskdoneMutation = trpc.useMutation(['planning.subTask.done'], {
-    onSuccess: () => {
-      context.invalidateQueries(['planning.byDate']);
-    },
-  });
-  const subTaskFinishAllMutation = trpc.useMutation(
-    ['planning.subTasks.finishAll'],
-    {
-      onSuccess: () => {
-        context.invalidateQueries(['planning.byDate']);
-      },
-    },
-  );
   const AssigneeTextMutation = trpc.useMutation(
     ['planning.tasks.AssigneeText'],
     {
@@ -214,6 +197,12 @@ const KanbanItem = ({
       },
     },
   );
+  const moveMutation = trpc.useMutation(['planning.tasks.move'], {
+    onSuccess: () => {
+      context.invalidateQueries(['planning.byDate']);
+    },
+  });
+  const date = useContext(DateContext);
   const [open, setOpen] = useState(false);
 
   const {
@@ -221,8 +210,6 @@ const KanbanItem = ({
     name,
     description,
     ownerId,
-    done,
-    doneUser,
     minMorning,
     minAfternoon,
     minEvening,
@@ -236,6 +223,7 @@ const KanbanItem = ({
     hasMorning,
     hasAfternoon,
     hasEvening,
+    important,
   } = item;
 
   const userId = data?.user?.id;
@@ -269,6 +257,12 @@ const KanbanItem = ({
   ].filter(
     (value, index, self) => index === self.findIndex((t) => t.id === value.id),
   );
+
+  const isFilled =
+    (morningAsignee.length > 0 ||
+      afternoonAsignee.length > 0 ||
+      eveningAsignee.length > 0) &&
+    description.length > 0;
 
   const willUseMaxMorning =
     maxMorning - morningAsignee.length > 0 ? true : false;
@@ -319,29 +313,19 @@ const KanbanItem = ({
     afternoonAsignee.findIndex((item) => item.id === userId) > -1 ||
     eveningAsignee.findIndex((item) => item.id === userId) > -1;
   return (
-    <div className="bg-white rounded-md shadow-md">
+    <div
+      className={`bg-white rounded-md shadow-md ${
+        ownerId && !isFilled
+          ? 'border-4 border-blue-600'
+          : important && !isFilled
+          ? 'border-4 border-orange-600'
+          : ''
+      }`}
+    >
       <ReactTooltip />
       <div className="p-5">
         <div className="flex justify-between content-center tracking-tight pb-2">
           <strong className="inline-flex items-center gap-2">
-            <div
-              data-tip={
-                doneUser
-                  ? `${doneUser.name} heeft deze taak afgerond`
-                  : 'Deze taak is nog niet afgerond'
-              }
-              className="text-xs inline-flex items-center font-bold leading-sm uppercase px-2 py-1 bg-orange-200 text-orange-700 rounded-full"
-            >
-              <input
-                type="checkbox"
-                checked={done}
-                disabled={
-                  doneMutation.status !== 'idle' &&
-                  doneMutation.status !== 'success'
-                }
-                onChange={() => doneMutation.mutateAsync({ id, done: !!!done })}
-              />
-            </div>
             <h2 className="font-bold text-gray-900">{name}</h2>
           </strong>
           <div className="flex items-center gap-2">
@@ -372,10 +356,23 @@ const KanbanItem = ({
                 </svg>
               </button>
             )}
+            {isEditer && ownerId && !locked && (
+              <button
+                onClick={() =>
+                  moveMutation.mutate({
+                    id,
+                    date: new Date(new Date(date).setDate(date.getDate() + 1)),
+                  })
+                }
+                className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-lime-200 text-lime-700 rounded-full"
+              >
+                <HiCalendar className="h-4 w-4" />
+              </button>
+            )}
             {(userId === ownerId || isEditer) && !locked && (
               <button
                 onClick={() => editTask(item)}
-                className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-lime-200 text-lime-700 rounded-full"
+                className="text-xs inline-flex items-center font-bold leading-sm uppercase px-3 py-1 bg-orange-200 text-orange-700 rounded-full"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -407,7 +404,7 @@ const KanbanItem = ({
                       className="w-4 h-4 text-slate-800 cursor-pointer"
                       onClick={() =>
                         AssigneeTextMutation.mutateAsync({
-                          id,
+                          id: uID,
                           text: '',
                         })
                       }
@@ -423,17 +420,7 @@ const KanbanItem = ({
         </div>
         {item.subTask.length > 0 && (
           <div className="pt-2">
-            <div className="flex gap-1 items-baseline justify-between">
-              <h2 className="font-bold">Subtaken</h2>
-              <button
-                onClick={() =>
-                  subTaskFinishAllMutation.mutateAsync({ id, done: true })
-                }
-                className="text-xs text-gray-600"
-              >
-                Alles afronden
-              </button>
-            </div>
+            <h2 className="font-bold">Subtaken</h2>
             <ul className="flex flex-col">
               {open &&
                 item.subTask.map((subTask) => (
@@ -449,18 +436,7 @@ const KanbanItem = ({
                     <input
                       type="checkbox"
                       checked={subTask.done}
-                      disabled={
-                        (subTaskdoneMutation.status !== 'idle' &&
-                          subTaskdoneMutation.status !== 'success') ||
-                        (subTaskFinishAllMutation.status !== 'idle' &&
-                          subTaskFinishAllMutation.status !== 'success')
-                      }
-                      onChange={() =>
-                        subTaskdoneMutation.mutateAsync({
-                          id: subTask.id,
-                          done: !!!subTask.done,
-                        })
-                      }
+                      disabled={true}
                     />
                     {subTask.name}
                   </li>
@@ -511,11 +487,7 @@ const KanbanItem = ({
             <div className="flex gap-2 content-center tracking-tight my-2">
               <h2 className="font-bold text-gray-900">Ochtend</h2>
               {/* FIXME: we could make this more clear by using a progessbar, for example: https://tailwinduikit.com/components/webapp/UI_element/progress_bar */}
-              <span
-                className={`inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full ${
-                  morningAsignee.length == 0 ? 'bg-red-200 border-red-400' : ''
-                }`}
-              >
+              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
                 {morningAsignee.length} / {maxMorning > 0 ? maxMorning : '∞'}
               </span>
             </div>
@@ -537,13 +509,7 @@ const KanbanItem = ({
           <div className="pt-2">
             <div className="flex gap-2 content-center tracking-tight my-2">
               <h2 className="font-bold text-gray-900">Middag</h2>
-              <span
-                className={`inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full ${
-                  afternoonAsignee.length == 0
-                    ? 'bg-red-200 border-red-400'
-                    : ''
-                }`}
-              >
+              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
                 {afternoonAsignee.length} /{' '}
                 {maxAfternoon > 0 ? maxAfternoon : '∞'}
               </span>
@@ -566,11 +532,7 @@ const KanbanItem = ({
           <div className="pt-2">
             <div className="flex gap-2 content-center tracking-tight my-2">
               <h2 className="font-bold text-gray-900">Avond</h2>
-              <span
-                className={`inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full ${
-                  eveningAsignee.length == 0 ? 'bg-red-200 border-red-400' : ''
-                }`}
-              >
+              <span className="inline-flex items-center justify-center px-2 py-1 mr-2 text-xs font-bold leading-none text-gray-700 border-2 rounded-full">
                 {eveningAsignee.length} / {maxEvening > 0 ? maxEvening : '∞'}
               </span>
             </div>
